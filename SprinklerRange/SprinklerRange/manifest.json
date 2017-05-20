@@ -7,7 +7,7 @@
       "PatchVersion": 0,
       "Build": null
    },
-   "Description": "Hold f2 to view the range of sprinklers and scarecrows.",
+   "Description": "Press f2 to view the range of sprinklers and scarecrows.",
    "UniqueID": "cat.sprinklerrange",
    "EntryDll": "SprinklerRange.dll"
 }
