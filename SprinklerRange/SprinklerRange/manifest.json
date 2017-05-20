@@ -7,7 +7,7 @@
       "PatchVersion": 0,
       "Build": null
    },
-   "Description": "Hold Shift to view the range of sprinklers.",
+   "Description": "Hold f2 to view the range of sprinklers.",
    "UniqueID": "cat.sprinklerrange",
    "EntryDll": "SprinklerRange.dll"
 }
