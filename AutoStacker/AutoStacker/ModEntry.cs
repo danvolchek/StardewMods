@@ -22,6 +22,11 @@ namespace AutoStacker
 
             if (key == config.ActivationKey.ToLower())
             {
+               /* List<Item> items = Game1.player.items.FindAll(it => it != null);
+                foreach (Item item in items)
+                {
+                    Monitor.Log(item.Name + ": " + item.Stack+"/"+item.maximumStackSize());
+                }*/
                 stackOwnInventory();
 
             }
@@ -29,10 +34,11 @@ namespace AutoStacker
 
         private void stackOwnInventory()
         {
-            List<Item> items = Game1.player.items.FindAll(it => it != null);
+            List<Item> items = Game1.player.items.FindAll(it => it != null && it.maximumStackSize()!=-1);
             items.Reverse();
             foreach (Item item in items)
             {
+               
                 if (item.Stack == item.maximumStackSize() || item.Stack == 0)
                     continue;
 
@@ -40,7 +46,7 @@ namespace AutoStacker
                 {
                     int remain = stackOnMe.getRemainingStackSpace();
                     int add = Math.Min(remain, item.Stack);
-
+                 
                     stackOnMe.addToStack(add);
                     item.Stack -= add;
 
@@ -53,7 +59,7 @@ namespace AutoStacker
             for (int i = 0; i < Game1.player.items.Count; i++)
             {
                 Item it = Game1.player.items[i];
-                if (it != null && it.Stack == 0)
+                if (it != null && it.Stack == 0 && it.maximumStackSize() != -1)
                 {
                     swapStack(findFirstNonEmptyStack(it, i + 1), it);
 
@@ -63,7 +69,7 @@ namespace AutoStacker
             for (int i = 0; i < Game1.player.items.Count; i++)
             {
                 Item it = Game1.player.items[i];
-                if (it != null && it.Stack == 0)
+                if (it != null && it.Stack == 0 && it.maximumStackSize() != -1)
                 {
                     Game1.player.items[i] = null;
 
@@ -71,7 +77,7 @@ namespace AutoStacker
             }
 
 
-            
+
         }
 
         private Item findFirstNonEmptyStack(Item a, int from)
