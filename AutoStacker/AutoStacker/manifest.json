@@ -1,0 +1,13 @@
+{
+   "Name": "Auto Stacker",
+   "Author": "Cat",
+   "Version": {
+      "MajorVersion": 1,
+      "MinorVersion": 0,
+      "PatchVersion": 0,
+      "Build": null
+   },
+   "Description": "Press k to automatically stack the current items in the open inventory.",
+   "UniqueID": "cat.autostacker",
+   "EntryDll": "AutoStacker.dll"
+}
