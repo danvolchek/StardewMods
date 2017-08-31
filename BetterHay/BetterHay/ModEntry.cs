@@ -55,7 +55,7 @@ public class ModEntry : Mod
 							if (!BetterHayGrass.TryAddHayToInventory(item.Key) && config.DropHayOnGroundIfNoRoomInInventory)
 								BetterHayGrass.DropHayOnGround(item.Key);
 
-		lastTerrainFeatures = Game1.currentLocation.terrainFeatures?.ToDictionary(entry => entry.Key,
+		lastTerrainFeatures = Game1.currentLocation?.terrainFeatures?.ToDictionary(entry => entry.Key,
 		                      entry => entry.Value);
 	}
 
