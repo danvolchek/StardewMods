@@ -7,7 +7,7 @@
     "PatchVersion": 0,
     "Build": null
   },
-  "Description": "Press the activation key to open up a menu with information about future geode openings!.",
+  "Description": "Press the activation key to open up a menu with information about future geode openings!",
   "UniqueID": "cat.geodeinfomenu",
   "EntryDll": "GeodeInfoMenu.dll"
 }
