@@ -47,6 +47,8 @@ namespace GeodeInfoMenu
         public override void Entry(IModHelper helper)
         {
             config = helper.ReadConfig<GeodeInfoMenuConfig>();
+            config.NumberOfNextGeodeDropsToShow = config.NumberOfNextGeodeDropsToShow < 0 ? 0 : config.NumberOfNextGeodeDropsToShow;
+            config.NumberOfNextGeodeDropsToShow = config.NumberOfNextGeodeDropsToShow > 999 ? 9 : config.NumberOfNextGeodeDropsToShow;
             Geodes = new Dictionary<GeodeType, int> {
                 {GeodeType.Normal, 535}, {GeodeType.FrozenGeode, 536}, {GeodeType.MagmaGeode, 537}, {GeodeType.OmniGeode, 749}
             };
@@ -255,6 +257,7 @@ namespace GeodeInfoMenu
         private IList<Tuple<int[], bool[]>> GetNextDropsForGeodes(int amount)
         {
             IList<Tuple<int[], bool[]>> list = new List<Tuple<int[], bool[]>>();
+
             foreach (GeodeType type in GetGeodeTypes())
             {
                 int GeodesCracked = (int)Game1.stats.GeodesCracked + 1;

@@ -77,12 +77,12 @@ namespace GeodeInfoMenu.Menus
                 SpriteText.drawString(b, this.numInFront + "", slotX + this.bounds.X, slotY + this.bounds.Y + Game1.pixelZoom * 3, 99, -1, 99, 1f, 0.1f, false, -1, "", -1);
 
             }
-            b.Draw(Game1.objectSpriteSheet, new Rectangle((int)(slotX + this.bounds.X + Game1.tileSize / 1.5), slotY + this.bounds.Y, SPRITE_SIZE, SPRITE_SIZE), new Microsoft.Xna.Framework.Rectangle?(Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, this.parentSheetIndex, 16, 16)), Color.White);
+            b.Draw(Game1.objectSpriteSheet, new Rectangle((int)(slotX + this.bounds.X + Game1.tileSize), slotY + this.bounds.Y, SPRITE_SIZE, SPRITE_SIZE), new Microsoft.Xna.Framework.Rectangle?(Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, this.parentSheetIndex, 16, 16)), Color.White);
 
             int scaleSize = 3;
             if (this.drawStar)
-                b.Draw(Game1.mouseCursors, new Vector2(slotX + this.bounds.X + Game1.tileSize / 1.5f + 12f /*+ Game1.tileSize/2*/, slotY + this.bounds.Y + (float)(Game1.tileSize - 12) + 4), new Microsoft.Xna.Framework.Rectangle?(new Microsoft.Xna.Framework.Rectangle(346, 392, 8, 8)), Color.White * 1, 0.0f, new Vector2(4f, 4f), scaleSize, SpriteEffects.None, 1f);
-            SpriteText.drawString(b, this.name, slotX + this.bounds.X + SPRITE_SIZE + Game1.tileSize, slotY + this.bounds.Y + Game1.pixelZoom * 3, 999, -1, 999, 1f, 0.1f, false, -1, "", -1);
+                b.Draw(Game1.mouseCursors, new Vector2(slotX + this.bounds.X + Game1.tileSize + 12f /*+ Game1.tileSize/2*/, slotY + this.bounds.Y + (float)(Game1.tileSize - 12) + 4), new Microsoft.Xna.Framework.Rectangle?(new Microsoft.Xna.Framework.Rectangle(346, 392, 8, 8)), Color.White * 1, 0.0f, new Vector2(4f, 4f), scaleSize, SpriteEffects.None, 1f);
+            SpriteText.drawString(b, this.name, slotX + this.bounds.X + SPRITE_SIZE + (int)(Game1.tileSize*1.5), slotY + this.bounds.Y + Game1.pixelZoom * 3, 999, -1, 999, 1f, 0.1f, false, -1, "", -1);
         }
 
 
