@@ -51,12 +51,22 @@ namespace BetterHay
                 if (!Game1.currentLocation.terrainFeatures.Contains(item))
                     if (((Game1.IsMultiplayer ? Game1.recentMultiplayerRandom : new Random((int)((double)Game1.uniqueIDForThisGame + (double)item.Key.X * 1000.0 + (double)item.Key.Y * 11.0))).NextDouble() < 0.5))
                         if (Game1.player.CurrentTool is MeleeWeapon && (Game1.player.CurrentTool.Name.Contains("Scythe") || Game1.player.CurrentTool.parentSheetIndex == 47))
-                            if ((Game1.getLocationFromName("Farm") as Farm).tryToAddHay(1) != 0)
-                                if (!BetterHayGrass.TryAddHayToInventory(item.Key) && config.DropHayOnGroundIfNoRoomInInventory)
-                                    BetterHayGrass.DropHayOnGround(item.Key);
+                        {
+                            if (IsWithinRange(Game1.player.getTileLocation(), item.Key, 3))
+                                if ((Game1.getLocationFromName("Farm") as Farm).tryToAddHay(1) != 0)
+                                    if (!BetterHayGrass.TryAddHayToInventory(item.Key) && config.DropHayOnGroundIfNoRoomInInventory)
+                                        BetterHayGrass.DropHayOnGround(item.Key);
+                        }
 
             lastTerrainFeatures = Game1.currentLocation?.terrainFeatures?.ToDictionary(entry => entry.Key,
                                   entry => entry.Value);
+        }
+
+        private bool IsWithinRange(Vector2 first, Vector2 second, double range)
+        {
+            if (second == null || first == null)
+                return false;
+            return Math.Sqrt(Math.Pow(first.X - second.X, 2) + Math.Pow(first.Y - second.Y, 2)) < range;
         }
 
         //Update the last list of terrain features
