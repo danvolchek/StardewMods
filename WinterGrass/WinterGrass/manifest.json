@@ -1,0 +1,19 @@
+﻿{
+  "Name": "WinterGrass",
+  "Author": "Cat",
+  "Version": {
+    "MajorVersion": 1,
+    "MinorVersion": 0,
+    "PatchVersion": 0,
+    "Build": null
+  },
+  "Dependencies": [
+    {
+      "UniqueID": "dantheman999.VariableGrass",
+      "IsRequired": false
+    }
+  ],
+  "Description": "Grass will stay around in winter.",
+  "UniqueID": "cat.wintergrass",
+  "EntryDll": "WinterGrass.dll"
+}
