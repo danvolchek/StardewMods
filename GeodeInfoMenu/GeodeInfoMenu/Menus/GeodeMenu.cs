@@ -18,14 +18,16 @@ namespace GeodeInfoMenu
         /***
          * New Fields
          ***/
-         /// <summary>
-         /// The icons to draw as the tabs.
-         /// </summary>
+        /// <summary>
+        /// The icons to draw as the tabs.
+        /// </summary>
         public static Texture2D tabIcons;
         /// <summary>
         /// The mod config.
         /// </summary>
         private GeodeInfoMenuConfig config;
+
+        private GeodeInfoMenuMod modEntry;
 
         /***
          * Existing Fields
@@ -40,10 +42,13 @@ namespace GeodeInfoMenu
         public static bool forcePreventClose;
         private bool wasSearchTextBoxSelectedWhenPageLeft;
 
+
+
         public GeodeMenu(GeodeInfoMenuMod mod, GeodeInfoMenuConfig config, IList<Tuple<int[], bool[]>> items, GeodeMenuStateInfo savedState = null, bool forceReloadState = false)
       : base(Game1.viewport.Width / 2 - (800 + IClickableMenu.borderWidth * 2) / 2, Game1.viewport.Height / 2 - (600 + IClickableMenu.borderWidth * 2) / 2, 800 + IClickableMenu.borderWidth * 2, 600 + IClickableMenu.borderWidth * 2, true)
         {
             this.config = config;
+            modEntry = mod;
             wasSearchTextBoxSelectedWhenPageLeft = false;
 
             this.tabs.Add(new ClickableComponent(new Rectangle(this.xPositionOnScreen + Game1.tileSize, this.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + Game1.tileSize, Game1.tileSize, Game1.tileSize), "search", "Search for Drops")
@@ -124,6 +129,21 @@ namespace GeodeInfoMenu
         public GeodeMenu(int startingTab, GeodeInfoMenuMod entry, GeodeInfoMenuConfig config, IList<Tuple<int[], bool[]>> items) : this(entry, config, items)
         {
             this.ChangeTab(startingTab);
+        }
+
+        /// <summary>
+        /// Exists the menu if it was not opened during the geode cracking menu, otherwise opens the geode cracking menu.
+        /// </summary>
+        private void Exit()
+        {
+            IClickableMenu lastMenu = modEntry.GetLastMenu();
+            if (lastMenu is StardewValley.Menus.GeodeMenu)
+            {
+                modEntry.SaveMenuState(this);
+                Game1.activeClickableMenu = lastMenu;
+            }
+            else
+                Game1.exitActiveMenu();
         }
 
         /***
@@ -280,7 +300,7 @@ namespace GeodeInfoMenu
             {
                 if (playSound)
                     Game1.playSound("bigDeSelect");
-                this.exitThisMenu(true);
+                Exit();
                 return;
             }
 
@@ -403,14 +423,16 @@ namespace GeodeInfoMenu
         {
             if (((IEnumerable<InputButton>)Game1.options.menuButton).Contains<InputButton>(new InputButton(key)) && this.readyToClose())
             {
-                Game1.exitActiveMenu();
+                Exit();
                 Game1.playSound("bigDeSelect");
+                return;
             }
 
             if (config.PressingEscapeWhileTypingInSearchBoxInstantlyClosesMenu && key == Keys.Escape)
             {
-                Game1.exitActiveMenu();
+                Exit();
                 Game1.playSound("bigDeSelect");
+                return;
             }
             else
                 this.pages[this.currentTab].receiveKeyPress(key);

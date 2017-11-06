@@ -39,6 +39,11 @@ namespace GeodeInfoMenu
         /// </summary>
         private GeodeInfoMenuConfig config;
 
+        /// <summary>
+        /// The menu where players actually break geodes.
+        /// </summary>
+        private StardewValley.Menus.IClickableMenu GeodeBreakingMenu = null;
+
 
         /// <summary>
         /// Entry method. Sets up config and event listeners.
@@ -86,9 +91,28 @@ namespace GeodeInfoMenu
         /// <param name="e">Event arguments</param>
         private void MenuClosed(object sender, EventArgsClickableMenuClosed e)
         {
-            if (e.PriorMenu is GeodeMenu)
-                menuStateInfo = (e.PriorMenu as GeodeMenu).SaveState();
+            SaveMenuState(e.PriorMenu);
+            GeodeBreakingMenu = null;
+        }
 
+        /// <summary>
+        /// Saves the menu state from e if e is a geode menu.
+        /// </summary>
+        /// <param name="e">A menu</param>
+        public void SaveMenuState(StardewValley.Menus.IClickableMenu e)
+        {
+            if (e is GeodeMenu)
+            {
+                menuStateInfo = (e as GeodeMenu).SaveState();
+            }
+        }
+
+        /// <summary>
+        /// Gets the last opened menu that is not a GeodeMenu.
+        /// </summary>
+        public StardewValley.Menus.IClickableMenu GetLastMenu()
+        {
+            return GeodeBreakingMenu;
         }
 
         /// <summary>
@@ -98,7 +122,14 @@ namespace GeodeInfoMenu
         /// <param name="e">Event arguments</param>
         private void KeyPressed(object sender, EventArgsKeyPressed e)
         {
-            if (e.KeyPressed.ToString().ToLower() == config.ActivationKey.ToLower() && Game1.activeClickableMenu == null)
+            bool canOpen = Game1.activeClickableMenu == null || Game1.activeClickableMenu is StardewValley.Menus.GeodeMenu;
+
+            if (Game1.activeClickableMenu is StardewValley.Menus.GeodeMenu)
+            {
+                GeodeBreakingMenu = Game1.activeClickableMenu;
+            }
+
+            if (e.KeyPressed.ToString().ToLower() == config.ActivationKey.ToLower() && canOpen)
             {
                 GeodeMenu menu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), config.RememberMenuStateAfterClose ? menuStateInfo : null);
                 Game1.activeClickableMenu = menu;
