@@ -9,18 +9,19 @@ namespace BetterHay
 {
     class BetterHayGrass
     {
-        //Tries to add hay to the player's inventory
-        public static bool TryAddHayToInventory(Vector2 tileLocation)
+        //Tries to add an item to the player's inventory
+        public static bool TryAddItemToInventory(int which)
         {
-            bool addedToInventory = Game1.player.addItemToInventory(new SObject(178, 1)) == null;
+            string name = Game1.objectInformation[which].Split('/')[0];
+            bool addedToInventory = Game1.player.addItemToInventory(new SObject(which, 1)) == null;
             if (addedToInventory)
-                Game1.addHUDMessage(new HUDMessage("Hay", 1, true, Color.LightGoldenrodYellow, (Item)new StardewValley.Object(178, 1, false, -1, 0)));
+                Game1.addHUDMessage(new HUDMessage(name, 1, true, Color.LightGoldenrodYellow, (Item)new StardewValley.Object(which, 1, false, -1, 0)));
 
             return addedToInventory;
         }
 
-        //Drops hay on the given tileLocation
-        public static void DropHayOnGround(Vector2 tileLocation)
+        //Drops an item on the given tileLocation
+        public static void DropOnGround(Vector2 tileLocation, int which)
         {
             Random random;
             if (Game1.IsMultiplayer)
@@ -36,7 +37,7 @@ namespace BetterHay
                 random = new Random((int)(uniqueId + tilePos + mineLevel + timesReachedBottom));
             }
 
-            Game1.createObjectDebris(178, (int)tileLocation.X, (int)tileLocation.Y);
+            Game1.createObjectDebris(which, (int)tileLocation.X, (int)tileLocation.Y);
         }
     }
 
