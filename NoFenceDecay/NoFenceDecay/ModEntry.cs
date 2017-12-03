@@ -7,6 +7,7 @@ using StardewValley;
 
 using System.Collections.Generic;
 using System.Linq;
+using StardewValley.Locations;
 
 namespace NoFenceDecay
 {
@@ -27,8 +28,6 @@ namespace NoFenceDecay
                     fence.health = fence.maxHealth;
                 }
             }
-
-
         }
 
         private List<Fence> getFences()
@@ -41,14 +40,17 @@ namespace NoFenceDecay
             foreach (GameLocation loc in Game1.locations)
             {
                 fences.AddRange(loc.Objects.Values.OfType<Fence>());
+
+                if(loc is BuildableGameLocation)
+                {
+                    foreach (GameLocation innerLoc in ((BuildableGameLocation)loc).buildings.Select(item => item.indoors))
+                        if(innerLoc != null)
+                            fences.AddRange(innerLoc.Objects.Values.OfType<Fence>());
+                }
             }
 
             return fences;
-
         }
-
     }
-
-
 }
 
