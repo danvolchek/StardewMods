@@ -1,13 +1,13 @@
 {
-   "Name": "Sprinkler Range",
+   "Name": "Range Display",
    "Author": "Cat",
    "Version": {
       "MajorVersion": 1,
-      "MinorVersion": 0,
+      "MinorVersion": 1,
       "PatchVersion": 0,
       "Build": null
    },
-   "Description": "Press f2 to view the range of sprinklers and scarecrows.",
+   "Description": "Press a key to view the range of sprinklers, scarecrows, and bee houses.",
    "UniqueID": "cat.sprinklerrange",
    "EntryDll": "SprinklerRange.dll"
 }
