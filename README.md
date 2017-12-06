@@ -10,3 +10,4 @@ Contains the mods I've created for Stardew Valley
 - No Fence Decay: Stops fences and fence gates from decaying.
 - Sprinkler Range: Displays the range of scarecrows and sprinklers.
 - Winter Grass: Allows grass to persist through winter.
+- Custom Warp Locations: Allows you to change where warp totems/obelisks/the return scepter warp you to.
