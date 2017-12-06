@@ -11,3 +11,4 @@ Contains the mods I've created for Stardew Valley
 - Sprinkler Range: Displays the range of scarecrows and sprinklers.
 - Winter Grass: Allows grass to persist through winter.
 - Custom Warp Locations: Allows you to change where warp totems/obelisks/the return scepter warp you to.
+- Hold to Break Geodes: Lets you hold your mouse down to continously break geodes.
