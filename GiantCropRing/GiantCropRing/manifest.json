@@ -1,7 +1,7 @@
 {
    "Name": "Giant Crop Ring",
    "Author": "Cat",
-   "Version": "1.0.0",
+   "Version": "1.0.1",
    "Description": "Adds a ring which increases the chance of getting giant crops.",
    "UniqueID": "cat.giantcropring",
    "EntryDll": "GiantCropRing.dll",
