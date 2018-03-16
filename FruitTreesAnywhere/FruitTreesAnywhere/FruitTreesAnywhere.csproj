@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
+    <Compile Include="AnywhereSapling.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
