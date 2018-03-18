@@ -1,5 +1,5 @@
 # StardewMods
-Contains the mods I've created for Stardew Valley
+This repo contains the mods I've created for Stardew Valley. Each folder contains some more information and a link to the NexusMods page for downloads.
 
 ## Overview
 - Auto Stacker: Automatically stacks items in your inventory into as few stacks as possible at the press of a key.
@@ -12,3 +12,4 @@ Contains the mods I've created for Stardew Valley
 - Winter Grass: Allows grass to persist through winter.
 - Custom Warp Locations: Allows you to change where warp totems/obelisks/the return scepter warp you to.
 - Hold to Break Geodes: Lets you hold your mouse down to continously break geodes.
+- Better Fruit Trees: Lets fruit trees grow even if there are things around them, and lets junimos harvest fruit trees for you.
