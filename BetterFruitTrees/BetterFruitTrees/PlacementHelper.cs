@@ -9,13 +9,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FruitTreesAnywhere
+namespace BetterFruitTrees
 {
-    public class ModEntry : Mod
+    /***
+     * Contains all the logic needed to allow for sapling placement and growth near other trees or debris.
+     ***/
+    class PlacementHelper : IInitializable
     {
         private int RemoveChecks = 0;
 
-        public override void Entry(IModHelper helper)
+        public void Init()
         {
             SaveEvents.BeforeSave += this.BeforeSave;
             InputEvents.ButtonPressed += this.ButtonPressed;
@@ -31,7 +34,6 @@ namespace FruitTreesAnywhere
         {
             if ((e.IsActionButton || e.IsUseToolButton) && Game1.player.ActiveObject != null && Game1.player.ActiveObject.name.Contains("Sapling"))
             {
-                Monitor.Log("Holding Sapling");
                 Vector2 vector2 = GetMouseTile();
 
                 if (!Game1.eventUp || Game1.isFestival())
@@ -213,7 +215,6 @@ namespace FruitTreesAnywhere
         {
             if (tree.daysUntilMature > 28)
                 tree.daysUntilMature = 28;
-
             tree.daysUntilMature--;
             int oldGrowthStage = tree.growthStage;
             tree.growthStage = tree.daysUntilMature > 0 ? (tree.daysUntilMature > 7 ? (tree.daysUntilMature > 14 ? (tree.daysUntilMature > 21 ? 0 : 1) : 2) : 3) : 4;

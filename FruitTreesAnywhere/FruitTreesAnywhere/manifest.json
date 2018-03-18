@@ -1,9 +1,0 @@
-﻿{
-    "Name": "Fruit Trees Anywhere",
-    "Author": "Cat",
-    "Version": "1.0.0",
-    "Description": "Fruit trees can be placed and will grow even if there is something in the 3x3 area surrounding them.",
-    "UniqueID": "cat.fruittreesanywhere",
-    "EntryDll": "FruitTreesAnywhere.dll",
-    "UpdateKeys": ["Nexus:1976"]
-}
