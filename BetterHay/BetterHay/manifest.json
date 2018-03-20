@@ -1,13 +1,10 @@
 ﻿{
   "Name": "BetterHay",
   "Author": "Cat",
-  "Version": {
-    "MajorVersion": 2,
-    "MinorVersion": 0,
-    "PatchVersion": 4,
-    "Build": null
-  },
+  "Version": "2.1.0",
   "Description": "You get hay from scything grass regardless of whether you have silos, and can always remove hay from hoppers.",
   "UniqueID": "cat.betterhay",
-  "EntryDll": "BetterHay.dll"
+  "EntryDll": "BetterHay.dll",
+  "MinimumApiVersion": "2.0",
+  "UpdateKeys": [ "Nexus:1430" ]
 }
