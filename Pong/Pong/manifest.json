@@ -1,0 +1,10 @@
+{
+  "Name": "Pong",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Replaces SDV with Pong!",
+  "UniqueID": "cat.Pong",
+  "EntryDll": "Pong.dll",
+  "MinimumApiVersion": "2.0",
+  "UpdateKeys": [ "Nexus:1994" ]
+}
