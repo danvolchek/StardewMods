@@ -173,7 +173,7 @@ namespace BetterFruitTrees
             return IsPassable(location, x, y, tilePixels) && !IsOccupied(location, new Vector2(x, y), tilePixels);
         }
 
-        //Thanks to PathosChild for these functions (adapted slightly)
+        //Thanks to Pathoschild for these functions (adapted slightly)
         //https://github.com/Pathoschild/StardewMods/blob/data-maps/1.3/DataMaps/DataMaps/AccessibilityMap.cs#L137-L197
 
         private bool IsPassable(GameLocation location, int x, int y, Rectangle tilePixels)
