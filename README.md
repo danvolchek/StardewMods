@@ -2,7 +2,7 @@
 This repo contains the mods I've created for Stardew Valley. Each folder contains some more information and a link to the NexusMods page for downloads.
 
 ## Overview
-- Auto Stacker: Automatically stacks items in your inventory into as few stacks as possible at the press of a key.
+- [Auto Stacker](/AutoStacker): Automatically stacks items in your inventory into as few stacks as possible at the press of a key.
 - Better Hay: Allows for hay collection when you don't have a siloh or your silohs are full, also has option to drop grass starter.
 - Geode Info Menu: Adds a menu which displays what will drop from geodes you break open in the future.
 - Giant Crop Ring: Adds a wearable ring that increases the chance of giant crops growing.
