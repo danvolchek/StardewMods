@@ -15,3 +15,4 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - Better Fruit Trees: Lets fruit trees grow even if there are things around them, and lets junimos harvest fruit trees for you.
 - Customizable Death Penalty: Allows you to choose to keep items, money, or mine levels upon death.
 - Pong: Replaces the game with Pong.
+- Desert Obelisk: Adds a desert obelisk to the game that lets you warp to the desert whenever you want.

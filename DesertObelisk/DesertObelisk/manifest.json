@@ -1,0 +1,16 @@
+﻿{
+  "Name": "Desert Obelisk",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Adds a desert obelisk that warps you to the desert!",
+  "UniqueID": "cat.desertobelisk",
+  "EntryDll": "DesertObelisk.dll",
+  "MinimumApiVersion": "2.5",
+  "UpdateKeys": ["Nexus:2021"],
+  "Dependencies": [
+    {
+      "UniqueID": "Lita.StarblueValley",
+      "IsRequired": false
+    }
+  ]
+}
