@@ -6,6 +6,7 @@ using StardewValley.Buildings;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace DesertObelisk
@@ -17,10 +18,18 @@ namespace DesertObelisk
         private List<DesertObelisk> savedTempObelisks;
         private readonly string savedObeliskPath = "savedObelisks.json";
         private AssetModifier modifier;
+        private int desertWarpX = 34;
 
         public override void Entry(IModHelper helper)
         {
-            modifier = new AssetModifier(helper, this.Monitor);
+            if (helper.ModRegistry.IsLoaded("Entoarox.ExtendedMinecart"))
+            {
+                desertWarpX -= 2;
+            }
+            string savesFolder = $"{helper.DirectoryPath}{Path.DirectorySeparatorChar}saves";
+            if (!Directory.Exists(savesFolder))
+                Directory.CreateDirectory(savesFolder);
+            modifier = new AssetModifier(helper, this.Monitor, desertWarpX);
             savedTempObelisks = new List<DesertObelisk>();
             obeliskBlueprint = new BluePrint("Desert Obelisk");
 
@@ -32,8 +41,8 @@ namespace DesertObelisk
         }
 
         private void AfterLoad(object sender, EventArgs e)
-        {
-            LoadObelisksFromFile(savedObeliskPath);
+        {        
+            LoadObelisksFromFile($"saves{Path.DirectorySeparatorChar}{Constants.SaveFolderName}_{savedObeliskPath}");
         }
 
         private void AfterSave(object sender, EventArgs e)
@@ -43,7 +52,7 @@ namespace DesertObelisk
 
         private void BeforeSave(object sender, EventArgs e)
         {
-            SaveObelisksToFile(savedObeliskPath);
+            SaveObelisksToFile($"saves{Path.DirectorySeparatorChar}{Constants.SaveFolderName}_{savedObeliskPath}");
 
             ClearAndSaveTempObelisks(savedTempObelisks);
         }
@@ -85,7 +94,7 @@ namespace DesertObelisk
             IList<Vector2> saveData = Helper.ReadJsonFile<IList<Vector2>>(path);
 
             if (saveData != null)
-                Game1.getFarm().buildings.AddRange(saveData.Select(item => new DesertObelisk(obeliskBlueprint, item)));
+                Game1.getFarm().buildings.AddRange(saveData.Select(item => new DesertObelisk(obeliskBlueprint, item, desertWarpX)));
         }
 
         private void ConvertObelisks()
@@ -96,7 +105,7 @@ namespace DesertObelisk
                 if (buildings[i].buildingType == "Desert Obelisk" && !(buildings[i] is DesertObelisk))
                 {
                     Monitor.Log($"Converting {buildings[i].GetType().Name}", LogLevel.Trace);
-                    buildings[i] = new DesertObelisk(obeliskBlueprint, new Vector2(buildings[i].tileX, buildings[i].tileY));
+                    buildings[i] = new DesertObelisk(obeliskBlueprint, new Vector2(buildings[i].tileX, buildings[i].tileY), desertWarpX);
                 }
             }
         }

@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Desert Obelisk",
   "Author": "Cat",
-  "Version": "1.0.0",
+  "Version": "1.2.0",
   "Description": "Adds a desert obelisk that warps you to the desert!",
   "UniqueID": "cat.desertobelisk",
   "EntryDll": "DesertObelisk.dll",
@@ -10,6 +10,10 @@
   "Dependencies": [
     {
       "UniqueID": "Lita.StarblueValley",
+      "IsRequired": false
+    },
+    {
+      "UniqueID": "Entoarox.ExtendedMinecart",
       "IsRequired": false
     }
   ]

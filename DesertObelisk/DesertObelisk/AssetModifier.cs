@@ -11,12 +11,14 @@ namespace DesertObelisk
     public class AssetModifier : IAssetLoader, IAssetEditor
     {
         private Texture2D obeliskTexture = null;
+        private int desertWarpX;
 
         private IModHelper helper;
 
-        public AssetModifier(IModHelper helper, IMonitor monitor)
+        public AssetModifier(IModHelper helper, IMonitor monitor, int desertWarpX)
         {
             this.helper = helper;
+            this.desertWarpX = desertWarpX;
             IManifest loadedManifest = null;
 
             foreach (IContentPack contentPack in helper.GetContentPacks())
@@ -54,7 +56,7 @@ namespace DesertObelisk
                     monitor.Log("Loaded default obelisk texture because no content packs or Starblue Valley were found/valid.", LogLevel.Trace);
                     obeliskTexture = helper.Content.Load<Texture2D>("assets/Desert Obelisk.png");
                 }
-            }
+            }    
 
             helper.Content.AssetLoaders.Add(this);
             helper.Content.AssetEditors.Add(this);
@@ -72,12 +74,12 @@ namespace DesertObelisk
             desert.map.AddTileSheet(markerTileSheet);
             Layer frontLayer = desert.map.GetLayer("Front");
             Layer buildingsLayer = desert.map.GetLayer("Buildings");
-            frontLayer.Tiles[34, 40] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 0);
-            frontLayer.Tiles[35, 40] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 1);
-            frontLayer.Tiles[34, 41] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 2);
-            frontLayer.Tiles[35, 41] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 3);
-            buildingsLayer.Tiles[34, 42] = new StaticTile(buildingsLayer, markerTileSheet, BlendMode.Alpha, 4);
-            buildingsLayer.Tiles[35, 42] = new StaticTile(buildingsLayer, markerTileSheet, BlendMode.Alpha, 5);
+            frontLayer.Tiles[desertWarpX, 40] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 0);
+            frontLayer.Tiles[desertWarpX + 1, 40] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 1);
+            frontLayer.Tiles[desertWarpX, 41] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 2);
+            frontLayer.Tiles[desertWarpX + 1, 41] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 3);
+            buildingsLayer.Tiles[desertWarpX, 42] = new StaticTile(buildingsLayer, markerTileSheet, BlendMode.Alpha, 4);
+            buildingsLayer.Tiles[desertWarpX + 1, 42] = new StaticTile(buildingsLayer, markerTileSheet, BlendMode.Alpha, 5);
 
             GameEvents.OneSecondTick -= this.OneSecondTick;
         }

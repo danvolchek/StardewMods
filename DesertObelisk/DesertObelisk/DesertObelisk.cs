@@ -9,9 +9,11 @@ namespace DesertObelisk
 {
     class DesertObelisk : Building
     {
-        public DesertObelisk(BluePrint blueprint, Vector2 tileLocation) : base(blueprint, tileLocation)
+        private int desertWarpX;
+        public DesertObelisk(BluePrint blueprint, Vector2 tileLocation, int desertWarpX) : base(blueprint, tileLocation)
         {
             this.daysOfConstructionLeft = 0;
+            this.desertWarpX = desertWarpX;
         }
 
         public override bool doAction(Vector2 tileLocation, StardewValley.Farmer who)
@@ -45,14 +47,14 @@ namespace DesertObelisk
 
         private void WarpToDesert()
         {
-            Game1.warpFarmer("Desert", 34, 43, 2);
+            Game1.warpFarmer("Desert", desertWarpX, 43, 2);
             Game1.fadeToBlackAlpha = 0.99f;
             Game1.screenGlow = false;
             Game1.player.temporarilyInvincible = false;
             Game1.player.temporaryInvincibilityTimer = 0;
             Game1.displayFarmer = true;
 
-            GameEvents.HalfSecondTick += this.CheckForWarpOver;
+            GameEvents.UpdateTick += this.CheckForWarpOver;
         }
 
         private void CheckForWarpOver(object sender, EventArgs e)
@@ -60,7 +62,7 @@ namespace DesertObelisk
             if (!Game1.eventUp && Game1.currentLocation.Name == "Desert")
             {
                 Game1.player.position.X += 0.5f * Game1.tileSize;
-                GameEvents.HalfSecondTick -= this.CheckForWarpOver;
+                GameEvents.UpdateTick -= this.CheckForWarpOver;
             }
         }
     }
