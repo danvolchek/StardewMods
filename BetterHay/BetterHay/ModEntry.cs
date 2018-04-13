@@ -156,8 +156,7 @@ namespace BetterHay
 
             foreach (Vector2 hopperLocation in hopperLocations)
             {
-                Objects.Remove(hopperLocation);
-                Objects.Add(hopperLocation, (ToType)Activator.CreateInstance(typeof(ToType), new object[] { hopperLocation, 99, false }));
+                Objects[hopperLocation] = (ToType)Activator.CreateInstance(typeof(ToType), new object[] { hopperLocation, 99, false });
             }
 
         }
