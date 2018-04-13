@@ -16,3 +16,4 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Customizable Death Penalty](/CustomizableDeathPenalty): Allows you to choose to keep items, money, or mine levels upon death.
 - [Pong](/Pong): Replaces the game with Pong.
 - [Desert Obelisk](/DesertObelisk): Adds a desert obelisk to the game that lets you warp to the desert whenever you want.
+- [Safe Lightning](/SafeLightning): Stops lightning from hitting anything in your farm except lightning rods.
