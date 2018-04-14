@@ -8,7 +8,7 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Giant Crop Ring](/GiantCropRing): Adds a wearable ring that increases the chance of giant crops growing.
 - [No Crows](/NoCrows): Stops crows from eating crops permanently.
 - [No Fence Decay](/NoFenceDecay): Stops fences and fence gates from decaying.
-- [Range Display](/Range Display): Displays the range of scarecrows, sprinklers, bee houses, and junimo huts.
+- [Range Display](/RangeDisplay): Displays the range of scarecrows, sprinklers, bee houses, and junimo huts.
 - [Winter Grass](/WinterGrass): Allows grass to persist through winter.
 - [Custom Warp Locations](/CustomWarpLocations): Allows you to change where warp totems/obelisks/the return scepter warp you to.
 - [Hold to Break Geodes](/HoldToBreakGeodes): Lets you hold your mouse down to continously break geodes.
