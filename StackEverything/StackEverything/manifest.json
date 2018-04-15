@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Stack Everything",
+  "Author": "Cat",
+  "Version": "1.0.1",
+  "Description": "Lets you stack everything up to 999.",
+  "UniqueID": "cat.stackeverything",
+  "EntryDll": "StackEverything.dll",
+  "MinimumApiVersion": "2.0",
+  "UpdateKeys": ["Nexus:2053"]
+}
