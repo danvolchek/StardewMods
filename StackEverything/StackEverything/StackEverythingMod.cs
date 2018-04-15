@@ -15,10 +15,10 @@ namespace StackEverything
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             //drawInMenu is ambigous and needs to be patched manually by getting the method
-            MethodInfo toDraw = typeof(SObject).GetMethods(BindingFlags.Instance | BindingFlags.Public).ToList().Find(m => m.Name == "drawInMenu");
-            MethodInfo prefix = typeof(DrawInMenuPatch).GetMethods(BindingFlags.Static | BindingFlags.Public).ToList().Find(m => m.Name == "Postfix");
+            MethodInfo drawInMenu = typeof(SObject).GetMethods(BindingFlags.Instance | BindingFlags.Public).ToList().Find(m => m.Name == "drawInMenu");
+            MethodInfo postfix = typeof(DrawInMenuPatch).GetMethods(BindingFlags.Static | BindingFlags.Public).ToList().Find(m => m.Name == "Postfix");
 
-            harmony.Patch(toDraw, null, new HarmonyMethod(prefix));
+            harmony.Patch(drawInMenu, null, new HarmonyMethod(postfix));
         }
     }
 }
