@@ -10,7 +10,7 @@ namespace StackEverything.Patches
     [HarmonyPatch("maximumStackSize")]
     public class StackSizePatch
     {
-        static bool Prefix(SObject __instance, ref int __result)
+        static bool Prefix(ref int __result)
         {
              __result = 999;
 
