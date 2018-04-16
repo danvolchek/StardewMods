@@ -7,6 +7,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SObject = StardewValley.Object;
 
 namespace RangeDisplay
@@ -51,6 +52,13 @@ namespace RangeDisplay
             };
 
             config = helper.ReadConfig<RangeDisplayConfig>();
+
+            //handle compatability for the versions where we assigned the modifier key badly
+            if (config.HoverModifierKey == "control")
+            {
+                config.HoverModifierKey = "leftcontrol,rightcontrol";
+                helper.WriteConfig(config);
+            }
 
             GraphicsEvents.OnPreRenderHudEvent += OnPreRenderHudEvent;
             InputEvents.ButtonPressed += ButtonPressed;
@@ -110,12 +118,18 @@ namespace RangeDisplay
 
         private void ButtonReleased(object sender, EventArgsInput e)
         {
-            if (e.Button.ToString().ToLower().Contains(config.HoverModifierKey.ToLower()) && config.ShowRangeOfHoveredOverItem)
+            if (DoesMatchConfigKey(e.Button, config.HoverModifierKey) && config.ShowRangeOfHoveredOverItem)
             {
                 isModifierKeyDown = false;
                 RefreshRangeItems(Game1.currentLocation);
             }
         }
+
+        private bool DoesMatchConfigKey(SButton b, string configValue)
+        {
+            string buttonAsString = b.ToString().ToLower();
+            return configValue.ToLower().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Any(Item => buttonAsString.Equals(Item.Trim()));
+        }       
 
         private void MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
@@ -137,7 +151,7 @@ namespace RangeDisplay
 
         private void ButtonPressed(object sender, EventArgsInput e)
         {
-            if (e.Button.ToString().ToLower().Contains(config.CycleActiveDisplayKey))
+            if (DoesMatchConfigKey(e.Button, config.CycleActiveDisplayKey))
             {
                 if (displayIndex == allRangeItems.Length - 1)
                 {
@@ -162,7 +176,7 @@ namespace RangeDisplay
                 displayManager.DisplayOnly(allRangeItems[displayIndex]);
                 hudMessageManager.AddHudMessage(allRangeItems[displayIndex]);
             }
-            else if (e.Button.ToString().ToLower().Contains(config.HoverModifierKey.ToLower()) && config.ShowRangeOfHoveredOverItem)
+            else if (DoesMatchConfigKey(e.Button, config.HoverModifierKey) && config.ShowRangeOfHoveredOverItem)
             {
                 isModifierKeyDown = true;
                 RefreshRangeItems(Game1.currentLocation);

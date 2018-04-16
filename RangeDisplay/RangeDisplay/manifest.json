@@ -1,8 +1,10 @@
 ﻿{
   "Name": "Range Display",
   "Author": "Cat",
-  "Version": "2.0.0",
+  "Version": "2.1.0",
   "Description": "Press a key to view the range of sprinklers, scarecrows, bee houses, and junimo huts.",
   "UniqueID": "cat.sprinklerrange",
-  "EntryDll": "RangeDisplay.dll"
+  "EntryDll": "RangeDisplay.dll",
+  "MinimumApiVersion": "2.0",
+  "UpdateKeys": ["Nexus:1179"]
 }
