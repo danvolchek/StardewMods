@@ -17,4 +17,4 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Pong](/Pong): Replaces the game with Pong.
 - [Desert Obelisk](/DesertObelisk): Adds a desert obelisk to the game that lets you warp to the desert whenever you want.
 - [Safe Lightning](/SafeLightning): Stops lightning from hitting anything in your farm except lightning rods.
-- [Stack Everything](/StackEverything): Lets you stack BigCraftables and bobbers up to 999 like every other item.
+- [Stack Everything](/StackEverything): Lets you stack BigCraftables, Furniture, Wallpapers, and bobbers up to 999 like every other item.
