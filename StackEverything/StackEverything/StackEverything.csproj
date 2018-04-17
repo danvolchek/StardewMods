@@ -46,9 +46,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Patches\DrawInMenuPatch.cs" />
+    <Compile Include="Patches\Size\AddToStackPatch.cs" />
+    <Compile Include="Patches\Size\GetStackPatch.cs" />
+    <Compile Include="Patches\Size\MaximumStackSizePatch.cs" />
     <Compile Include="StackEverythingMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Patches\StackSizePatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
