@@ -2,18 +2,16 @@
 using StackEverything.Patches;
 using StackEverything.Patches.Size;
 using StardewModdingAPI;
-using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using SObject = StardewValley.Object;
 
 namespace StackEverything
 {
     public class StackEverythingMod : Mod
     {
-        public static Type[] patchedTypes = new Type[] { typeof(Furniture), typeof(Wallpaper) };
+        public static Type[] patchedTypes = new Type[] { GetSDVType("Objects.Furniture"), GetSDVType("Objects.Wallpaper") };
 
         public override void Entry(IModHelper helper)
         {
@@ -31,7 +29,7 @@ namespace StackEverything
 
             MethodInfo drawPostfix = typeof(DrawInMenuPatch).GetMethods(BindingFlags.Static | BindingFlags.Public).ToList().Find(m => m.Name == "Postfix");
             
-            foreach (Type t in patchedTypes.Union(new Type[] { typeof(SObject) }))
+            foreach (Type t in patchedTypes.Union(new Type[] { GetSDVType("Object") }))
             {
                 MethodInfo drawInMenu = t.GetMethods(BindingFlags.Instance | BindingFlags.Public).ToList().Find(m => m.Name == "drawInMenu");
 
@@ -47,6 +45,19 @@ namespace StackEverything
                     harmony.Patch(original, prefix == null ? null : new HarmonyMethod(prefix), prefix == null ? null : new HarmonyMethod(postfix));
                 }
             }
+        }
+
+        //Big thanks to Routine for this workaround for mac users.
+        //https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/PyTK/PyUtils.cs#L117
+        private static Type GetSDVType(string type)
+        {
+            string prefix = "StardewValley.";
+            Type defaultSDV = Type.GetType(prefix + type + ", Stardew Valley");
+
+            if (defaultSDV != null)
+                return defaultSDV;
+            else
+                return Type.GetType(prefix + type + ", StardewValley");
         }
     }
 }
