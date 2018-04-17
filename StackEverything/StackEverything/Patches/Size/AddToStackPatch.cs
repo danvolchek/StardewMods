@@ -3,7 +3,7 @@
 namespace StackEverything.Patches.Size
 {
     /// <summary>
-    /// Copy over and modify <see cref="Object.addToStack(int)"/> slightly.
+    /// Rewrite the <see cref="Item.addToStack(int)"/> method.
     /// </summary>
     public class AddToStackPatch
     {
@@ -15,21 +15,18 @@ namespace StackEverything.Patches.Size
             if (amount == -1 || amount == 0)
                 amount = 1;
 
-            int num1 = __instance.maximumStackSize();
-            if (num1 == 1)
+            int maxStack = __instance.maximumStackSize();
+            int proposedStack = __instance.Stack + amount;
+            if(proposedStack > maxStack)
             {
-                __result = amount;
-                return false;
-            }
-            __instance.Stack = __instance.Stack + amount;
-            if (__instance.Stack <= num1)
+                __instance.Stack = maxStack;
+                __result = proposedStack - maxStack;
+            } else
             {
+                __instance.Stack = proposedStack;
                 __result = 0;
-                return false;
             }
-            int num2 = __instance.Stack - num1;
-            __instance.Stack = num1;
-            __result = num2;
+
             return false;
         }
     }
