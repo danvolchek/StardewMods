@@ -6,9 +6,7 @@ using SObject = StardewValley.Object;
 
 namespace StackEverything.Patches
 {
-    /// <summary>
-    /// Draw stack size in inventories.
-    /// </summary>
+    /// <summary>Draw stack size in inventories.</summary>
     internal class DrawInMenuPatch
     {
         public static void Postfix(Item __instance, SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)

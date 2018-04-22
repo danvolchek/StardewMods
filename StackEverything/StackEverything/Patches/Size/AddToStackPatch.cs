@@ -2,9 +2,7 @@
 
 namespace StackEverything.Patches.Size
 {
-    /// <summary>
-    /// Rewrite the <see cref="Item.addToStack(int)"/> method.
-    /// </summary>
+    /// <summary>Rewrite the <see cref="Item.addToStack(int)"/> method.</summary>
     public class AddToStackPatch
     {
         public static bool Prefix(Item __instance, ref int amount, ref int __result)
@@ -17,11 +15,12 @@ namespace StackEverything.Patches.Size
 
             int maxStack = __instance.maximumStackSize();
             int proposedStack = __instance.Stack + amount;
-            if(proposedStack > maxStack)
+            if (proposedStack > maxStack)
             {
                 __instance.Stack = maxStack;
                 __result = proposedStack - maxStack;
-            } else
+            }
+            else
             {
                 __instance.Stack = proposedStack;
                 __result = 0;
