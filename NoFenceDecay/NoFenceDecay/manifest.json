@@ -1,13 +1,10 @@
 {
-   "Name": "No Fence Decay",
-   "Author": "Cat",
-   "Version": {
-      "MajorVersion": 1,
-      "MinorVersion": 0,
-      "PatchVersion": 0,
-      "Build": null
-   },
-   "Description": "Makes all fences and gates last forever.",
-   "UniqueID": "cat.nofencedecay",
-   "EntryDll": "NoFenceDecay.dll"
+  "Name": "No Fence Decay",
+  "Author": "Cat",
+  "Version": "1.2.0-beta",
+  "Description": "Makes all fences and gates last forever.",
+  "UniqueID": "cat.nofencedecay",
+  "EntryDll": "NoFenceDecay.dll",
+  "MinimumApiVersion": "2.6-beta",
+  "UpdateKeys": ["Nexus:1180"]
 }
