@@ -35,6 +35,21 @@ namespace RangeDisplay.RangeHandling.RangeCreators
 
         public IEnumerable<Vector2> GetRange(SObject obj, Vector2 position, GameLocation location)
         {
+            if (this.betterSprinklersAPI == null)
+            {
+                foreach (Vector2 pos in this.GetDefaultRange(obj, position))
+                    yield return pos;
+            } else if (this.betterSprinklersAPI.GetSprinklerCoverage().TryGetValue(obj.parentSheetIndex, out Vector2[] bExtra))
+                foreach (Vector2 extraPos in bExtra)
+                    yield return extraPos + position;
+
+            if (this.simpleSprinklersAPI != null && this.simpleSprinklersAPI.GetNewSprinklerCoverage().TryGetValue(obj.parentSheetIndex, out Vector2[] sExtra))
+                foreach(Vector2 extraPos in sExtra)
+                    yield return extraPos + position;
+        }
+
+        public IEnumerable<Vector2> GetDefaultRange(SObject obj, Vector2 position)
+        {
             string objectName = obj.Name.ToLower();
 
             yield return new Vector2(position.X - 1, position.Y);
@@ -63,14 +78,6 @@ namespace RangeDisplay.RangeHandling.RangeCreators
                     }
                 }
             }
-
-            if (this.simpleSprinklersAPI != null && this.simpleSprinklersAPI.GetNewSprinklerCoverage().TryGetValue(obj.parentSheetIndex, out Vector2[] sExtra))
-                foreach(Vector2 extraPos in sExtra)
-                    yield return extraPos + position;
-
-            if (this.betterSprinklersAPI != null && this.betterSprinklersAPI.GetSprinklerCoverage().TryGetValue(obj.parentSheetIndex, out Vector2[] bExtra))
-                foreach (Vector2 extraPos in bExtra)
-                    yield return extraPos + position;
         }
     }
 }
