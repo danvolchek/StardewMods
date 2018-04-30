@@ -92,7 +92,7 @@ namespace RangeDisplay
             this.displayManager.Clear();
 
             //Objects in the world and objects being hovered over
-            foreach (KeyValuePair<Vector2, SObject> item in location.Objects)
+            foreach (KeyValuePair<Vector2, SObject> item in location.Objects.Pairs)
             {
                 foreach (IObjectRangeCreator creator in this.objectRangeCreators)
                 {
