@@ -10,13 +10,13 @@ namespace RangeDisplay
 
         public void AddHudMessage(string message)
         {
-            if (currentMessage != null && Game1.hudMessages.Contains(currentMessage))
+            if (this.currentMessage != null && Game1.hudMessages.Contains(this.currentMessage))
             {
-                Game1.hudMessages.Remove(currentMessage);
+                Game1.hudMessages.Remove(this.currentMessage);
             }
 
-            currentMessage = new HUDMessage("Range Display: " + message, "");
-            Game1.addHUDMessage(currentMessage);
+            this.currentMessage = new HUDMessage("Range Display: " + message, "");
+            Game1.addHUDMessage(this.currentMessage);
         }
 
         public void AddHudMessage(RangeItem item)

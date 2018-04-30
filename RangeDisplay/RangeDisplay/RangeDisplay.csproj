@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="APIs\IBetterSprinklersAPI.cs" />
+    <Compile Include="APIs\ISimpleSprinklersAPI.cs" />
     <Compile Include="DisplayManager.cs" />
     <Compile Include="HudMessageManager.cs" />
     <Compile Include="RangeDisplayConfig.cs" />

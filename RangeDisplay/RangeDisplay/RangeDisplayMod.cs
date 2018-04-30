@@ -27,10 +27,12 @@ namespace RangeDisplay
 
         private RangeDisplayConfig config;
 
+        private SprinklerRangeCreator sprinklerRangeCreator;
+
         //Need to fix rendering and item change (walking)
         public override void Entry(IModHelper helper)
         {
-            displayManager = new DisplayManager(helper.Content.Load<Texture2D>("assets/border.png"), helper.Content.Load<Texture2D>("assets/filled_in.png"),
+            this.displayManager = new DisplayManager(helper.Content.Load<Texture2D>("assets/border.png"), helper.Content.Load<Texture2D>("assets/filled_in.png"),
             new Dictionary<RangeItem, Color>()
             {
                 { RangeItem.Sprinkler, Color.LightSkyBlue },
@@ -39,37 +41,45 @@ namespace RangeDisplay
                 { RangeItem.Junimo_Hut, Color.LimeGreen }
             });
 
-            objectRangeCreators = new List<IObjectRangeCreator>()
+            this.sprinklerRangeCreator = new SprinklerRangeCreator();
+            this.objectRangeCreators = new List<IObjectRangeCreator>()
             {
-                new SprinklerRangeCreator(),
+                this.sprinklerRangeCreator,
                 new ScarecrowRangeCreator(),
                 new BeeHouseRangeCreator()
             };
 
-            buildingRangeCreators = new List<IBuildingRangeCreator>()
+            this.buildingRangeCreators = new List<IBuildingRangeCreator>()
             {
                 new JunimoHutRangeCreator()
             };
 
-            config = helper.ReadConfig<RangeDisplayConfig>();
+            this.config = helper.ReadConfig<RangeDisplayConfig>();
 
             //handle compatability for the versions where we assigned the modifier key badly
-            if (config.HoverModifierKey == "control")
+            if (this.config.HoverModifierKey == "control")
             {
-                config.HoverModifierKey = "leftcontrol,rightcontrol";
-                helper.WriteConfig(config);
+                this.config.HoverModifierKey = "leftcontrol,rightcontrol";
+                helper.WriteConfig(this.config);
             }
 
-            GraphicsEvents.OnPreRenderHudEvent += OnPreRenderHudEvent;
-            InputEvents.ButtonPressed += ButtonPressed;
-            GameEvents.EighthUpdateTick += EighthUpdateTick;
+            GraphicsEvents.OnPreRenderHudEvent += this.OnPreRenderHudEvent;
+            InputEvents.ButtonPressed += this.ButtonPressed;
+            GameEvents.EighthUpdateTick += this.EighthUpdateTick;
 
-            if (config.ShowRangeOfHeldItem || config.ShowRangeOfHoveredOverItem)
+            if (this.config.ShowRangeOfHeldItem || this.config.ShowRangeOfHoveredOverItem)
             {
-                ControlEvents.MouseChanged += MouseChanged;
-                if (config.ShowRangeOfHoveredOverItem)
-                    InputEvents.ButtonReleased += ButtonReleased;
+                ControlEvents.MouseChanged += this.MouseChanged;
+                if (this.config.ShowRangeOfHoveredOverItem)
+                    InputEvents.ButtonReleased += this.ButtonReleased;
             }
+
+            GameEvents.FirstUpdateTick += this.FirstUpdateTick;
+        }
+
+        private void FirstUpdateTick(object sender, EventArgs e)
+        {
+            this.sprinklerRangeCreator.ModRegistryReady(this.Helper.ModRegistry);
         }
 
         private void RefreshRangeItems(GameLocation location)
@@ -79,37 +89,37 @@ namespace RangeDisplay
 
             Vector2 mouseTile = new Vector2((Game1.getMouseX() + Game1.viewport.X) / Game1.tileSize, (Game1.getMouseY() + Game1.viewport.Y) / Game1.tileSize);
 
-            displayManager.Clear();
+            this.displayManager.Clear();
 
             //Objects in the world and objects being hovered over
             foreach (KeyValuePair<Vector2, SObject> item in location.Objects)
             {
-                foreach (IObjectRangeCreator creator in objectRangeCreators)
+                foreach (IObjectRangeCreator creator in this.objectRangeCreators)
                 {
                     if (creator.CanHandle(item.Value))
                     {
-                        displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetRange(item.Value, item.Key, location), mouseTile.Equals(item.Key) && isModifierKeyDown);
+                        this.displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetRange(item.Value, item.Key, location), mouseTile.Equals(item.Key) && this.isModifierKeyDown);
                         break;
                     }
                 }
             }
 
             //Buildings in the world and objects being hovered over
-            foreach (IBuildingRangeCreator creator in buildingRangeCreators)
+            foreach (IBuildingRangeCreator creator in this.buildingRangeCreators)
             {
-                Vector2 mouseTileOrZero = isModifierKeyDown ? mouseTile : Vector2.Zero;
-                displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetRange(mouseTileOrZero, location));
-                displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetForceRange(mouseTileOrZero, location), true);
+                Vector2 mouseTileOrZero = this.isModifierKeyDown ? mouseTile : Vector2.Zero;
+                this.displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetRange(mouseTileOrZero, location));
+                this.displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetForceRange(mouseTileOrZero, location), true);
             }
 
             //Held item
-            if (activeObject != null && config.ShowRangeOfHeldItem)
+            if (this.activeObject != null && this.config.ShowRangeOfHeldItem)
             {
-                foreach (IObjectRangeCreator creator in objectRangeCreators)
+                foreach (IObjectRangeCreator creator in this.objectRangeCreators)
                 {
-                    if (creator.CanHandle(activeObject))
+                    if (creator.CanHandle(this.activeObject))
                     {
-                        displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetRange(activeObject, mouseTile, Game1.currentLocation), true);
+                        this.displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetRange(this.activeObject, mouseTile, Game1.currentLocation), true);
                         break;
                     }
                 }
@@ -118,9 +128,9 @@ namespace RangeDisplay
 
         private void ButtonReleased(object sender, EventArgsInput e)
         {
-            if (DoesMatchConfigKey(e.Button, config.HoverModifierKey) && config.ShowRangeOfHoveredOverItem)
+            if (this.DoesMatchConfigKey(e.Button, this.config.HoverModifierKey) && this.config.ShowRangeOfHoveredOverItem)
             {
-                isModifierKeyDown = false;
+                this.isModifierKeyDown = false;
                 RefreshRangeItems(Game1.currentLocation);
             }
         }
@@ -133,9 +143,9 @@ namespace RangeDisplay
 
         private void MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
-            if (activeObject != null && Game1.activeClickableMenu == null && config.ShowRangeOfHeldItem)
+            if (this.activeObject != null && Game1.activeClickableMenu == null && this.config.ShowRangeOfHeldItem)
                 RefreshRangeItems(Game1.currentLocation);
-            else if (config.ShowRangeOfHoveredOverItem && isModifierKeyDown)
+            else if (this.config.ShowRangeOfHoveredOverItem && this.isModifierKeyDown)
                 RefreshRangeItems(Game1.currentLocation);
         }
 
@@ -146,39 +156,39 @@ namespace RangeDisplay
 
             RefreshRangeItems(Game1.currentLocation);
 
-            activeObject = Game1.player.ActiveObject;
+            this.activeObject = Game1.player.ActiveObject;
         }
 
         private void ButtonPressed(object sender, EventArgsInput e)
         {
-            if (DoesMatchConfigKey(e.Button, config.CycleActiveDisplayKey))
+            if (DoesMatchConfigKey(e.Button, this.config.CycleActiveDisplayKey))
             {
-                if (displayIndex == allRangeItems.Length - 1)
+                if (this.displayIndex == this.allRangeItems.Length - 1)
                 {
-                    displayIndex++;
-                    displayManager.DisplayAll(true);
-                    hudMessageManager.AddHudMessage("All");
+                    this.displayIndex++;
+                    this.displayManager.DisplayAll(true);
+                    this.hudMessageManager.AddHudMessage("All");
                     return;
                 }
-                else if (displayIndex == allRangeItems.Length)
+                else if (this.displayIndex == this.allRangeItems.Length)
                 {
-                    displayIndex++;
-                    displayManager.DisplayAll(false);
-                    hudMessageManager.AddHudMessage("None");
+                    this.displayIndex++;
+                    this.displayManager.DisplayAll(false);
+                    this.hudMessageManager.AddHudMessage("None");
                     return;
                 }
 
-                if (displayIndex == allRangeItems.Length + 1)
+                if (this.displayIndex == this.allRangeItems.Length + 1)
                 {
-                    displayIndex = -1;
+                    this.displayIndex = -1;
                 }
-                displayIndex = (displayIndex + 1) % allRangeItems.Length;
-                displayManager.DisplayOnly(allRangeItems[displayIndex]);
-                hudMessageManager.AddHudMessage(allRangeItems[displayIndex]);
+                this.displayIndex = (this.displayIndex + 1) % this.allRangeItems.Length;
+                this.displayManager.DisplayOnly(this.allRangeItems[this.displayIndex]);
+                this.hudMessageManager.AddHudMessage(this.allRangeItems[this.displayIndex]);
             }
-            else if (DoesMatchConfigKey(e.Button, config.HoverModifierKey) && config.ShowRangeOfHoveredOverItem)
+            else if (DoesMatchConfigKey(e.Button, this.config.HoverModifierKey) && this.config.ShowRangeOfHoveredOverItem)
             {
-                isModifierKeyDown = true;
+                this.isModifierKeyDown = true;
                 RefreshRangeItems(Game1.currentLocation);
             }
         }
@@ -187,7 +197,7 @@ namespace RangeDisplay
         {
             if (!Context.IsWorldReady)
                 return;
-            displayManager.Draw(Game1.spriteBatch);
+            this.displayManager.Draw(Game1.spriteBatch);
         }
     }
 }

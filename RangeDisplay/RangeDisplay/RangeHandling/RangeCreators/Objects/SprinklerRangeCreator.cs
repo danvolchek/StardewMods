@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using RangeDisplay.APIs;
+using StardewModdingAPI;
 using StardewValley;
 using System;
 using System.Collections.Generic;
@@ -9,6 +11,22 @@ namespace RangeDisplay.RangeHandling.RangeCreators
     internal class SprinklerRangeCreator : IObjectRangeCreator
     {
         public RangeItem HandledRangeItem => RangeItem.Sprinkler;
+
+        private ISimpleSprinklersAPI simpleSprinklersAPI = null;
+        private IBetterSprinklersAPI betterSprinklersAPI = null;
+
+        public void ModRegistryReady(IModRegistry registry)
+        {
+            if (registry.IsLoaded("tZed.SimpleSprinkler"))
+            {
+                this.simpleSprinklersAPI = registry.GetApi<ISimpleSprinklersAPI>("tZed.SimpleSprinkler");
+            }
+
+            if (registry.IsLoaded("Speeder.BetterSprinklers"))
+            {
+                this.betterSprinklersAPI = registry.GetApi<IBetterSprinklersAPI>("Speeder.BetterSprinklers");
+            }
+        }
 
         public bool CanHandle(SObject obj)
         {
@@ -45,6 +63,14 @@ namespace RangeDisplay.RangeHandling.RangeCreators
                     }
                 }
             }
+
+            if (this.simpleSprinklersAPI != null && this.simpleSprinklersAPI.GetNewSprinklerCoverage().TryGetValue(obj.parentSheetIndex, out Vector2[] sExtra))
+                foreach(Vector2 extraPos in sExtra)
+                    yield return extraPos + position;
+
+            if (this.betterSprinklersAPI != null && this.betterSprinklersAPI.GetSprinklerCoverage().TryGetValue(obj.parentSheetIndex, out Vector2[] bExtra))
+                foreach (Vector2 extraPos in bExtra)
+                    yield return extraPos + position;
         }
     }
 }
