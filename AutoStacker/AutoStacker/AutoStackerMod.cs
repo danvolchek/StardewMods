@@ -1,18 +1,19 @@
 ﻿using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using System;
 using System.Collections.Generic;
-using StardewModdingAPI.Events;
+using System.Linq;
 
 namespace AutoStacker
 {
-    class ModEntry : Mod
+    internal class AutoStackerMod : Mod
     {
-        private ModConfig config;
+        private AutoStackerConfig config;
 
         public override void Entry(IModHelper helper)
         {
-            config = helper.ReadConfig<ModConfig>();
+            this.config = helper.ReadConfig<AutoStackerConfig>();
             ControlEvents.KeyPressed += this.KeyPressed;
         }
 
@@ -20,71 +21,58 @@ namespace AutoStacker
         {
             String key = e.KeyPressed.ToString().ToLower();
 
-            if (key == config.ActivationKey.ToLower())
+            if (key == this.config.ActivationKey.ToLower())
             {
-               /* List<Item> items = Game1.player.items.FindAll(it => it != null);
-                foreach (Item item in items)
-                {
-                    Monitor.Log(item.Name + ": " + item.Stack+"/"+item.maximumStackSize());
-                }*/
-                stackOwnInventory();
-
+                StackOwnInventory();
             }
         }
 
-        private void stackOwnInventory()
+        private void StackOwnInventory()
         {
-            List<Item> items = Game1.player.items.FindAll(it => it != null && it.maximumStackSize()!=-1);
+            IEnumerable<Item> items = Game1.player.Items.Where(it => it != null && it.maximumStackSize() != -1);
             items.Reverse();
             foreach (Item item in items)
             {
-               
                 if (item.Stack == item.maximumStackSize() || item.Stack == 0)
                     continue;
 
-                foreach (Item stackOnMe in Game1.player.items.FindAll(it => it != null && it != item && it.canStackWith(item) && it.getRemainingStackSpace() > 0))
+                foreach (Item stackOnMe in Game1.player.Items.Where(it => it != null && it != item && it.canStackWith(item) && it.getRemainingStackSpace() > 0))
                 {
                     int remain = stackOnMe.getRemainingStackSpace();
                     int add = Math.Min(remain, item.Stack);
-                 
+
                     stackOnMe.addToStack(add);
                     item.Stack -= add;
 
                     if (item.Stack == 0)
                         break;
-
                 }
             }
 
-            for (int i = 0; i < Game1.player.items.Count; i++)
+            for (int i = 0; i < Game1.player.Items.Count; i++)
             {
-                Item it = Game1.player.items[i];
+                Item it = Game1.player.Items[i];
                 if (it != null && it.Stack == 0 && it.maximumStackSize() != -1)
                 {
-                    swapStack(findFirstNonEmptyStack(it, i + 1), it);
-
+                    SwapStack(FindFirstNonEmptyStack(it, i + 1), it);
                 }
             }
 
-            for (int i = 0; i < Game1.player.items.Count; i++)
+            for (int i = 0; i < Game1.player.Items.Count; i++)
             {
-                Item it = Game1.player.items[i];
+                Item it = Game1.player.Items[i];
                 if (it != null && it.Stack == 0 && it.maximumStackSize() != -1)
                 {
-                    Game1.player.items[i] = null;
-
+                    Game1.player.Items[i] = null;
                 }
             }
-
-
-
         }
 
-        private Item findFirstNonEmptyStack(Item a, int from)
+        private Item FindFirstNonEmptyStack(Item a, int from)
         {
-            for (int i = from; i < Game1.player.items.Count; i++)
+            for (int i = from; i < Game1.player.Items.Count; i++)
             {
-                Item it = Game1.player.items[i];
+                Item it = Game1.player.Items[i];
                 if (it != null && it.Stack != 0 && it.canStackWith(a))
                 {
                     return it;
@@ -93,7 +81,7 @@ namespace AutoStacker
             return null;
         }
 
-        private void swapStack(Item a, Item b)
+        private void SwapStack(Item a, Item b)
         {
             if (a == null || b == null)
                 return;
