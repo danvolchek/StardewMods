@@ -7,7 +7,7 @@ namespace ChatCommands
     /// <summary>
     /// Replaces the game's chat box.
     /// </summary>
-    class CommandChatBox : ChatBox
+    internal class CommandChatBox : ChatBox
     {
         private ICommandHandler handler;
         private IReflectedField<int> bCheatHistoryPosition;
@@ -15,7 +15,6 @@ namespace ChatCommands
 
         public CommandChatBox(IReflectionHelper helper, ICommandHandler handler) : base()
         {
-
             this.handler = handler;
             this.bCheatHistoryPosition = helper.GetField<int>(this, "cheatHistoryPosition");
             this.multiplayer = helper.GetField<Multiplayer>(typeof(Game1), "multiplayer");
@@ -42,7 +41,8 @@ namespace ChatCommands
                     {
                         this.receiveChatMessage(Game1.player.UniqueMultiplayerID, 0, LocalizedContentManager.CurrentLanguageCode, message);
                         this.handler.Handle(message);
-                    } else
+                    }
+                    else
                     {
                         base.textBoxEnter(sender);
                         return;

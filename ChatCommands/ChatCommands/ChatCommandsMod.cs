@@ -5,7 +5,8 @@ using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Reflection;
+using System.Text;
 
 namespace ChatCommands
 {
@@ -14,10 +15,12 @@ namespace ChatCommands
         private NotifyingTextWriter interceptor;
         private CommandValidifier commandValidifier;
 
+        private Color defaultCommandColor = new Color(104, 214, byte.MaxValue);
+
         public override void Entry(IModHelper helper)
         {
-            this.interceptor = new NotifyingTextWriter(Console.Out, this.OnLineWritten);
             this.commandValidifier = new CommandValidifier(helper.ConsoleCommands);
+            this.interceptor = new NotifyingTextWriter(Console.Out, this.OnLineWritten);
 
             Console.SetOut(this.interceptor);
             SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
@@ -35,7 +38,6 @@ namespace ChatCommands
             }
         }
 
-
         public void Handle(string input)
         {
             input = input.Substring(1);
@@ -44,25 +46,46 @@ namespace ChatCommands
             if (parts[0] == "halp")
                 parts[0] = "help";
 
-            this.interceptor.isRedirecting = true;
+            this.interceptor.isNotifying = true;
             this.Helper.ConsoleCommands.Trigger(parts[0], parts.Skip(1).ToArray());
-            this.interceptor.isRedirecting = false;
+            this.interceptor.isNotifying = false;
         }
 
         public bool CanHandle(string input)
         {
-            return this.commandValidifier.IsValidCommand(input.Substring(1));
+            return input.Length > 1 && this.commandValidifier.IsValidCommand(input.Substring(1));
         }
 
         private void OnLineWritten(char[] buffer, int index, int count)
         {
             string toWrite = StripSMAPIPrefix(string.Join("", buffer.Skip(index).Take(count)).Trim()).Trim();
             if (!string.IsNullOrWhiteSpace(toWrite))
-                Game1.chatBox?.addMessage(toWrite, new Color(104, 214, byte.MaxValue));
+                Game1.chatBox?.addMessage(toWrite, ConvertConsoleColorToColor(Console.ForegroundColor));
+        }
+
+        private Color ConvertConsoleColorToColor(ConsoleColor color)
+        {
+            if (color == ConsoleColor.White || color == ConsoleColor.Black)
+                return this.defaultCommandColor;
+
+            try
+            {
+                string name = Enum.GetName(typeof(ConsoleColor), color);
+                PropertyInfo colorInfo = typeof(Color).GetProperty(name, BindingFlags.Static | BindingFlags.Public);
+                return (Color)colorInfo.GetValue(typeof(Color));
+            }
+            catch
+            {
+                return this.defaultCommandColor;
+            }
+
         }
 
         private string StripSMAPIPrefix(string input)
         {
+            if (input.Length == 0)
+                return input;
+
             if (input[0] != '[')
                 return input;
             return string.Join("", input.Substring(input.IndexOf(']') + 1)).TrimStart();
@@ -77,7 +100,7 @@ namespace ChatCommands
         {
             bool inQuotes = false;
             IList<string> args = new List<string>();
-            IList<char> currentArg = new List<char>();
+            StringBuilder currentArg = new StringBuilder();
             foreach (char c in input)
             {
                 if (c == '"')
@@ -86,13 +109,13 @@ namespace ChatCommands
                 }
                 else if (!inQuotes && char.IsWhiteSpace(c))
                 {
-                    args.Add(string.Concat(currentArg));
+                    args.Add(currentArg.ToString());
                     currentArg.Clear();
                 }
                 else
-                    currentArg.Add(c);
+                    currentArg.Append(c);
             }
-            args.Add(string.Concat(currentArg));
+            args.Add(currentArg.ToString());
             return args.Where(item => !string.IsNullOrWhiteSpace(item)).ToArray();
         }
     }

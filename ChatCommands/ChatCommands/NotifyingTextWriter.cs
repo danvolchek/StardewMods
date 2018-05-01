@@ -9,11 +9,11 @@ namespace ChatCommands
     /// <remarks>
     /// Borrowed heavily from https://github.com/Pathoschild/SMAPI/blob/develop/src/SMAPI/Framework/Logging/InterceptingTextWriter.cs
     /// </remarks>
-    class NotifyingTextWriter : TextWriter
+    internal class NotifyingTextWriter : TextWriter
     {
         private TextWriter original;
         private OnLineWritten callback;
-        public bool isRedirecting;
+        public bool isNotifying;
 
         public override Encoding Encoding => this.original.Encoding;
 
@@ -21,12 +21,12 @@ namespace ChatCommands
         {
             this.original = original;
             this.callback = callback;
-            this.isRedirecting = false;
+            this.isNotifying = false;
         }
 
         public override void Write(char[] buffer, int index, int count)
         {
-            if(this.isRedirecting)
+            if (this.isNotifying)
                 this.callback(buffer, index, count);
             this.original.Write(buffer, index, count);
         }

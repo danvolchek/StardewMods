@@ -5,10 +5,11 @@ namespace ChatCommands
 {
     /// <summary>Checks whether a command is a real SMAPI command.</summary>
     /// <remarks>Reflecting into SMAPI internals is discouraged, but we need to know if the command is real or not :).</remarks>
-    class CommandValidifier
+    internal class CommandValidifier
     {
         private MethodInfo commandHelperGet;
         private object CommandHelper;
+
         public CommandValidifier(ICommandHelper helper)
         {
             FieldInfo info = helper.GetType().GetField("CommandManager", BindingFlags.NonPublic | BindingFlags.Instance);
