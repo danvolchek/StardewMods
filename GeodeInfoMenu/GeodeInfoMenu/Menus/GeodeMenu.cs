@@ -48,8 +48,8 @@ namespace GeodeInfoMenu
       : base(Game1.viewport.Width / 2 - (800 + IClickableMenu.borderWidth * 2) / 2, Game1.viewport.Height / 2 - (600 + IClickableMenu.borderWidth * 2) / 2, 800 + IClickableMenu.borderWidth * 2, 600 + IClickableMenu.borderWidth * 2, true)
         {
             this.config = config;
-            modEntry = mod;
-            wasSearchTextBoxSelectedWhenPageLeft = false;
+            this.modEntry = mod;
+            this.wasSearchTextBoxSelectedWhenPageLeft = false;
 
             this.tabs.Add(new ClickableComponent(new Rectangle(this.xPositionOnScreen + Game1.tileSize, this.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + Game1.tileSize, Game1.tileSize, Game1.tileSize), "search", "Search for Drops")
             {
@@ -136,10 +136,10 @@ namespace GeodeInfoMenu
         /// </summary>
         private void Exit()
         {
-            IClickableMenu lastMenu = modEntry.GetLastMenu();
+            IClickableMenu lastMenu = this.modEntry.GetLastMenu();
             if (lastMenu is StardewValley.Menus.GeodeMenu)
             {
-                modEntry.SaveMenuState(this);
+                this.modEntry.SaveMenuState(this);
                 Game1.activeClickableMenu = lastMenu;
             }
             else
@@ -428,7 +428,7 @@ namespace GeodeInfoMenu
                 return;
             }
 
-            if (config.PressingEscapeWhileTypingInSearchBoxInstantlyClosesMenu && key == Keys.Escape)
+            if (this.config.PressingEscapeWhileTypingInSearchBoxInstantlyClosesMenu && key == Keys.Escape)
             {
                 Exit();
                 Game1.playSound("bigDeSelect");

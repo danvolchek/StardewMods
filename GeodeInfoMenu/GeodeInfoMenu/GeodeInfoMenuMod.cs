@@ -51,13 +51,13 @@ namespace GeodeInfoMenu
         /// <param name="helper">Mod helper to read config and load sprites.</param>
         public override void Entry(IModHelper helper)
         {
-            config = helper.ReadConfig<GeodeInfoMenuConfig>();
-            config.NumberOfNextGeodeDropsToShow = config.NumberOfNextGeodeDropsToShow < 0 ? 0 : config.NumberOfNextGeodeDropsToShow;
-            config.NumberOfNextGeodeDropsToShow = config.NumberOfNextGeodeDropsToShow > 999 ? 9 : config.NumberOfNextGeodeDropsToShow;
-            Geodes = new Dictionary<GeodeType, int> {
+            this.config = helper.ReadConfig<GeodeInfoMenuConfig>();
+            this.config.NumberOfNextGeodeDropsToShow = this.config.NumberOfNextGeodeDropsToShow < 0 ? 0 : this.config.NumberOfNextGeodeDropsToShow;
+            this.config.NumberOfNextGeodeDropsToShow = this.config.NumberOfNextGeodeDropsToShow > 999 ? 9 : this.config.NumberOfNextGeodeDropsToShow;
+            this.Geodes = new Dictionary<GeodeType, int> {
                 {GeodeType.Normal, 535}, {GeodeType.FrozenGeode, 536}, {GeodeType.MagmaGeode, 537}, {GeodeType.OmniGeode, 749}
             };
-            dropNameToGeodeDrop = GetAllPossibleDropMappings();
+            this.dropNameToGeodeDrop = GetAllPossibleDropMappings();
             GeodeMenu.tabIcons = helper.Content.Load<Texture2D>("Sprites/tabs.png");
             ControlEvents.KeyPressed += this.KeyPressed;
             MenuEvents.MenuClosed += this.MenuClosed;
@@ -78,8 +78,8 @@ namespace GeodeInfoMenu
         {
             if (Game1.activeClickableMenu is GeodeMenu)
             {
-                menuStateInfo = (Game1.activeClickableMenu as GeodeMenu).SaveState();
-                GeodeMenu menu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), menuStateInfo, true);
+                this.menuStateInfo = (Game1.activeClickableMenu as GeodeMenu).SaveState();
+                GeodeMenu menu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.menuStateInfo, true);
                 Game1.activeClickableMenu = menu;
             }
         }
@@ -92,7 +92,7 @@ namespace GeodeInfoMenu
         private void MenuClosed(object sender, EventArgsClickableMenuClosed e)
         {
             SaveMenuState(e.PriorMenu);
-            GeodeBreakingMenu = null;
+            this.GeodeBreakingMenu = null;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace GeodeInfoMenu
         {
             if (e is GeodeMenu)
             {
-                menuStateInfo = (e as GeodeMenu).SaveState();
+                this.menuStateInfo = (e as GeodeMenu).SaveState();
             }
         }
 
@@ -112,7 +112,7 @@ namespace GeodeInfoMenu
         /// </summary>
         public StardewValley.Menus.IClickableMenu GetLastMenu()
         {
-            return GeodeBreakingMenu;
+            return this.GeodeBreakingMenu;
         }
 
         /// <summary>
@@ -126,12 +126,12 @@ namespace GeodeInfoMenu
 
             if (Game1.activeClickableMenu is StardewValley.Menus.GeodeMenu)
             {
-                GeodeBreakingMenu = Game1.activeClickableMenu;
+                this.GeodeBreakingMenu = Game1.activeClickableMenu;
             }
 
-            if (e.KeyPressed.ToString().ToLower() == config.ActivationKey.ToLower() && canOpen)
+            if (e.KeyPressed.ToString().ToLower() == this.config.ActivationKey.ToLower() && canOpen)
             {
-                GeodeMenu menu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), config.RememberMenuStateAfterClose ? menuStateInfo : null);
+                GeodeMenu menu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.config.RememberMenuStateAfterClose ? this.menuStateInfo : null);
                 Game1.activeClickableMenu = menu;
                 menu.SetSearchTabSearchBoxSelectedStatus(true);
             }
@@ -150,7 +150,7 @@ namespace GeodeInfoMenu
         {
             IList<GeodeDrop> items = new List<GeodeDrop>();
 
-            foreach (KeyValuePair<string, GeodeDrop> kvp in dropNameToGeodeDrop)
+            foreach (KeyValuePair<string, GeodeDrop> kvp in this.dropNameToGeodeDrop)
                 if (kvp.Key.Contains(partialName))
                     items.Add(kvp.Value);
             return items;
@@ -178,7 +178,7 @@ namespace GeodeInfoMenu
             {
                 if (geodesToCrack[i])
                 {
-                    int geodeParentSheetIndex = Geodes[GetGeodeTypes()[i]];
+                    int geodeParentSheetIndex = this.Geodes[GetGeodeTypes()[i]];
                     int amnt = GeodesUntilTreasure(geodeParentSheetIndex, item.ParentSheetIndex);
                     searchResultInfo[currIndex++] = new Tuple<int, int>(geodeParentSheetIndex, amnt);
                 }
@@ -259,7 +259,7 @@ namespace GeodeInfoMenu
             }
             foreach (GeodeType type in GetGeodeTypes())
             {
-                foreach (string drop in Game1.objectInformation[Geodes[type]].Split('/')[6].Split(' '))
+                foreach (string drop in Game1.objectInformation[this.Geodes[type]].Split('/')[6].Split(' '))
                 {
                     string name = Game1.objectInformation[Convert.ToInt32(drop)].Split('/')[0].ToLower();
                     if (!mapping.ContainsKey(name))
@@ -277,7 +277,7 @@ namespace GeodeInfoMenu
         /// <returns>An integer array of item ids</returns>
         private int[] GetDropsFromGeode(GeodeType type)
         {
-            return Array.ConvertAll(Game1.objectInformation[Geodes[type]].Split('/')[6].Split(' '), s => int.Parse(s));
+            return Array.ConvertAll(Game1.objectInformation[this.Geodes[type]].Split('/')[6].Split(' '), s => int.Parse(s));
         }
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace GeodeInfoMenu
                 bool[] stars = new bool[amount];
                 for (int i = 0; i < amount; i++)
                 {
-                    items[i] = GeodeSimulator(Geodes[type], GeodesCracked++);
+                    items[i] = GeodeSimulator(this.Geodes[type], GeodesCracked++);
                     stars[i] = this.HasNotDonatedItemToMuseum(items[i]);
                 }
                 list.Add(new Tuple<int[], bool[]>(items, stars));
@@ -311,7 +311,7 @@ namespace GeodeInfoMenu
         /// <returns>Whether this item has been donated or not</returns>
         private bool HasNotDonatedItemToMuseum(int parentSheetIndex)
         {
-            if (!config.ShowStarsNextToMineralsAndArtifactsNotDonatedToTheMuseum)
+            if (!this.config.ShowStarsNextToMineralsAndArtifactsNotDonatedToTheMuseum)
                 return false;
             string objectInfo = Game1.objectInformation[parentSheetIndex].Split('/')[3];
             return (objectInfo.Contains("Mineral") || objectInfo.Contains("Arch")) &&
@@ -387,7 +387,7 @@ namespace GeodeInfoMenu
                             case 2:
                                 return 382; //coal
                             case 3:
-                                return Game1.player.deepestMineLevel > 75 ? 384 : 380; // goald ore : coal
+                                return Game1.player.deepestMineLevel > 75 ? 384 : 380; // gold ore : coal
                         }
                     }
                     else
@@ -433,7 +433,7 @@ namespace GeodeInfoMenu
             int iGeodeIndex = 0;
             for (int i = 0; i < geodes.Length; i++)
                 if (geodes[i])
-                    iGeodes[iGeodeIndex++] = Geodes[GetGeodeTypes()[i]];
+                    iGeodes[iGeodeIndex++] = this.Geodes[GetGeodeTypes()[i]];
             return iGeodes;
         }
 

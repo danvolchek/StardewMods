@@ -48,7 +48,7 @@ namespace GeodeInfoMenu
         {
             this.HardCodedDrop = item;
             this.ParentSheetIndex = SItems[item];
-            IsHardCodedDrop = true;
+            this.IsHardCodedDrop = true;
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace GeodeInfoMenu
         public GeodeDrop(int parentSheetIndex)
         {
             this.ParentSheetIndex = parentSheetIndex;
-            IsHardCodedDrop = false;
+            this.IsHardCodedDrop = false;
         }
 
     }
