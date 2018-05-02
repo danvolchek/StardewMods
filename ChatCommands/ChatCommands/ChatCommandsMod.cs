@@ -28,7 +28,9 @@ namespace ChatCommands
         private NotifyingTextWriter consoleNotifier;
         private CommandValidator commandValidator;
 
-        private Color defaultCommandColor = new Color(104, 214, byte.MaxValue);
+        private readonly Color defaultCommandColor = new Color(104, 214, byte.MaxValue);
+
+        private ChatCommandsConfig modConfig;
 
         public override void Entry(IModHelper helper)
         {
@@ -38,7 +40,10 @@ namespace ChatCommands
             Console.SetOut(this.consoleNotifier);
             SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
 
-            new ListenCommand(helper.ConsoleCommands, this.Monitor, helper.ReadConfig<ChatCommandsConfig>(), this.consoleNotifier);
+            this.modConfig = helper.ReadConfig<ChatCommandsConfig>();
+            
+
+            new ListenCommand(helper.ConsoleCommands, this.Monitor, this.modConfig, this.consoleNotifier);
         }
 
         private void SaveEvents_AfterLoad(object sender, EventArgs e)
@@ -47,7 +52,7 @@ namespace ChatCommands
             {
                 if (Game1.chatBox != null)
                     Game1.onScreenMenus.Remove(Game1.chatBox);
-                Game1.chatBox = new CommandChatBox(this.Helper.Reflection, this);
+                Game1.chatBox = new CommandChatBox(this.Helper.Reflection, this, this.modConfig);
                 Game1.onScreenMenus.Add(Game1.chatBox);
                 this.Monitor.Log("Replaced Chatbox", LogLevel.Trace);
             }

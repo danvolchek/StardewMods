@@ -11,3 +11,7 @@ The mod
  - Detects when the input is a valid SMAPI command.
  - If it is valid, it runs the command, copies the output the command made, and writes that back to the chat box.
  - Otherwise it lets the game handle the input.
+
+It also
+ - Adds a scrollbar by not actually deleting messages over the limit, and instead only displaying a subset of messages
+ - Piggybacks off the existing history system to add history for SMAPI commands
