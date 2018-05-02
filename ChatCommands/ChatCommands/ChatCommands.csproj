@@ -45,12 +45,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatCommandsConfig.cs" />
     <Compile Include="ChatCommandsMod.cs" />
     <Compile Include="CommandChatBox.cs" />
+    <Compile Include="ListenCommand.cs" />
     <Compile Include="NotifyingTextWriter.cs" />
     <Compile Include="ICommandHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CommandValidifier.cs" />
+    <Compile Include="CommandValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />

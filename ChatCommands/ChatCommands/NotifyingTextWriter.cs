@@ -13,7 +13,8 @@ namespace ChatCommands
     {
         private TextWriter original;
         private OnLineWritten callback;
-        public bool isNotifying;
+        private bool isNotifying = false;
+        private bool isForceNotifying = false;
 
         public override Encoding Encoding => this.original.Encoding;
 
@@ -21,12 +22,11 @@ namespace ChatCommands
         {
             this.original = original;
             this.callback = callback;
-            this.isNotifying = false;
         }
 
         public override void Write(char[] buffer, int index, int count)
         {
-            if (this.isNotifying)
+            if (this.isNotifying || this.isForceNotifying)
                 this.callback(buffer, index, count);
             this.original.Write(buffer, index, count);
         }
@@ -34,6 +34,26 @@ namespace ChatCommands
         public override void Write(char ch)
         {
             this.original.Write(ch);
+        }
+
+        public void Notify(bool b)
+        {
+            this.isNotifying = b;
+        }
+
+        public void ToggleForceNotify()
+        {
+            this.isForceNotifying = !this.isForceNotifying;
+        }
+
+        public bool IsForceNotifying()
+        {
+            return this.isForceNotifying;
+        }
+
+        public bool IsNotifying()
+        {
+            return this.isNotifying;
         }
 
         public delegate void OnLineWritten(char[] buffer, int index, int count);

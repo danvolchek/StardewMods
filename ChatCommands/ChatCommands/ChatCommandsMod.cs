@@ -7,23 +7,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ChatCommands
 {
     public class ChatCommandsMod : Mod, ICommandHandler
     {
-        private NotifyingTextWriter interceptor;
-        private CommandValidifier commandValidifier;
+        /// <summary>Regex patterns which match console messages to suppress from the console and log.</summary>
+        /// <remarks>Taken from https://github.com/Pathoschild/SMAPI/blob/develop/src/SMAPI/Program.cs#L89. </remarks>
+        private readonly Regex[] SuppressConsolePatterns =
+        {
+            new Regex(@"^TextBox\.Selected is now '(?:True|False)'\.$", RegexOptions.Compiled | RegexOptions.CultureInvariant),
+            new Regex(@"^(?:FRUIT )?TREE: IsClient:(?:True|False) randomOutput: \d+$", RegexOptions.Compiled | RegexOptions.CultureInvariant),
+            new Regex(@"^loadPreferences\(\); begin", RegexOptions.Compiled | RegexOptions.CultureInvariant),
+            new Regex(@"^savePreferences\(\); async=", RegexOptions.Compiled | RegexOptions.CultureInvariant),
+            new Regex(@"^Multiplayer auth success$", RegexOptions.Compiled | RegexOptions.CultureInvariant),
+            new Regex(@"^DebugOutput: added CLOUD", RegexOptions.Compiled | RegexOptions.CultureInvariant)
+        };
+
+        private NotifyingTextWriter consoleNotifier;
+        private CommandValidator commandValidator;
 
         private Color defaultCommandColor = new Color(104, 214, byte.MaxValue);
 
         public override void Entry(IModHelper helper)
         {
-            this.commandValidifier = new CommandValidifier(helper.ConsoleCommands);
-            this.interceptor = new NotifyingTextWriter(Console.Out, this.OnLineWritten);
+            this.commandValidator = new CommandValidator(helper.ConsoleCommands);
+            this.consoleNotifier = new NotifyingTextWriter(Console.Out, this.OnLineWritten);
 
-            Console.SetOut(this.interceptor);
+            Console.SetOut(this.consoleNotifier);
             SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
+
+            new ListenCommand(helper.ConsoleCommands, this.Monitor, helper.ReadConfig<ChatCommandsConfig>(), this.consoleNotifier);
         }
 
         private void SaveEvents_AfterLoad(object sender, EventArgs e)
@@ -46,19 +61,26 @@ namespace ChatCommands
             if (parts[0] == "halp")
                 parts[0] = "help";
 
-            this.interceptor.isNotifying = true;
+            this.consoleNotifier.Notify(true);
             this.Helper.ConsoleCommands.Trigger(parts[0], parts.Skip(1).ToArray());
-            this.interceptor.isNotifying = false;
+            this.consoleNotifier.Notify(false);
         }
 
         public bool CanHandle(string input)
         {
-            return input.Length > 1 && this.commandValidifier.IsValidCommand(input.Substring(1));
+            return input.Length > 1 && this.commandValidator.IsValidCommand(input.Substring(1));
         }
 
         private void OnLineWritten(char[] buffer, int index, int count)
         {
-            string toWrite = StripSMAPIPrefix(string.Join("", buffer.Skip(index).Take(count)).Trim()).Trim();
+            string toWrite = string.Join("", buffer.Skip(index).Take(count)).Trim();
+            string noPrefix = StripSMAPIPrefix(toWrite).Trim();
+
+            if (this.ShouldIgnore(noPrefix))
+                return;
+            if (this.consoleNotifier.IsNotifying())
+                toWrite = noPrefix;
+
             if (!string.IsNullOrWhiteSpace(toWrite))
                 Game1.chatBox?.addMessage(toWrite, ConvertConsoleColorToColor(Console.ForegroundColor));
         }
@@ -117,6 +139,11 @@ namespace ChatCommands
             }
             args.Add(currentArg.ToString());
             return args.Where(item => !string.IsNullOrWhiteSpace(item)).ToArray();
+        }
+
+        public bool ShouldIgnore(string input)
+        {
+            return this.SuppressConsolePatterns.Any(p => p.IsMatch(input));
         }
     }
 }
