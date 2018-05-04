@@ -15,3 +15,4 @@ The mod
 It also
  - Adds a scrollbar by not actually deleting messages over the limit, and instead only displaying a subset of messages
  - Piggybacks off the existing history system to add history for SMAPI commands
+ - Dynamically changes the message limit based on the user's window size, so larger screens see more messages.

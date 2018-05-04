@@ -4,24 +4,51 @@ using System.Text;
 namespace ChatCommands
 {
     /// <summary>
-    /// A <see cref="TextWriter"/> that intercepts another <see cref="TextWriter"/> and notifes anything written to it.
+    ///     A <see cref="TextWriter" /> that intercepts another <see cref="TextWriter" /> and notifes
+    ///     anything written to it.
     /// </summary>
     /// <remarks>
-    /// Borrowed heavily from https://github.com/Pathoschild/SMAPI/blob/develop/src/SMAPI/Framework/Logging/InterceptingTextWriter.cs
+    ///     Borrowed heavily from
+    ///     https://github.com/Pathoschild/SMAPI/blob/develop/src/SMAPI/Framework/Logging/InterceptingTextWriter.cs
     /// </remarks>
     internal class NotifyingTextWriter : TextWriter
     {
-        private TextWriter original;
-        private OnLineWritten callback;
-        private bool isNotifying = false;
-        private bool isForceNotifying = false;
+        public delegate void OnLineWritten(char[] buffer, int index, int count);
 
-        public override Encoding Encoding => this.original.Encoding;
+        private readonly OnLineWritten callback;
+
+        private readonly TextWriter original;
+
+        private bool isForceNotifying;
+
+        private bool isNotifying;
 
         public NotifyingTextWriter(TextWriter original, OnLineWritten callback)
         {
             this.original = original;
             this.callback = callback;
+        }
+
+        public override Encoding Encoding => this.original.Encoding;
+
+        public bool IsForceNotifying()
+        {
+            return this.isForceNotifying;
+        }
+
+        public bool IsNotifying()
+        {
+            return this.isNotifying;
+        }
+
+        public void Notify(bool b)
+        {
+            this.isNotifying = b;
+        }
+
+        public void ToggleForceNotify()
+        {
+            this.isForceNotifying = !this.isForceNotifying;
         }
 
         public override void Write(char[] buffer, int index, int count)
@@ -35,27 +62,5 @@ namespace ChatCommands
         {
             this.original.Write(ch);
         }
-
-        public void Notify(bool b)
-        {
-            this.isNotifying = b;
-        }
-
-        public void ToggleForceNotify()
-        {
-            this.isForceNotifying = !this.isForceNotifying;
-        }
-
-        public bool IsForceNotifying()
-        {
-            return this.isForceNotifying;
-        }
-
-        public bool IsNotifying()
-        {
-            return this.isNotifying;
-        }
-
-        public delegate void OnLineWritten(char[] buffer, int index, int count);
     }
 }

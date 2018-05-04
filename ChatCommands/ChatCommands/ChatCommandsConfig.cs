@@ -1,8 +1,8 @@
 ﻿namespace ChatCommands
 {
-    class ChatCommandsConfig
+    internal class ChatCommandsConfig
     {
         public bool ListenToConsoleOnStartup { get; set; } = false;
-        public int MaximumNumberOfHistoryMessages { get; set; } = 30;
+        public int MaximumNumberOfHistoryMessages { get; set; } = 50;
     }
 }
