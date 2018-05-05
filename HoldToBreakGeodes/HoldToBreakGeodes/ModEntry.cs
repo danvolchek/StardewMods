@@ -1,23 +1,21 @@
-﻿using StardewModdingAPI;
+﻿using System;
+using Microsoft.Xna.Framework.Input;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using StardewValley.Menus;
 
 namespace HoldToBreakGeodes
 {
     public class ModEntry : Mod
     {
-        bool leftClickPressed;
-        int leftClickXPos;
-        int leftClickYPos;
+        private bool leftClickPressed;
+        private int leftClickXPos;
+        private int leftClickYPos;
 
         public override void Entry(IModHelper helper)
         {
-            leftClickPressed = false;
+            this.leftClickPressed = false;
             ControlEvents.MouseChanged += this.MouseChanged;
             GameEvents.FourthUpdateTick += this.ReSendLeftClick;
         }
@@ -25,32 +23,30 @@ namespace HoldToBreakGeodes
         /**
          * Records the click position of left clicks.
          **/
-        public void MouseChanged(object sender, EventArgsMouseStateChanged e)
+        private void MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
-            leftClickPressed = e.NewState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-            bool leftClickWasPressed = e.PriorState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-            if (leftClickPressed && !leftClickWasPressed)
-            {
-                leftClickXPos = e.NewPosition.X;
-                leftClickYPos = e.NewPosition.Y;
-            }
+            this.leftClickPressed = e.NewState.LeftButton == ButtonState.Pressed;
+            bool leftClickWasPressed = e.PriorState.LeftButton == ButtonState.Pressed;
+            if (!this.leftClickPressed || leftClickWasPressed) return;
+
+            this.leftClickXPos = e.NewPosition.X;
+            this.leftClickYPos = e.NewPosition.Y;
         }
 
         /**
          * Re sends a left click to the geode menu if one is already not being broken, the player has the room and money for it, and the click was on the geode spot.
          **/
-        public void ReSendLeftClick(object sender, EventArgs e)
+        private void ReSendLeftClick(object sender, EventArgs e)
         {
-            if (leftClickPressed && Game1.activeClickableMenu is StardewValley.Menus.GeodeMenu GMenu)
-            {
-                bool clintNotBusy = GMenu.heldItem != null && GMenu.heldItem.Name.Contains("Geode") && (Game1.player.money >= 25 && GMenu.geodeAnimationTimer <= 0);
-                bool playerHasRoom = Game1.player.freeSpotsInInventory() > 1 || Game1.player.freeSpotsInInventory() == 1 && GMenu.heldItem.Stack == 1;
-                if (clintNotBusy && playerHasRoom && GMenu.geodeSpot.containsPoint(leftClickXPos, leftClickYPos))
-                {
-                    Game1.activeClickableMenu.receiveLeftClick(leftClickXPos, leftClickYPos, false);
-                }
-            }
+            if (!this.leftClickPressed || !(Game1.activeClickableMenu is GeodeMenu gMenu)) return;
 
+            bool clintNotBusy = gMenu.heldItem != null && gMenu.heldItem.Name.Contains("Geode") &&
+                                Game1.player.money >= 25 && gMenu.geodeAnimationTimer <= 0;
+            bool playerHasRoom = Game1.player.freeSpotsInInventory() > 1 ||
+                                 (Game1.player.freeSpotsInInventory() == 1 && gMenu.heldItem != null && gMenu.heldItem.Stack == 1);
+            if (clintNotBusy && playerHasRoom &&
+                gMenu.geodeSpot.containsPoint(this.leftClickXPos, this.leftClickYPos))
+                gMenu.receiveLeftClick(this.leftClickXPos, this.leftClickYPos, false);
         }
     }
 }
