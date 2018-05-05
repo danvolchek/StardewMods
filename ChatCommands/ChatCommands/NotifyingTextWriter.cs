@@ -29,6 +29,21 @@ namespace ChatCommands
             this.callback = callback;
         }
 
+        /// <summary>
+        /// When a write is invoked, send the information over to the callback.
+        /// </summary>
+        public override void Write(char[] buffer, int index, int count)
+        {
+            if (this.isNotifying || this.isForceNotifying)
+                this.callback(buffer, index, count);
+            this.original.Write(buffer, index, count);
+        }
+
+        public override void Write(char ch)
+        {
+            this.original.Write(ch);
+        }
+
         public override Encoding Encoding => this.original.Encoding;
 
         public bool IsForceNotifying()
@@ -49,18 +64,6 @@ namespace ChatCommands
         public void ToggleForceNotify()
         {
             this.isForceNotifying = !this.isForceNotifying;
-        }
-
-        public override void Write(char[] buffer, int index, int count)
-        {
-            if (this.isNotifying || this.isForceNotifying)
-                this.callback(buffer, index, count);
-            this.original.Write(buffer, index, count);
-        }
-
-        public override void Write(char ch)
-        {
-            this.original.Write(ch);
         }
     }
 }

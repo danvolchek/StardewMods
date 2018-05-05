@@ -7,17 +7,26 @@ namespace ChatCommands
         private readonly NotifyingTextWriter writer;
         private readonly IMonitor monitor;
 
-        public ListenCommand(ICommandHelper helper, IMonitor monitor, ChatCommandsConfig config, NotifyingTextWriter writer)
+        public ListenCommand(IMonitor monitor, ChatCommandsConfig config, NotifyingTextWriter writer)
         {
             this.writer = writer;
             this.monitor = monitor;
-
-            helper.Add("listen", "Toggles displaying console output in the in game chat box.", this.Handle);
-
+           
             if (config.ListenToConsoleOnStartup)
                 this.Handle(null, null);
         }
 
+        /// <summary>
+        /// Adds this command to SMAPI.
+        /// </summary>
+        public void Register(ICommandHelper helper)
+        {
+            helper.Add("listen", "Toggles displaying console output in the in game chat box.", this.Handle);
+        }
+
+        /// <summary>
+        /// Handles the command.
+        /// </summary>
         private void Handle(string name, string[] args)
         {
             this.writer.ToggleForceNotify();

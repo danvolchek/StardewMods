@@ -1,5 +1,6 @@
 ﻿using StardewModdingAPI;
 using System.Reflection;
+using ChatCommands.Util;
 
 namespace ChatCommands
 {
@@ -21,7 +22,7 @@ namespace ChatCommands
 
         public bool IsValidCommand(string input)
         {
-            string first = ChatCommandsMod.ParseArgs(input)[0];
+            string first = Utils.ParseArgs(input)[0];
             switch (first)
             {
                 case "halp":
