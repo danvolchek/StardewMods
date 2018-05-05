@@ -263,7 +263,7 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
-        /// Determins the number of messages that should be displayed.
+        /// Determines the number of messages that should be displayed.
         /// </summary>
         private void DetermineNumberOfMaxMessages()
         {
@@ -496,7 +496,7 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
-        /// A fixed version of <see cref="Game1.parseText(string,Microsoft.Xna.Framework.Graphics.SpriteFont,int)"/> that uses .X instead of .Length.
+        /// A fixed version of <see cref="Game1.parseText(string,SpriteFont,int)"/> that uses .X instead of .Length.
         /// </summary>
         private static string FixedParseText(string text, SpriteFont whichFont, int width)
         {

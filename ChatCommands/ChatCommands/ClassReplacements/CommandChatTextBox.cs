@@ -67,12 +67,12 @@ namespace ChatCommands.ClassReplacements
 
             if (this.finalText[this.currentSnippetIndex].message == null)
             {
-                //we're in an emogi
-                if (this.currentInsertPosition == 0) //start a new text snippet before this one
+                //The current snippet is an emoji
+                if (this.currentInsertPosition == 0) //Create a new text snippet before this one.
                 {
                     this.finalText.Insert(this.currentSnippetIndex, new ChatSnippet(text, LocalizedContentManager.CurrentLanguageCode));
                 }
-                else //start a new snippet after this one
+                else //Create a new text snippet after this one.
                 {
                     this.finalText.Insert(this.currentSnippetIndex + 1, new ChatSnippet(text, LocalizedContentManager.CurrentLanguageCode));
                     this.currentSnippetIndex++;
@@ -82,7 +82,7 @@ namespace ChatCommands.ClassReplacements
             }
             else
             {
-                //we're in a text box
+                //The current snippet is a text snippet, add text to it.
                 ChatSnippet currSnippet = this.finalText[this.currentSnippetIndex];
                 currSnippet.message = currSnippet.message.Substring(0, this.currentInsertPosition) + text +
                                       currSnippet.message.Substring(this.currentInsertPosition);
@@ -94,8 +94,8 @@ namespace ChatCommands.ClassReplacements
             this.updateWidth();
         }
         //AXIOMS:
-        //If the current message is text, we can be anywhere from [0,text.length]
-        //If the current message is an emoji, we're at either 0 or 1 (before/after)
+        //If the current message is text, this.currentInsertPosition is in [0,text.length]
+        //If the current message is an emoji, this.currentInsertPosition is either 0 or 1 (before/after)
 
         /// <summary>
         /// Handle the backspace key being pressed.
@@ -104,26 +104,29 @@ namespace ChatCommands.ClassReplacements
         {
             if (this.finalText.Any())
             {
-                //either at the start, or an emoji before us
                 if (this.currentInsertPosition == 0)
                 {
-                    //at the start
+                    //The current snippet is the first one.
                     if (this.currentSnippetIndex == 0)
                         return;
 
                     if (this.finalText[this.currentSnippetIndex].message == null)
                     {
-                        //we're an emoji, so the thing to the left of us is either text or an emoji
+                        //The current snippet is an emoji,
+                        //so the before this one is either text or an emoji
                         ChatSnippet lastSnippet = this.finalText[this.currentSnippetIndex - 1];
 
                         if (lastSnippet.message == null)
                         {
-                            //the thing to the left of us is an emoji. But we're also an emoji, so no merging.
+                            //The previous snippet is an emoji.
+                            //But the current snippet is also an emoji, so no merging - just delete it.
                             this.finalText.RemoveAt(this.currentSnippetIndex - 1);
                             this.currentSnippetIndex--;
                         }
                         else
                         {
+                            //The previous snippet is text, delete a character from the end of it,
+                            //and remove it if necessary.
                             lastSnippet.message = lastSnippet.message.Substring(0, lastSnippet.message.Length - 1);
                             if (lastSnippet.message.Length == 0)
                             {
@@ -138,21 +141,23 @@ namespace ChatCommands.ClassReplacements
                     }
                     else
                     {
-                        //must be an emoji to the left and we're text
+                        //The current snippet is a text snippet.
+
+                        //There must be an emoji before this snippet, remove it.
                         this.finalText.RemoveAt(this.currentSnippetIndex - 1);
                         this.currentSnippetIndex--;
 
-                        //need to merge with the previous snippet, of which there not may be one,
-                        //and it may be an emoji
+                        //This snippet now needs to merge with the previous snippet,
+                        //which may not exist (no merging), or may be an emoji (no merging).
 
-                        //now at the start
+                        //No previous snippet.
                         if (this.currentSnippetIndex == 0)
                             return;
-                        //emoji before us
+                        //Previous snippet is an emoji.
                         if (this.finalText[this.currentSnippetIndex - 1].message == null)
                             return;
 
-                        //merge into the text before us
+                        //Merge the current snippet with the previous one.
                         ChatSnippet last = this.finalText[this.currentSnippetIndex - 1];
                         this.currentInsertPosition = last.message.Length;
                         last.message += this.finalText[this.currentSnippetIndex].message;
@@ -165,18 +170,21 @@ namespace ChatCommands.ClassReplacements
                 }
                 else if (this.finalText[this.currentSnippetIndex].message == null)
                 {
-                    //we're in an emoji, and not at the start of the emoji. Bye bye emoji
+                    //The current snippet is an emoji, and the insert position has to be one,
+                    //so we delete the emoji.
                     this.finalText.RemoveAt(this.currentSnippetIndex);
                     if (this.currentSnippetIndex != 0)
                     {
+                        //The removed emoji was not the first snippet.
                         this.currentSnippetIndex--;
                         this.currentInsertPosition = GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]);
 
-                        //we may now need to merge two text boxes
+                        //If this emoji seperated two text snippets, they need to be
+                        //merged.
                         if (this.currentSnippetIndex != this.finalText.Count - 1 &&
                             this.finalText[this.currentSnippetIndex + 1].message != null)
                         {
-                            //merge into text after us
+                            //Merge the next and current text snippets.
                             ChatSnippet next = this.finalText[this.currentSnippetIndex + 1];
                             ChatSnippet curr = this.finalText[this.currentSnippetIndex];
                             this.currentInsertPosition = curr.message.Length;
@@ -191,12 +199,14 @@ namespace ChatCommands.ClassReplacements
                 }
                 else
                 {
-                    //we're in the middle of a text message
+                    //The current snippet is a text snippet, and the current insert position
+                    //is not at the start of the it, so a character is removed from it.
                     ChatSnippet currSnippet = this.finalText[this.currentSnippetIndex];
                     currSnippet.message = currSnippet.message.Remove(this.currentInsertPosition - 1, 1);
+
                     if (currSnippet.message.Length == 0)
                     {
-                        //we deleted the entire message
+                        //If the entire snippet is now empty, remove it.
                         this.finalText.Remove(currSnippet);
                         if (this.currentSnippetIndex != 0)
                         {
@@ -247,13 +257,13 @@ namespace ChatCommands.ClassReplacements
                 return;
             if (this.currentInsertPosition == 0)
             {
-                //inserting at the start of a message - add before
+                //Inserting at the start of a message - add before the current snippet.
                 this.finalText.Insert(this.currentSnippetIndex, new ChatSnippet(emoji));
                 this.currentSnippetIndex++;
             }
             else if (this.currentInsertPosition == this.finalText[this.currentSnippetIndex].message.Length - 1)
             {
-                //inserting at the end of a message - add after
+                //Inserting at the end of a message - add after current snippet.
                 ChatSnippet emojiSnippet = new ChatSnippet(emoji);
                 this.finalText.Insert(this.currentSnippetIndex + 1, emojiSnippet);
                 this.currentSnippetIndex++;
@@ -262,7 +272,7 @@ namespace ChatCommands.ClassReplacements
             else
             {
 
-                //inserting at the middle of a message - split
+                //Inserting at the middle of a text message - split the message in two.
                 ChatSnippet orig = this.finalText[this.currentSnippetIndex];
 
                 string first = orig.message.Substring(0, this.currentInsertPosition);
@@ -277,8 +287,10 @@ namespace ChatCommands.ClassReplacements
             }
             this.updateWidth();
         }
-
-        //take into account currents
+        
+        /// <summary>
+        /// Draws the chat text box.
+        /// </summary>
         public override void Draw(SpriteBatch spriteBatch, bool drawShadow = true)
         {
             if (this.Selected)
@@ -329,17 +341,18 @@ namespace ChatCommands.ClassReplacements
         {
             if (!this.finalText.Any())
                 return;
-            //we're at the boundry of a snippet
+            //Current position is at the boundry of a snippet.
             if (this.currentInsertPosition == 0)
             {
-                //if there are no snippets before this, we can't go left anymore
+                //If there are no snippets before this, the cursor can't move any more left.
                 if (this.currentSnippetIndex == 0)
                     return;
 
-                //move to previous snippet
+                //Move to previous snippet.
                 this.currentSnippetIndex--;
 
-                //move to start if we moved onto an emoji, or end - 1 if we moved onto text
+                //Move to start if the current snippet is an emoji, or end - 1 if the current snippet
+                //is a text snippet.
                 this.currentInsertPosition = this.finalText[this.currentSnippetIndex].message == null ?
                     0 : (GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]) - 1);
 
@@ -355,17 +368,18 @@ namespace ChatCommands.ClassReplacements
         {
             if (!this.finalText.Any())
                 return;
-            //we're at the right boundary of a snippet
+            //Current position is at the boundry of a snippet.
             if (this.currentInsertPosition == (this.finalText[this.currentSnippetIndex].message?.Length ?? 1))
             {
-                //there are no more snippets to the right, so we can't go right any more
+                //If there are no snippets before this, the cursor can't move any more right.
                 if (this.currentSnippetIndex == this.finalText.Count - 1)
                     return;
 
-                //move to next snippet
+                //Move to next snippet.
                 this.currentSnippetIndex++;
 
-                //move to the end of the emoji, or the first + 1 of text
+                //Move to the end of the next snippet if it is an emoji, or the first + 1 of the
+                //next snippet if it is text. This is 1 in both cases.
                 this.currentInsertPosition = 1;
 
             }
