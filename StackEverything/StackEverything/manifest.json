@@ -1,10 +1,10 @@
 ﻿{
   "Name": "Stack Everything",
   "Author": "Cat",
-  "Version": "2.3.0",
+  "Version": "2.4.0-beta",
   "Description": "Lets you stack BigCraftables (scarecrows, furnaces, casks, etc), Furniture, and Wallpapers up to 999.",
   "UniqueID": "cat.stackeverything",
   "EntryDll": "StackEverything.dll",
-  "MinimumApiVersion": "2.5.5",
+  "MinimumApiVersion": "2.6-beta",
   "UpdateKeys": [ "Nexus:2053" ]
 }

@@ -11,7 +11,7 @@ namespace StackEverything.Patches
     {
         public static void Postfix(Item __instance, SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
         {
-            if (!(__instance is SObject objInstance && !objInstance.bigCraftable) && !StackEverythingMod.patchedTypes.Any(item => __instance.GetType().IsAssignableFrom(item)))
+            if (!(__instance is SObject objInstance && !objInstance.bigCraftable) && !StackEverythingMod.PatchedTypes.Any(item => __instance.GetType().IsAssignableFrom(item)))
                 return;
 
             if (drawStackNumber && __instance.maximumStackSize() > 1 && ((double)scaleSize > 0.3 && __instance.Stack != int.MaxValue) && __instance.Stack > 1)
