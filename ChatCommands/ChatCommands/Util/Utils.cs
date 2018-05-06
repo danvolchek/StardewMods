@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
+using StardewValley;
+using StardewValley.Menus;
 
 namespace ChatCommands.Util
 {
@@ -96,6 +98,13 @@ namespace ChatCommands.Util
 
             args.Add(currentArg.ToString());
             return args.Where(item => !string.IsNullOrWhiteSpace(item)).ToArray();
+        }
+
+        internal static ChatSnippet CopyChatSnippet(ChatSnippet snippet)
+        {
+            return snippet.message == null
+                ? new ChatSnippet(snippet.emojiIndex)
+                : new ChatSnippet(snippet.message, LocalizedContentManager.CurrentLanguageCode);
         }
     }
 }

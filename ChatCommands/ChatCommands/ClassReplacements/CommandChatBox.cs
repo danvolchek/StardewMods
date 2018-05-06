@@ -15,7 +15,8 @@ namespace ChatCommands.ClassReplacements
     /// </summary>
     internal class CommandChatBox : ChatBox
     {
-        private readonly List<string> bCheatHistory;
+        private readonly List<CommandChatTextBoxState> sentMessageHistory = new List<CommandChatTextBoxState>();
+        private CommandChatTextBoxState currentTypedMessage;
 
         private readonly IReflectedField<int> bCheatHistoryPosition;
         private readonly IReflectedField<bool> bChoosingEmoji;
@@ -24,38 +25,39 @@ namespace ChatCommands.ClassReplacements
         private readonly List<ChatMessage> bMessages;
         private readonly ICommandHandler handler;
         private readonly CommandChatTextBox commandChatTextBox;
-        private readonly int maxHistoryEntries;
+        private readonly ChatCommandsConfig config;
         private int displayLineIndex;
 
         /// <summary>
         /// Construct an instance.
         /// </summary>
         /// <remarks>Reassigns the enter handler, replaces <see cref="ChatTextBox"/> and <see cref="EmojiMenu"/>.</remarks>
-        public CommandChatBox(IReflectionHelper helper, ICommandHandler handler, ChatCommandsConfig config)
+        public CommandChatBox(IModHelper helper, ICommandHandler handler, ChatCommandsConfig config)
         {
             this.handler = handler;
-            this.bCheatHistoryPosition = helper.GetField<int>(this, "cheatHistoryPosition");
-            this.bFormatMessage = helper.GetMethod(this, "formatMessage");
-            this.bMessages = helper.GetField<List<ChatMessage>>(this, "messages").GetValue();
-            this.bCheatHistory = helper.GetField<List<string>>(this, "cheatHistory").GetValue();
-            this.bEmojiMenuIcon = helper.GetField<ClickableTextureComponent>(this, "emojiMenuIcon").GetValue();
-            this.bChoosingEmoji = helper.GetField<bool>(this, "choosingEmoji");
+            this.bCheatHistoryPosition = helper.Reflection.GetField<int>(this, "cheatHistoryPosition");
+            this.bFormatMessage = helper.Reflection.GetMethod(this, "formatMessage");
+            this.bMessages = helper.Reflection.GetField<List<ChatMessage>>(this, "messages").GetValue();
+            this.bEmojiMenuIcon = helper.Reflection.GetField<ClickableTextureComponent>(this, "emojiMenuIcon").GetValue();
+            this.bChoosingEmoji = helper.Reflection.GetField<bool>(this, "choosingEmoji");
             Texture2D chatBoxTexture = Game1.content.Load<Texture2D>("LooseSprites\\chatBox");
 
-            this.chatBox.OnEnterPressed -= helper.GetField<TextBoxEvent>(this, "e").GetValue();
+            this.chatBox.OnEnterPressed -= helper.Reflection.GetField<TextBoxEvent>(this, "e").GetValue();
             this.chatBox = this.commandChatTextBox = new CommandChatTextBox(chatBoxTexture,
                 null, Game1.smallFont, Color.White);
             Game1.keyboardDispatcher.Subscriber = this.chatBox;
             this.chatBox.Selected = false;
             this.chatBox.OnEnterPressed += this.EnterPressed;
 
-            this.emojiMenu = new CommandEmojiMenu(helper, this, emojiTexture, chatBoxTexture);
+            ConsoleChatMessage.Init(LocalizedContentManager.CurrentLanguageCode);
 
-            helper.GetMethod(this, "updatePosition").Invoke();
+            this.emojiMenu = new CommandEmojiMenu(helper.Reflection, this, emojiTexture, chatBoxTexture);
+
+            helper.Reflection.GetMethod(this, "updatePosition").Invoke();
 
 
             this.displayLineIndex = -1;
-            this.maxHistoryEntries = config.MaximumNumberOfHistoryMessages;
+            this.config = config;
             this.DetermineNumberOfMaxMessages();
         }
 
@@ -75,15 +77,17 @@ namespace ChatCommands.ClassReplacements
                         return;
                     }
 
+
+                    this.sentMessageHistory.Insert(0, this.commandChatTextBox.Save());
+                    if (this.sentMessageHistory.Count >= this.config.MaximumNumberOfHistoryMessages)
+                        this.sentMessageHistory.RemoveAt(this.sentMessageHistory.Count - 1);
+
                     string filtered = FilterMessagePlaintext(message);
                     if (message[0] == 47 && this.handler.CanHandle(filtered))
                     {
                         this.receiveChatMessage(Game1.player.UniqueMultiplayerID, 0,
                             LocalizedContentManager.CurrentLanguageCode, message);
                         this.handler.Handle(filtered);
-                        this.bCheatHistory.Insert(0, filtered);
-                        if (this.bCheatHistory.Count >= this.maxHistoryEntries)
-                            this.bCheatHistory.RemoveAt(this.bCheatHistory.Count - 1);
                     }
                     else
                     {
@@ -176,7 +180,20 @@ namespace ChatCommands.ClassReplacements
 
             foreach (string part in text2.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
             {
-                this.AddNewMessage(part, this.messageColor(chatKind), language);
+                this.AddNewMessage(part, this.messageColor(chatKind), this.chatBox.Font, language);
+            }
+        }
+
+        /// <summary>
+        /// Adds a message without any formatting to the chat box.
+        /// </summary>
+        public void AddConsoleMessage(string message, Color color)
+        {
+            string text = FixedParseText(message, this.chatBox.Font, this.chatBox.Width - 8);
+
+            foreach (string part in text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
+            {
+                this.AddNewMessage(part, color, this.chatBox.Font, LocalizedContentManager.CurrentLanguageCode, true);
             }
         }
 
@@ -189,55 +206,30 @@ namespace ChatCommands.ClassReplacements
 
             foreach (string part in text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
             {
-                this.AddNewMessage(part, color, LocalizedContentManager.CurrentLanguageCode);
+                this.AddNewMessage(part, color, this.chatBox.Font, LocalizedContentManager.CurrentLanguageCode);
             }
         }
 
         /// <summary>
         /// Adds a new message to the chat box.
         /// </summary>
-        private void AddNewMessage(string message, Color color, LocalizedContentManager.LanguageCode code)
+        private void AddNewMessage(string message, Color color, SpriteFont font, LocalizedContentManager.LanguageCode code, bool isConsoleMessage = false)
         {
             if (string.IsNullOrEmpty(message))
                 message = " ";
 
-            ChatMessage newMessage = new ChatMessage
-            {
-                timeLeftToDisplay = 600,
-                verticalSize = (int)this.chatBox.Font.MeasureString(message).Y + 4,
-                color = color,
-                language = code
-            };
+            ChatMessage newMessage = isConsoleMessage && this.config.UseMonospacedFontForCommandOutput ? new ConsoleChatMessage() : new ChatMessage();
+
+            newMessage.timeLeftToDisplay = 600;
+            newMessage.verticalSize = (int)font.MeasureString(message).Y + 4;
+            newMessage.color = color;
+            newMessage.language = code;
+
             newMessage.parseMessageForEmoji(message);
             this.bMessages.Add(newMessage);
-            if (this.maxHistoryEntries > 0 && this.bMessages.Count >= this.maxHistoryEntries)
+            if (this.config.MaximumNumberOfHistoryMessages > 0 && this.bMessages.Count >= this.config.MaximumNumberOfHistoryMessages)
                 this.bMessages.RemoveAt(0);
             else if (this.displayLineIndex == this.bMessages.Count - 2) this.displayLineIndex++;
-        }
-
-        /// <summary>
-        /// Resets the chatbox with the given literal text, not handling any emojis.
-        /// </summary>
-        /// <remarks>Doing it in this roundabout manner makes it so that the player can keep typing.</remarks>
-        private void SimulatePlayerReset(string input)
-        {
-            this.commandChatTextBox.MoveCursorAllTheWayRight();
-            this.commandChatTextBox.Backspace();
-            while (!this.IsChatBoxEmpty())
-                this.commandChatTextBox.Backspace();
-            foreach (char c in input.Trim())
-                this.chatBox.RecieveTextInput(c);
-        }
-
-        /// <summary>
-        /// Whether the chat box is empty or not.
-        /// </summary>
-        /// <returns></returns>
-        private bool IsChatBoxEmpty()
-        {
-            string plaintext = FilterMessagePlaintext(ChatMessage.makeMessagePlaintext(this.chatBox.finalText));
-
-            return plaintext.Length == 0;
         }
 
         /// <summary>Filters generated plaintext by removing color from the end of the name.</summary>
@@ -326,16 +318,16 @@ namespace ChatCommands.ClassReplacements
         {
             if (key == Keys.Up)
             {
-                if (this.bCheatHistoryPosition.GetValue() >= this.bCheatHistory.Count - 1)
+                if (this.bCheatHistoryPosition.GetValue() >= this.sentMessageHistory.Count - 1)
                     return;
 
                 if (this.bCheatHistoryPosition.GetValue() == -1)
                 {
-                    this.commandChatTextBox.Save();
+                    this.currentTypedMessage = this.commandChatTextBox.Save();
                 }
 
                 this.bCheatHistoryPosition.SetValue(this.bCheatHistoryPosition.GetValue() + 1);
-                this.SimulatePlayerReset(this.bCheatHistory[this.bCheatHistoryPosition.GetValue()]);
+                this.commandChatTextBox.Load(this.sentMessageHistory[this.bCheatHistoryPosition.GetValue()]);
             }
             else if (key == Keys.Down)
             {
@@ -347,13 +339,13 @@ namespace ChatCommands.ClassReplacements
                     this.clickAway();
                     this.activate();
                     this.displayLineIndex = currIndex;
-                    this.commandChatTextBox.Load();
+                    this.commandChatTextBox.Load(this.currentTypedMessage, true);
 
                     return;
                 }
 
                 this.bCheatHistoryPosition.SetValue(this.bCheatHistoryPosition.GetValue() - 1);
-                this.SimulatePlayerReset(this.bCheatHistory[this.bCheatHistoryPosition.GetValue()]);
+                this.commandChatTextBox.Load(this.sentMessageHistory[this.bCheatHistoryPosition.GetValue()]);
             }
             else if (key == Keys.Left)
             {
@@ -455,8 +447,12 @@ namespace ChatCommands.ClassReplacements
             foreach (ChatMessage message in this.GetDisplayedLines())
             {
                 num2 += message.verticalSize;
-                message.draw(b, 12,
-                    this.yPositionOnScreen - num2 - 8 + (this.chatBox.Selected ? 0 : this.chatBox.Height));
+                if(message is ConsoleChatMessage cMessage)
+                    cMessage.ConsoleDraw(b, 12,
+                        this.yPositionOnScreen - num2 - 8 + (this.chatBox.Selected ? 0 : this.chatBox.Height));
+                else
+                    message.draw(b, 12,
+                        this.yPositionOnScreen - num2 - 8 + (this.chatBox.Selected ? 0 : this.chatBox.Height));
             }
 
             if (!this.chatBox.Selected)

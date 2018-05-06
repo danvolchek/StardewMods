@@ -47,9 +47,11 @@
   <ItemGroup>
     <Compile Include="ChatCommandsConfig.cs" />
     <Compile Include="ChatCommandsMod.cs" />
+    <Compile Include="ClassReplacements\CommandChatTextBoxState.cs" />
     <Compile Include="ClassReplacements\CommandChatBox.cs" />
     <Compile Include="ClassReplacements\CommandChatTextBox.cs" />
     <Compile Include="ClassReplacements\CommandEmojiMenu.cs" />
+    <Compile Include="ClassReplacements\ConsoleChatMessage.cs" />
     <Compile Include="ListenCommand.cs" />
     <Compile Include="NotifyingTextWriter.cs" />
     <Compile Include="ICommandHandler.cs" />
@@ -61,6 +63,7 @@
     <None Include="manifest.json" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.2.1.0-beta-20180428\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.2.1.0-beta-20180428\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

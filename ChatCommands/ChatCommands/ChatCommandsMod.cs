@@ -5,6 +5,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using System;
 using System.Linq;
+using System.Text;
 using Microsoft.Xna.Framework.Input;
 
 namespace ChatCommands
@@ -18,9 +19,9 @@ namespace ChatCommands
         private NotifyingTextWriter consoleNotifier;
         private ChatCommandsConfig modConfig;
 
-        private int repeatWaitPeriod = 20;
+        private const int BaseWaitPeriod = 15;
 
-        private Keys downKey = Keys.None;
+        private int repeatWaitPeriod = BaseWaitPeriod;
 
         public override void Entry(IModHelper helper)
         {
@@ -33,7 +34,6 @@ namespace ChatCommands
 
             this.modConfig = helper.ReadConfig<ChatCommandsConfig>();
 
-            // ReSharper disable once ObjectCreationAsStatement
             new ListenCommand(this.Monitor, this.modConfig, this.consoleNotifier).Register(helper.ConsoleCommands);
         }
 
@@ -45,26 +45,26 @@ namespace ChatCommands
 
             bool isLeftDown = Keyboard.GetState().IsKeyDown(Keys.Left);
             bool isRightDown = Keyboard.GetState().IsKeyDown(Keys.Right);
-            if (isLeftDown ^ isRightDown)
-            {
-                if ((isLeftDown && this.downKey == Keys.Left) || (isRightDown && this.downKey == Keys.Right))
-                {
-                    if(this.repeatWaitPeriod !=0)
-                        this.repeatWaitPeriod--;
-                }
-                else
-                {
-                    this.repeatWaitPeriod = 15;
-                }
+            bool isUpDown = Keyboard.GetState().IsKeyDown(Keys.Up);
+            bool isDownDown = Keyboard.GetState().IsKeyDown(Keys.Down);
 
-                this.downKey = isLeftDown ? Keys.Left : Keys.Right;
-                if(this.repeatWaitPeriod == 0)
-                    Game1.chatBox.receiveKeyPress(this.downKey);
+            if (isLeftDown ^ isRightDown ^ isUpDown ^ isDownDown)
+            {
+                Keys downKey = isLeftDown ? Keys.Left : (isRightDown ? Keys.Right : (isUpDown ? Keys.Up : Keys.Down));
+
+                if (this.repeatWaitPeriod != 0)
+                    this.repeatWaitPeriod--;
+
+                if (this.repeatWaitPeriod == 0)
+                {
+                    Game1.chatBox.receiveKeyPress(downKey);
+                    if (isUpDown || isDownDown)
+                        this.repeatWaitPeriod = BaseWaitPeriod;
+                }
             }
             else
             {
-                this.downKey = Keys.None;
-                this.repeatWaitPeriod = 15;
+                this.repeatWaitPeriod = BaseWaitPeriod;
             }
         }
 
@@ -100,7 +100,7 @@ namespace ChatCommands
             if (Game1.chatBox != null && Game1.chatBox is CommandChatBox) return;
             if (Game1.chatBox != null)
                 Game1.onScreenMenus.Remove(Game1.chatBox);
-            Game1.chatBox = new CommandChatBox(this.Helper.Reflection, this, this.modConfig);
+            Game1.chatBox = new CommandChatBox(this.Helper, this, this.modConfig);
             Game1.onScreenMenus.Add(Game1.chatBox);
             this.Monitor.Log("Replaced Chatbox", LogLevel.Trace);
         }
@@ -119,7 +119,7 @@ namespace ChatCommands
                 toWrite = noPrefix;
 
             if (!string.IsNullOrWhiteSpace(toWrite))
-                Game1.chatBox?.addMessage(toWrite, Utils.ConvertConsoleColorToColor(Console.ForegroundColor));
+                (Game1.chatBox as CommandChatBox)?.AddConsoleMessage(toWrite, Utils.ConvertConsoleColorToColor(Console.ForegroundColor));
         }
     }
 }

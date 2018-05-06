@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ChatCommands.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
@@ -15,10 +16,6 @@ namespace ChatCommands.ClassReplacements
 
         private int lastUpdateInsertPosition;
         private int lastUpdatecurrentSnippetIndex;
-
-        private int savedCurrentInsertPosition = -1;
-        private int savedCurrentSnippetIndex = -1;
-        private readonly List<ChatSnippet> savedFinalText = new List<ChatSnippet>();
 
         public CommandChatTextBox(Texture2D textBoxTexture, Texture2D caretTexture, SpriteFont font, Color textColor) : base(textBoxTexture, caretTexture, font, textColor)
         {
@@ -77,7 +74,7 @@ namespace ChatCommands.ClassReplacements
                     this.finalText.Insert(this.currentSnippetIndex + 1, new ChatSnippet(text, LocalizedContentManager.CurrentLanguageCode));
                     this.currentSnippetIndex++;
                 }
-                this.currentInsertPosition = GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]);
+                this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
 
             }
             else
@@ -177,7 +174,7 @@ namespace ChatCommands.ClassReplacements
                     {
                         //The removed emoji was not the first snippet.
                         this.currentSnippetIndex--;
-                        this.currentInsertPosition = GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]);
+                        this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
 
                         //If this emoji seperated two text snippets, they need to be
                         //merged.
@@ -211,8 +208,7 @@ namespace ChatCommands.ClassReplacements
                         if (this.currentSnippetIndex != 0)
                         {
                             this.currentSnippetIndex--;
-                            this.currentInsertPosition =
-                                GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]);
+                            this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
                         }
                         else
                             this.currentInsertPosition = 0;
@@ -249,6 +245,14 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
+        /// Gets the last insertion index of the current snippet.
+        /// </summary>
+        private int GetLastIndexOfCurrentSnippet()
+        {
+            return GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]);
+        }
+
+        /// <summary>
         /// Add an emoji to the typed text.
         /// </summary>
         public void ReceiveEmoji(int emoji)
@@ -257,13 +261,16 @@ namespace ChatCommands.ClassReplacements
                 return;
             if (this.currentInsertPosition == 0)
             {
-                //Inserting at the start of a message - add before the current snippet.
+                //Inserting at the start of a text or emoji snippet - add before the current snippet.
                 this.finalText.Insert(this.currentSnippetIndex, new ChatSnippet(emoji));
-                this.currentSnippetIndex++;
+                if (this.finalText.Count != 1)
+                    this.currentSnippetIndex++;
+                else
+                    this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
             }
-            else if (this.currentInsertPosition == this.finalText[this.currentSnippetIndex].message.Length - 1)
+            else if (this.currentInsertPosition == this.GetLastIndexOfCurrentSnippet())
             {
-                //Inserting at the end of a message - add after current snippet.
+                //Inserting at the end of a text or emoji snippet message - add after current snippet.
                 ChatSnippet emojiSnippet = new ChatSnippet(emoji);
                 this.finalText.Insert(this.currentSnippetIndex + 1, emojiSnippet);
                 this.currentSnippetIndex++;
@@ -271,7 +278,6 @@ namespace ChatCommands.ClassReplacements
             }
             else
             {
-
                 //Inserting at the middle of a text message - split the message in two.
                 ChatSnippet orig = this.finalText[this.currentSnippetIndex];
 
@@ -354,7 +360,7 @@ namespace ChatCommands.ClassReplacements
                 //Move to start if the current snippet is an emoji, or end - 1 if the current snippet
                 //is a text snippet.
                 this.currentInsertPosition = this.finalText[this.currentSnippetIndex].message == null ?
-                    0 : (GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]) - 1);
+                    0 : (this.GetLastIndexOfCurrentSnippet() - 1);
 
             }
             else
@@ -390,40 +396,41 @@ namespace ChatCommands.ClassReplacements
         /// <summary>
         /// Move the cursor as far right as possible.
         /// </summary>
-        public void MoveCursorAllTheWayRight()
+        private void MoveCursorAllTheWayRight()
         {
             if (!this.finalText.Any())
                 return;
             this.currentSnippetIndex = this.finalText.Count - 1;
-            this.currentInsertPosition = GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]);
+            this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
         }
 
         /// <summary>
         /// Save the current state, so it can be restored later.
         /// </summary>
-        public void Save()
+        public CommandChatTextBoxState Save()
         {
-            this.savedCurrentInsertPosition = this.currentInsertPosition;
-            this.savedCurrentSnippetIndex = this.currentSnippetIndex;
-            this.savedFinalText.Clear();
-            foreach (ChatSnippet snippet in this.finalText)
-            {
-                this.savedFinalText.Add(snippet.message != null
-                    ? new ChatSnippet(snippet.message, LocalizedContentManager.CurrentLanguageCode)
-                    : new ChatSnippet(snippet.emojiIndex));
-            }
+            return new CommandChatTextBoxState(this.currentInsertPosition, this.currentSnippetIndex, this.finalText);
+            
         }
 
         /// <summary>
         /// Restored a previously saved state.
         /// </summary>
-        public void Load()
+        public void Load(CommandChatTextBoxState state, bool useSavedPosition = false)
         {
-            this.currentInsertPosition = this.savedCurrentInsertPosition;
-            this.currentSnippetIndex = this.savedCurrentSnippetIndex;
             this.finalText.Clear();
-            foreach (ChatSnippet snippet in this.savedFinalText)
-                this.finalText.Add(snippet);
+            foreach (ChatSnippet snippet in state.FinalText)
+                this.finalText.Add(Utils.CopyChatSnippet(snippet));
+            if (useSavedPosition)
+            {
+                this.currentInsertPosition = state.CurrentInsertPosition;
+                this.currentSnippetIndex = state.CurrentSnippetIndex;
+                
+            }
+            else
+            {
+                this.MoveCursorAllTheWayRight();
+            }
             this.updateWidth();
         }
     }
