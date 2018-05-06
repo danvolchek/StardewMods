@@ -1,23 +1,15 @@
-﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WinterGrass
+﻿namespace WinterGrass
 {
     //A slimmed down version of SDV's Grass class with the relevant information needed to re-create it
-    class GrassSave
+    internal class GrassSave
     {
-        public int grassType;
-        public int numWeeds;
-
+        public readonly int GrassType;
+        public readonly int NumWeeds;
 
         public GrassSave(int w, int n)
         {
-            grassType = w;
-            numWeeds = n;
+            this.GrassType = w;
+            this.NumWeeds = n;
         }
     }
 }

@@ -1,12 +1,7 @@
 ﻿{
   "Name": "WinterGrass",
   "Author": "Cat",
-  "Version": {
-    "MajorVersion": 1,
-    "MinorVersion": 0,
-    "PatchVersion": 0,
-    "Build": null
-  },
+  "Version": "1.2.1-beta",
   "Dependencies": [
     {
       "UniqueID": "dantheman999.VariableGrass",
@@ -15,5 +10,7 @@
   ],
   "Description": "Grass will stay around in winter.",
   "UniqueID": "cat.wintergrass",
-  "EntryDll": "WinterGrass.dll"
+  "MinimumApiVersion": "2.6-beta",
+  "EntryDll": "WinterGrass.dll",
+  "UpdateKeys": [ "Nexus:1601" ]
 }
