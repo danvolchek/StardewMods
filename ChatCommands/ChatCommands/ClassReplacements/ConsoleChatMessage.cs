@@ -67,7 +67,21 @@ namespace ChatCommands.ClassReplacements
                     widestCharacter = width;
             }*/
 
-            widestCharacter = font.MeasureString("w").X;
+            widestCharacter = font.MeasureString("e").X;
+        }
+
+        public static float MeasureStringWidth(SpriteFont font, string text, bool isConsole)
+        {
+            if (!isConsole)
+                return font.MeasureString(text).X;
+            else
+            {
+                float widest = 0;
+                foreach (string part in text.Split(new[] { "\n", "\r\n" }, StringSplitOptions.None))
+                    if (part.Length * widestCharacter > widest)
+                        widest = part.Length * widestCharacter;
+                return widest;
+            }
         }
     }
 }

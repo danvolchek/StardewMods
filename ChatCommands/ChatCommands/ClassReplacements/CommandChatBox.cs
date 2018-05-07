@@ -58,6 +58,10 @@ namespace ChatCommands.ClassReplacements
 
             this.displayLineIndex = -1;
             this.config = config;
+            this.config.UseMonospacedFontForCommandOutput = this.config.UseMonospacedFontForCommandOutput && !(
+                LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ja ||
+                LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.zh ||
+                LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.th);
             this.DetermineNumberOfMaxMessages();
         }
 
@@ -189,7 +193,7 @@ namespace ChatCommands.ClassReplacements
         /// </summary>
         public void AddConsoleMessage(string message, Color color)
         {
-            string text = FixedParseText(message, this.chatBox.Font, this.chatBox.Width - 8);
+            string text = FixedParseText(message, this.chatBox.Font, this.chatBox.Width - 8, this.config.UseMonospacedFontForCommandOutput);
 
             foreach (string part in text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
             {
@@ -287,13 +291,16 @@ namespace ChatCommands.ClassReplacements
         /// </summary>
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
+            if (!this.chatBox.Selected)
+                return;
+
             if (this.bEmojiMenuIcon.containsPoint(x, y))
             {
                 this.bChoosingEmoji.SetValue(!this.bChoosingEmoji.GetValue());
                 Game1.playSound("shwip");
                 this.bEmojiMenuIcon.scale = 4f;
             }
-            else if (this.emojiMenu.isWithinBounds(x, y))
+            else if (this.bChoosingEmoji.GetValue() && this.emojiMenu.isWithinBounds(x, y))
             {
                 (this.emojiMenu as CommandEmojiMenu)?.LeftClick(x, y, this);
             }
@@ -494,7 +501,7 @@ namespace ChatCommands.ClassReplacements
         /// <summary>
         /// A fixed version of <see cref="Game1.parseText(string,SpriteFont,int)"/> that uses .X instead of .Length.
         /// </summary>
-        private static string FixedParseText(string text, SpriteFont whichFont, int width)
+        private static string FixedParseText(string text, SpriteFont whichFont, int width, bool isConsole = false)
         {
             if (text == null)
                 return "";
@@ -506,7 +513,7 @@ namespace ChatCommands.ClassReplacements
             {
                 foreach (char ch in text)
                 {
-                    if (whichFont.MeasureString(str1 + ch).X > (double)width)
+                    if (ConsoleChatMessage.MeasureStringWidth(whichFont, str1 + ch, isConsole) > (double)width)
                     {
                         str2 = str2 + str1 + Environment.NewLine;
                         str1 = string.Empty;
@@ -523,7 +530,7 @@ namespace ChatCommands.ClassReplacements
             foreach (string str4 in str3.Split(chArray))
                 try
                 {
-                    if (whichFont.MeasureString(str1 + str4).X > (double)width || str4.Equals(Environment.NewLine))
+                    if (ConsoleChatMessage.MeasureStringWidth(whichFont, str1 + str4, isConsole) > (double)width || str4.Equals(Environment.NewLine))
                     {
                         str2 = str2 + str1 + Environment.NewLine;
                         str1 = string.Empty;

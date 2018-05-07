@@ -37,7 +37,11 @@ namespace ChatCommands
             new ListenCommand(this.Monitor, this.modConfig, this.consoleNotifier).Register(helper.ConsoleCommands);
         }
 
-        //Resend left and right arrow keys if they're being held down
+        /// <summary>
+        /// Resend the left, right, up, or down keys if one of them is being held.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void GameEvents_HalfSecondTick(object sender, EventArgs e)
         {
             if (Game1.chatBox == null || !Game1.chatBox.isActive())
