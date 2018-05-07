@@ -13,8 +13,8 @@ The mod
  - Otherwise it lets the game handle the input.
 
 It also
- - Adds a scrollbar by not actually deleting messages over the limit, and instead only displaying a subset of messages
- - Piggybacks off the existing history system to add history for SMAPI commands
+ - Adds the ability to scroll by not actually deleting messages over the limit, and instead only displaying a subset of messages.
+ - Piggybacks off the existing history system to add history for messages the user sent.
  - Dynamically changes the message limit based on the user's window size, so larger screens see more messages.
  - Rewrites how text entry works so players can use the left/right arrow keys how they'd expect to edit any part of their message.
- - Emulates a 'monospace' font by drawing characters at fixed widths for console output.
+ - Emulates a monospace font by drawing characters in fixed width slots for console output.
