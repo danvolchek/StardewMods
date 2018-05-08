@@ -20,3 +20,4 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Stack Everything](/StackEverything): Lets you stack BigCraftables, Furniture, Wallpapers, and bobbers up to 999 like every other item.
 - [Better Slingshots](/BetterSlingshots): Adds full auto fire, auto reload, better aiming, fixes bugs, and more to slingshots.
 - [Chat Commands](/ChatCommands): Lets you run SMAPI console commands in the in game chat box. Also adds scrolling, command history, and better text entry.
+- [Better Artisan Good Icons](/BetterArtisanGoodIcons): Draws a different texture for different wines, juices, jellies, and honey based on what was used to make them.
