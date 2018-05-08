@@ -47,10 +47,10 @@ namespace BetterArtisanGoodIcons
         /// <summary>Gets the info needed to draw the correct texture for the given artisan good.</summary>
         internal static bool GetDrawInfo(SObject item, out Texture2D mainTexture, out Rectangle mainPosition, out Rectangle iconPosition)
         {
-            if (item.parentSheetIndex == (int)ArtisanGood.Honey)
-                return GetDrawInfoHoney(item.parentSheetIndex, item.Name, out mainTexture, out mainPosition, out iconPosition);
+            if (item.ParentSheetIndex == (int)ArtisanGood.Honey)
+                return GetDrawInfoHoney(item.ParentSheetIndex, item.Name, out mainTexture, out mainPosition, out iconPosition);
             else
-                return GetDrawInfoNonHoney(item.ParentSheetIndex, item.preservedParentSheetIndex, out mainTexture, out mainPosition, out iconPosition);
+                return GetDrawInfoNonHoney(item.ParentSheetIndex, item.preservedParentSheetIndex.Value, out mainTexture, out mainPosition, out iconPosition);
         }
 
         /// <summary>Gets the info needed to draw the correct texture for non-honey artisan goods.</summary>

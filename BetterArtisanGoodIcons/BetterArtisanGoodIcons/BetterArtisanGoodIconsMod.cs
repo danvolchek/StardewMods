@@ -13,6 +13,7 @@ namespace BetterArtisanGoodIcons
     /// honey and non-honey versions of things.</remarks>
     public class BetterArtisanGoodIconsMod : Mod
     {
+
         public override void Entry(IModHelper helper)
         {
             ArtisanGoodsManager.Init(this.Helper, this.Monitor);

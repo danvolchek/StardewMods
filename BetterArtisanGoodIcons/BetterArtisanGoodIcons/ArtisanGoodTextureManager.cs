@@ -59,14 +59,13 @@ namespace BetterArtisanGoodIcons
         /// <summary>Gets the position for the given non-honey preserved item.</summary>
         internal void GetPosition(int preservedIndex, out Rectangle mainRectangle, out Rectangle iconRectangle)
         {
-            if (preservedIndex == 0)
+            if (preservedIndex == 0 || !this.positions.TryGetValue(preservedIndex, out mainRectangle))
             {
                 mainRectangle = Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, this.artisanGoodIndex, 16, 16);
                 iconRectangle = Rectangle.Empty;
                 return;
             }
-
-            mainRectangle = this.positions[preservedIndex];
+            
             iconRectangle = Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, preservedIndex, 16, 16);
         }
 
@@ -78,9 +77,11 @@ namespace BetterArtisanGoodIcons
             if (matchingType != null)
             {
                 int index = (int)((HoneyType)Enum.Parse(typeof(HoneyType), matchingType));
-                mainRectangle = this.positions[index];
-                iconRectangle = Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, index == -1 ? 421 : index, 16, 16);
-                return;
+                if (this.positions.TryGetValue(index, out mainRectangle))
+                {
+                    iconRectangle = Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, index == -1 ? 421 : index, 16, 16);
+                    return;
+                }              
             }
 
             iconRectangle = Rectangle.Empty;
@@ -88,21 +89,33 @@ namespace BetterArtisanGoodIcons
         }
 
         /// <summary>Gets the spritesheet for the given non-honey preserved item.</summary>
-        internal Texture2D GetSpritesheet(int regentIndex)
+        internal Texture2D GetSpritesheet(int preservedIndex)
         {
-            if (regentIndex == 0)
+            if (preservedIndex == 0 || !this.positions.TryGetValue(preservedIndex, out Rectangle _))
                 return Game1.objectSpriteSheet;
 
             return this.spriteSheet;
         }
 
         /// <summary>Gets the spritesheet for the given honey preserved item.</summary>
-        internal Texture2D GetSpritesheetHoney(string name)
+        internal Texture2D GetSpritesheetHoney(string honeyName)
         {
-            if (name == "Honey")
-                return Game1.objectSpriteSheet;
+            if (honeyName != "Honey")
+            {
+                honeyName = honeyName.Replace(" ", "");
+                string matchingType = HoneyFlowerTypes.FirstOrDefault(item => honeyName.Contains(item));
 
-            return this.spriteSheet;
+                if (matchingType != null)
+                {
+                    int index = (int)((HoneyType)Enum.Parse(typeof(HoneyType), matchingType));
+                    if (this.positions.TryGetValue(index, out Rectangle _))
+                    {
+                        return this.spriteSheet;
+                    }      
+                }
+            }
+
+            return Game1.objectSpriteSheet;
         }
 
         /// <summary>Whether this manager can draw textures for the given item.</summary>
