@@ -1,13 +1,14 @@
-﻿using System;
+﻿using StardewValley;
 
 namespace CustomWarpLocations.WarpOverrides
 {
-    class TotemWarpOverride : WarpOverride
+    internal class TotemWarpOverride : WarpOverride
     {
-        int parentSheetIndex;
-        internal TotemWarpOverride(Object target)
+        private readonly int parentSheetIndex;
+
+        internal TotemWarpOverride(object target)
         {
-            this.parentSheetIndex = ((StardewValley.Object)target).parentSheetIndex;
+            this.parentSheetIndex = ((Object) target).ParentSheetIndex;
         }
 
         internal override WarpLocation GetWarpLocation()
@@ -16,15 +17,16 @@ namespace CustomWarpLocations.WarpOverrides
             switch (this.parentSheetIndex)
             {
                 case 688:
-                    newLocation = warpLocations.FarmWarpLocation_Totem;
+                    newLocation = WarpLocations.FarmWarpLocation_Totem;
                     break;
                 case 689:
-                    newLocation = warpLocations.MountainWarpLocation_Totem;
+                    newLocation = WarpLocations.MountainWarpLocation_Totem;
                     break;
                 case 690:
-                    newLocation = warpLocations.BeachWarpLocation_Totem;
+                    newLocation = WarpLocations.BeachWarpLocation_Totem;
                     break;
             }
+
             return newLocation;
         }
     }

@@ -1,6 +1,6 @@
 ﻿namespace CustomWarpLocations
 {
-    public class NewWarpLocations
+    internal class NewWarpLocations
     {
         public WarpLocation FarmWarpLocation_Totem { get; set; } = new WarpLocation("Farm", 48, 7);
 

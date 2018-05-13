@@ -1,12 +1,9 @@
-﻿using System;
-
-namespace CustomWarpLocations
+﻿namespace CustomWarpLocations
 {
-    class ModConfig
+    internal class ModConfig
     {
-        public String LocationSaveKey { get; set; } = "f5";
+        public string LocationSaveKey { get; set; } = "f5";
 
         public bool AdvancedMode { get; set; } = false;
-
     }
 }

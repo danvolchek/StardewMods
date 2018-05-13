@@ -1,24 +1,19 @@
-﻿using System;
+﻿using StardewValley.Buildings;
 
 namespace CustomWarpLocations.WarpOverrides
 {
-    class ObeliskWarpOverride : WarpOverride
+    internal class ObeliskWarpOverride : WarpOverride
     {
-        string obeliskType;
-        internal ObeliskWarpOverride(Object target)
+        private readonly string obeliskType;
+
+        internal ObeliskWarpOverride(object target)
         {
-            this.obeliskType = ((StardewValley.Buildings.Building)target).buildingType;
+            this.obeliskType = ((Building) target).buildingType.Value;
         }
 
         internal override WarpLocation GetWarpLocation()
         {
-            WarpLocation newLocation = null;
-            if (this.obeliskType == "Earth Obelisk")
-                newLocation = warpLocations.MountainWarpLocation_Obelisk;
-            else
-                newLocation = warpLocations.BeachWarpLocation_Obelisk;
-
-            return newLocation;
+            return this.obeliskType == "Earth Obelisk" ? WarpLocations.MountainWarpLocation_Obelisk : WarpLocations.BeachWarpLocation_Obelisk;
         }
     }
 }

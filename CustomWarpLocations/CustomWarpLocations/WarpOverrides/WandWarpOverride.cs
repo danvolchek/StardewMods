@@ -2,7 +2,7 @@
 
 namespace CustomWarpLocations.WarpOverrides
 {
-    class WandWarpOverride : WarpOverride
+    internal class WandWarpOverride : WarpOverride
     {
         internal override WarpLocation GetWarpLocation()
         {
@@ -11,7 +11,7 @@ namespace CustomWarpLocations.WarpOverrides
             else
                 Game1.changeMusicTrack("none");
 
-            return warpLocations.FarmWarpLocation_Scepter;
+            return WarpLocations.FarmWarpLocation_Scepter;
         }
     }
 }

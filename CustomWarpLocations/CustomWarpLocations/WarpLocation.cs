@@ -1,14 +1,12 @@
-﻿using System;
-
-namespace CustomWarpLocations
+﻿namespace CustomWarpLocations
 {
-    public class WarpLocation
+    internal class WarpLocation
     {
-        public String locationName;
+        public string locationName;
         public int xCoord;
         public int yCoord;
 
-        public WarpLocation(String locationName, int x, int y)
+        public WarpLocation(string locationName, int x, int y)
         {
             this.locationName = locationName;
             this.xCoord = x;
