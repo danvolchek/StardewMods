@@ -9,7 +9,8 @@
   "UpdateKeys": [ "Nexus:1182" ],
   "Dependencies": [
     {
-      "UniqueID": "Platonymous.Toolkit"
+      "UniqueID": "Platonymous.Toolkit",
+      "MinimumVersion": "0.9.3"
     }
   ]
 }
