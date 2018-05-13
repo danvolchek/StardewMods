@@ -1,77 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
-using CustomElementHandler;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using PyTK.CustomElementHandler;
 using StardewValley;
 using StardewValley.Objects;
 
 namespace GiantCropRing
 {
-
     public class GiantRing : Ring, ISaveElement
     {
-        public override string DisplayName
-        {
-            get { return name; }
-            set { name = value; }
-
-            }
-
         public static Texture2D texture;
-        public static new int price;
+        public new static int price;
+
         public GiantRing()
         {
-            build();
+            this.Build(this.getAdditionalSaveData());
         }
 
-       
-
-        private void build()
+        public GiantRing(int id)
         {
-            this.category = -96;
-            this.name = "Giant Crop Ring";
-            this.description = "Increases the chance of growing giant crops if you wear it before going to sleep.";
-            this.indexInTileSheet = -1;
-            this.uniqueID = Game1.year + Game1.dayOfMonth + Game1.timeOfDay + this.indexInTileSheet + Game1.player.getTileX() + (int)Game1.stats.MonstersKilled + (int)Game1.stats.itemsCrafted;
-
+            this.Build(new Dictionary<string, string> { { "name", "Giant Crop Ring" }, { "id", $"{id}" } });
         }
 
-
-        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
+        public override string DisplayName
         {
-            spriteBatch.Draw(texture, location + new Vector2((float)(Game1.tileSize / 2), (float)(Game1.tileSize / 2)) * scaleSize, new Rectangle?(Game1.getSourceRectForStandardTileSheet(texture, 0, 16, 16)), Color.White * transparency, 0.0f, new Vector2(8f, 8f) * scaleSize, scaleSize * (float)Game1.pixelZoom, SpriteEffects.None, layerDepth);
-        }
-
-        public override Item getOne()
-        {
-            return (Item)new GiantRing();
+            get => this.Name;
+            set => this.Name = value;
         }
 
         public object getReplacement()
         {
-            if (Game1.player.leftRing == this || Game1.player.rightRing == this)
-            {
-                return new Ring(517);
-            }
-            else
-            {
-                return new Chest(true);
-            }
+            return new Ring(517);
         }
 
         public Dictionary<string, string> getAdditionalSaveData()
         {
-            Dictionary<string, string> savedata = new Dictionary<string, string>();
-            savedata.Add("name", name);
+            int id = this.uniqueID.Value == default(int) ? Guid.NewGuid().GetHashCode() : this.uniqueID.Value;
+            Dictionary<string, string> savedata = new Dictionary<string, string> { { "name", this.Name }, {"id", $"{id}"} };
             return savedata;
         }
 
         public void rebuild(Dictionary<string, string> additionalSaveData, object replacement)
         {
-           
-                build();
-            
+            this.Build(additionalSaveData);
+        }
+
+        private void Build(IReadOnlyDictionary<string, string> additionalSaveData)
+        {
+            this.category.Value = -96;
+            this.Name = "Giant Crop Ring";
+            this.description = "Increases the chance of growing giant crops if you wear it before going to sleep.";
+            this.uniqueID.Value = int.Parse(additionalSaveData["id"]);
+            this.ParentSheetIndex = this.uniqueID.Value;
+            this.indexInTileSheet.Value = this.uniqueID.Value;
+        }
+
+
+        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency,
+            float layerDepth, bool drawStackNumber, Color color, bool drawShadow)
+        {
+            spriteBatch.Draw(texture, location + new Vector2(Game1.tileSize / 2, Game1.tileSize / 2) * scaleSize,
+                Game1.getSourceRectForStandardTileSheet(texture, 0, 16, 16), color * transparency, 0.0f,
+                new Vector2(8f, 8f) * scaleSize, scaleSize * Game1.pixelZoom, SpriteEffects.None, layerDepth);
+        }
+
+        public override Item getOne()
+        {
+            return new GiantRing(this.uniqueID.Value);
         }
     }
 }

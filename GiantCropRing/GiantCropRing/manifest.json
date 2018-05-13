@@ -1,15 +1,15 @@
 {
-   "Name": "Giant Crop Ring",
-   "Author": "Cat",
-   "Version": "1.0.1",
-   "Description": "Adds a ring which increases the chance of getting giant crops.",
-   "UniqueID": "cat.giantcropring",
-   "EntryDll": "GiantCropRing.dll",
-   "MinimumApiVersion": "2.0",
-   "UpdateKeys": ["Nexus:1182"],
-   "Dependencies": [
-     {
-       "UniqueID": "Platonymous.CustomElementHandler"
-     }
-   ]
+  "Name": "Giant Crop Ring",
+  "Author": "Cat",
+  "Version": "1.1.0-beta",
+  "Description": "Adds a ring which increases the chance of getting giant crops.",
+  "UniqueID": "cat.giantcropring",
+  "EntryDll": "GiantCropRing.dll",
+  "MinimumApiVersion": "2.6-beta",
+  "UpdateKeys": [ "Nexus:1182" ],
+  "Dependencies": [
+    {
+      "UniqueID": "Platonymous.Toolkit"
+    }
+  ]
 }
