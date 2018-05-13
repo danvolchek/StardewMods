@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Harmony;
+﻿using Harmony;
 using Microsoft.Xna.Framework;
-using Netcode;
 using StackEverything.ObjectCopiers;
 using StackEverything.Patches;
 using StackEverything.Patches.Size;
@@ -14,6 +8,10 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using SObject = StardewValley.Object;
 
 namespace StackEverything
@@ -86,7 +84,7 @@ namespace StackEverything
             this.copiers.Add(new TapperCopier());
             this.copiers.Add(new FurnitureCopier());
 
-            LocationEvents.LocationObjectsChanged += this.LocationEvents_LocationObjectsChanged;
+            LocationEvents.ObjectsChanged += this.LocationEvents_ObjectsChanged;
             GameEvents.QuarterSecondTick += this.GameEvents_QuarterSecondTick;
         }
 
@@ -126,15 +124,18 @@ namespace StackEverything
         ///     Placed down tappers are the same instance as tappers in the inventory, leading to really weird behavior.
         ///     Instead, we'll copy them.
         /// </summary>
-        private void LocationEvents_LocationObjectsChanged(object sender, EventArgsLocationObjectsChanged e)
+        private void LocationEvents_ObjectsChanged(object sender, EventArgsLocationObjectsChanged e)
         {
+            if (e.Location != Game1.player.currentLocation)
+                return;
+
             IDictionary<Vector2, SObject> toReplace = new Dictionary<Vector2, SObject>();
-            foreach (KeyValuePair<Vector2, NetRef<SObject>> item in e.NewObjects)
-                if (Game1.player.items.Contains(item.Value.Value))
+            foreach (KeyValuePair<Vector2, SObject> item in e.Added)
+                if (Game1.player.items.Contains(item.Value))
                 {
-                    this.Monitor.Log($"{item.Value.Value.GetType().Name} was placed down and exists in the inventory.",
+                    this.Monitor.Log($"{item.Value.GetType().Name} was placed down and exists in the inventory.",
                         LogLevel.Trace);
-                    toReplace[item.Key] = this.Copy(item.Value.Value);
+                    toReplace[item.Key] = this.Copy(item.Value);
                 }
 
             foreach (KeyValuePair<Vector2, SObject> item in toReplace)
