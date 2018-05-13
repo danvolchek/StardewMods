@@ -1,38 +1,36 @@
-﻿using StardewValley;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using StardewValley;
 
 namespace CustomizableDeathPenalty
 {
     /***
      * Represents all the fields that can change due to death.
      ***/
-    class PlayerState
+    internal class PlayerState
     {
-        public int money;
         public int deepestMineLevel;
+        public IList<Item> inventory;
         public int lowestLevelReached;
-        public List<Item> inventory;
+        public int money;
 
-        public PlayerState(int m, int d, int l, List<Item> i)
+        public PlayerState(int m, int d, int l, IEnumerable<Item> i)
         {
-            money = m;
-            deepestMineLevel = d;
-            lowestLevelReached = l;
-            inventory = new List<Item>();
-            foreach (Item item in i)
-            {
+            this.money = m;
+            this.deepestMineLevel = d;
+            this.lowestLevelReached = l;
+            this.inventory = new List<Item>();
+            foreach (var item in i)
                 if (item == null)
                 {
-                    inventory.Add(null);
+                    this.inventory.Add(null);
                 }
                 else
                 {
-                    Item copy = item.getOne();
+                    var copy = item.getOne();
                     copy.Stack = item.Stack;
 
-                    inventory.Add(copy);
+                    this.inventory.Add(copy);
                 }
-            }
         }
     }
 }

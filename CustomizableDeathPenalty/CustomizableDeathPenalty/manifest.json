@@ -1,10 +1,10 @@
 {
   "Name": "Customizable Death Penalty",
   "Author": "Cat",
-  "Version": "1.0.1",
+  "Version": "1.1.0-beta",
   "Description": "Lets you choose the penalty for dying",
   "UniqueID": "cat.customizabledeathpenalty",
   "EntryDll": "CustomizableDeathPenalty.dll",
-  "MinimumApiVersion": "2.0",
+  "MinimumApiVersion": "2.6-beta",
   "UpdateKeys": [ "Nexus:1991" ]
 }
