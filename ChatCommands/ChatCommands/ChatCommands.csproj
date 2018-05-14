@@ -52,7 +52,8 @@
     <Compile Include="ClassReplacements\CommandChatTextBox.cs" />
     <Compile Include="ClassReplacements\CommandEmojiMenu.cs" />
     <Compile Include="ClassReplacements\ConsoleChatMessage.cs" />
-    <Compile Include="ListenCommand.cs" />
+    <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\ListenCommand.cs" />
     <Compile Include="NotifyingTextWriter.cs" />
     <Compile Include="ICommandHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

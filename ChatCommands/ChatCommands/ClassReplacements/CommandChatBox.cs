@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ChatCommands.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -28,6 +29,13 @@ namespace ChatCommands.ClassReplacements
         private readonly ChatCommandsConfig config;
         private int displayLineIndex;
 
+        private readonly Multiplayer multiplayer;
+        private readonly InputState inputState;
+
+        public const char whisperSeparator = (char)250;
+
+        //todo - check left click, check /r, up/down arrows wonky when box id is not -1, check /w with 3 people and already /w'ign someone
+
         /// <summary>
         /// Construct an instance.
         /// </summary>
@@ -43,18 +51,20 @@ namespace ChatCommands.ClassReplacements
             Texture2D chatBoxTexture = Game1.content.Load<Texture2D>("LooseSprites\\chatBox");
 
             this.chatBox.OnEnterPressed -= helper.Reflection.GetField<TextBoxEvent>(this, "e").GetValue();
-            this.chatBox = this.commandChatTextBox = new CommandChatTextBox(chatBoxTexture,
+            this.chatBox = this.commandChatTextBox = new CommandChatTextBox(this, chatBoxTexture,
                 null, Game1.smallFont, Color.White);
             Game1.keyboardDispatcher.Subscriber = this.chatBox;
             this.chatBox.Selected = false;
             this.chatBox.OnEnterPressed += this.EnterPressed;
+
+            this.multiplayer = helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
+            this.inputState = helper.Reflection.GetField<InputState>(typeof(Game1), "input").GetValue();
 
             ConsoleChatMessage.Init(LocalizedContentManager.CurrentLanguageCode);
 
             this.emojiMenu = new CommandEmojiMenu(helper.Reflection, this, emojiTexture, chatBoxTexture);
 
             helper.Reflection.GetMethod(this, "updatePosition").Invoke();
-
 
             this.displayLineIndex = -1;
             this.config = config;
@@ -68,7 +78,7 @@ namespace ChatCommands.ClassReplacements
         /// <summary>
         /// Handle enter being pressed.
         /// </summary>
-        private void EnterPressed(TextBox sender)
+        public void EnterPressed(TextBox sender)
         {
             if (sender is ChatTextBox chatTextBox)
             {
@@ -78,6 +88,7 @@ namespace ChatCommands.ClassReplacements
                     if (message.Length < 1)
                     {
                         this.textBoxEnter(sender);
+                        this.commandChatTextBox.Reset();
                         return;
                     }
 
@@ -93,9 +104,22 @@ namespace ChatCommands.ClassReplacements
                             LocalizedContentManager.CurrentLanguageCode, message);
                         this.handler.Handle(filtered);
                     }
+                    else if (this.commandChatTextBox.CurrentRecipientId != -1)
+                    {
+                        long key = Game1.player.UniqueMultiplayerID ^ this.commandChatTextBox.CurrentRecipientId;
+                        string identifier = $"{this.commandChatTextBox.CurrentRecipientId}";
+
+                        string playerName = Game1.getOnlineFarmers().FirstOrDefault(farmer =>
+                            farmer.UniqueMultiplayerID == this.commandChatTextBox.CurrentRecipientId).Name;
+
+                        this.receiveChatMessage(Game1.player.UniqueMultiplayerID, 0,
+                            LocalizedContentManager.CurrentLanguageCode, $"{(char)(whisperSeparator + 1)}{playerName}{whisperSeparator}{message}");
+                        this.multiplayer.sendChatMessage(LocalizedContentManager.CurrentLanguageCode, $"{whisperSeparator}{Utils.EncipherText(identifier, key)}{whisperSeparator}{Utils.EncipherText(message, key)}");                      
+                    }
                     else
                     {
                         this.textBoxEnter(sender);
+                        this.commandChatTextBox.Reset();
                         return;
                     }
                 }
@@ -108,36 +132,58 @@ namespace ChatCommands.ClassReplacements
             this.clickAway();
         }
 
-        /*private bool ignoringClickAways;
+    
+        private bool ignoreClickAway;
+        private bool isEscapeDown;
 
-        public override void clickAway()
-        {
-            if (this.ignoringClickAways)
-            {
-                if (!this.gameInputState.GetKeyboardState().IsKeyDown(Keys.Escape))
-                {
-                    this.ignoringClickAways = false;
-                }
-            } else if (this.bChoosingEmoji.GetValue())
-            {
-                this.bChoosingEmoji.SetValue(false);
-                if (this.gameInputState.GetKeyboardState().IsKeyDown(Keys.Escape))
-                    this.ignoringClickAways = true;
-            }
-            else
-            {
-                this.chatBox.Selected = false;
-                this.setText("");
-                this.bCheatHistoryPosition.SetValue(-1);
-                this.displayLineIndex = this.bMessages.Count - 1;
-                this.commandChatTextBox.Reset();
-            }
-        }*/
+        private bool sawChangeToTrue;
 
+        //breaks left clicks
         /// <summary>
         /// Handles deactiving the chat box.
         /// </summary>
         public override void clickAway()
+        {
+            KeyboardState keyboardState = this.inputState.GetKeyboardState();
+
+            if (keyboardState.IsKeyDown(Keys.Escape) && (this.isEscapeDown || !this.sawChangeToTrue))
+            {
+                if (this.ignoreClickAway || !this.sawChangeToTrue)
+                    return;
+
+                this.ignoreClickAway = true;
+            }
+
+            this.DeactivateLayer();
+        }
+
+        public void EscapeStatusChanged(bool isDown)
+        {
+
+            if (!this.isEscapeDown && isDown)
+                this.sawChangeToTrue = true;
+            else
+                this.sawChangeToTrue = false;
+
+            this.isEscapeDown = isDown;
+            if (!isDown)
+                this.ignoreClickAway = false;
+
+        }
+
+        private void DeactivateLayer()
+        {
+            if (this.bChoosingEmoji.GetValue())
+                this.bChoosingEmoji.SetValue(false);
+            else if (this.commandChatTextBox.CurrentRecipientId != -1)
+                this.commandChatTextBox.UpdateForNewRecepient(-1);
+            else if (this.commandChatTextBox.finalText.Any())
+                this.commandChatTextBox.Reset();
+            else
+                this.Reset();
+        }
+
+        private void Reset()
         {
             int old = this.bCheatHistoryPosition.GetValue();
             this.bCheatHistoryPosition.SetValue(-5);
@@ -150,7 +196,6 @@ namespace ChatCommands.ClassReplacements
             }
             else
                 this.bCheatHistoryPosition.SetValue(old);
-
         }
 
         /// <summary>
@@ -179,7 +224,33 @@ namespace ChatCommands.ClassReplacements
         public override void receiveChatMessage(long sourceFarmer, int chatKind,
             LocalizedContentManager.LanguageCode language, string message)
         {
+            bool whisperMessage = false;
+            string person = "you";
+            if (message[0] == whisperSeparator)
+            {
+                string[] parts = message.Substring(1).Split(whisperSeparator);
+                string recipientId = Utils.DecipherText(parts[0], sourceFarmer ^ Game1.player.UniqueMultiplayerID);
+                if (!long.TryParse(recipientId, out long recId) || recId != Game1.player.UniqueMultiplayerID)
+                    return;
+                message = Utils.DecipherText(parts[1], sourceFarmer ^ Game1.player.UniqueMultiplayerID);
+                whisperMessage = true;
+
+                //check this tomorrow
+                this.commandChatTextBox.lastWhisperId = sourceFarmer;
+            } else if (message[0] == whisperSeparator + 1)
+            {
+                string[] parts = message.Substring(1).Split(whisperSeparator);
+                person = parts[0];
+                message = parts[1];
+                whisperMessage = true;
+            }
+
             string text1 = this.bFormatMessage.Invoke<string>(sourceFarmer, chatKind, message);
+            if (whisperMessage)
+            {
+                text1 = text1.Substring(0, text1.IndexOf(":")) + $" (to {person} only):" +
+                        text1.Substring(text1.IndexOf(":") + 1);
+            }
             string text2 = FixedParseText(text1, this.chatBox.Font, this.chatBox.Width - 16);
 
             foreach (string part in text2.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
@@ -454,7 +525,7 @@ namespace ChatCommands.ClassReplacements
             foreach (ChatMessage message in this.GetDisplayedLines())
             {
                 num2 += message.verticalSize;
-                if(message is ConsoleChatMessage cMessage)
+                if (message is ConsoleChatMessage cMessage)
                     cMessage.ConsoleDraw(b, 12,
                         this.yPositionOnScreen - num2 - 8 + (this.chatBox.Selected ? 0 : this.chatBox.Height));
                 else

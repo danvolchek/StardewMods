@@ -106,5 +106,29 @@ namespace ChatCommands.Util
                 ? new ChatSnippet(snippet.emojiIndex)
                 : new ChatSnippet(snippet.message, LocalizedContentManager.CurrentLanguageCode);
         }
+
+        /// <summary>
+        /// Garble up visible text so users without the mod can't read it at a glance.
+        /// </summary>
+        internal static string EncipherText(string text, long key)
+        {
+            Random r = new Random((int)key);
+            StringBuilder curr = new StringBuilder();
+            foreach (char c in text)
+                curr.Append((char)(c + (char)r.Next(-32, 32)));
+            return string.Concat(curr.ToString().Reverse());
+        }
+
+        /// <summary>
+        /// Ungarble up visible text so users without the mod can't read it at a glance.
+        /// </summary>
+        internal static string DecipherText(string text, long key)
+        {
+            Random r = new Random((int)key);
+            StringBuilder curr = new StringBuilder();
+            foreach (char c in text.Reverse())
+                curr.Append((char)(c - (char)r.Next(-32, 32)));
+            return curr.ToString();
+        }
     }
 }

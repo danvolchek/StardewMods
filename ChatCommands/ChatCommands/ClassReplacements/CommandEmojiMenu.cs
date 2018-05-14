@@ -46,7 +46,7 @@ namespace ChatCommands.ClassReplacements
                 this.bDownArrowPressed.Invoke(30);
             else if (this.bSendArrow.containsPoint(x1, y1) && cb.chatBox.currentWidth > 0.0)
             {
-                cb.textBoxEnter(cb.chatBox);
+                (cb as CommandChatBox)?.EnterPressed(cb.chatBox);
                 this.bSendArrow.scale = 0.5f;
                 Game1.playSound("shwip");
             }

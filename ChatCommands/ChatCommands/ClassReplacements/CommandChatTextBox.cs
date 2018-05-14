@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ChatCommands.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 
@@ -17,8 +19,22 @@ namespace ChatCommands.ClassReplacements
         private int lastUpdateInsertPosition;
         private int lastUpdatecurrentSnippetIndex;
 
-        public CommandChatTextBox(Texture2D textBoxTexture, Texture2D caretTexture, SpriteFont font, Color textColor) : base(textBoxTexture, caretTexture, font, textColor)
+        private string displayTo = null;
+        private int toOffset = 0;
+
+        private CommandChatBox owner;
+
+        private Regex whisperRegex = new Regex(@"^/w (\w+) ",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private Regex whisperReplyRegex = new Regex(@"^/r ",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        internal long CurrentRecipientId { get; private set; } = -1;
+        internal long lastWhisperId = -1;
+
+        public CommandChatTextBox(CommandChatBox owner, Texture2D textBoxTexture, Texture2D caretTexture, SpriteFont font, Color textColor) : base(textBoxTexture, caretTexture, font, textColor)
         {
+            this.owner = owner;
+            this.UpdateForNewRecepient(this.CurrentRecipientId);
         }
 
         /// <summary>
@@ -28,6 +44,7 @@ namespace ChatCommands.ClassReplacements
         {
             this.currentWidth = 0.0f;
             this.finalText.Clear();
+            this.UpdateForNewRecepient(-1);
             this.currentSnippetIndex = this.currentInsertPosition = 0;
         }
 
@@ -36,15 +53,14 @@ namespace ChatCommands.ClassReplacements
         /// </summary>
         public override void RecieveCommandInput(char command)
         {
-            if (this.Selected && command == 8)
-                this.Backspace();
-            else
+            switch (command)
             {
-                base.RecieveCommandInput(command);
-                if (command == 13)
-                {
-                    this.currentInsertPosition = this.currentSnippetIndex = 0;
-                }
+                case (char)8 when this.Selected:
+                    this.Backspace();
+                    break;
+                default:
+                    base.RecieveCommandInput(command);
+                    break;
             }
         }
 
@@ -88,12 +104,47 @@ namespace ChatCommands.ClassReplacements
                 ReMeasureSnippetLength(currSnippet);
             }
 
+            if (!this.CheckForWhisper())
+                this.CheckForWhisperReply();
+
             this.updateWidth();
         }
         //AXIOMS:
         //If the current message is text, this.currentInsertPosition is in [0,text.length]
         //If the current message is an emoji, this.currentInsertPosition is either 0 or 1 (before/after)
 
+        private bool CheckForWhisper()
+        {
+            Match match = this.whisperRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
+            if (!match.Success)
+                return false;
+
+            if (this.TryGetUniqueIdFromName(match.Groups[1].Value, out long id))
+            {
+                if (this.UpdateForNewRecepient(id))
+                {
+                    //the first snippet must be a text snippet with the text
+                    this.finalText[0].message = this.finalText[0].message.Substring(match.Groups[0].Value.Length);
+                    this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
+                    return true;
+                }            
+            }
+
+            return false;
+        }
+
+        private bool CheckForWhisperReply()
+        {
+            Match match = this.whisperReplyRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
+            if (!match.Success || this.lastWhisperId == -1)
+                return false;
+
+            this.UpdateForNewRecepient(this.lastWhisperId);
+            //the first snippet must be a text snippet with the text
+            this.finalText[0].message = this.finalText[0].message.Substring(match.Groups[0].Value.Length);
+            this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
+            return true;
+        }
         /// <summary>
         /// Handle the backspace key being pressed.
         /// </summary>
@@ -293,7 +344,7 @@ namespace ChatCommands.ClassReplacements
             }
             this.updateWidth();
         }
-        
+
         /// <summary>
         /// Draws the chat text box.
         /// </summary>
@@ -302,21 +353,69 @@ namespace ChatCommands.ClassReplacements
             if (this.Selected)
             {
                 this.Selected = false;
-                base.Draw(spriteBatch, drawShadow);
+                this.DrawAtOffset(this.toOffset, spriteBatch, drawShadow);
                 this.Selected = true;
 
                 bool forceDrawCursor = this.lastUpdateInsertPosition != this.currentInsertPosition ||
                     this.lastUpdatecurrentSnippetIndex != this.currentSnippetIndex;
 
                 if (forceDrawCursor || DateTime.Now.Millisecond % 1000 >= 500)
-                    spriteBatch.Draw(Game1.staminaRect, new Rectangle(this.X + 16 + (int)this.GetCursorOffset() - 3, this.Y + 8, 4, 32), this._textColor);
+                    spriteBatch.Draw(Game1.staminaRect, new Rectangle(this.X + this.toOffset + 16 + (int)this.GetCursorOffset() - 3, this.Y + 8, 4, 32), this._textColor);
 
                 this.lastUpdatecurrentSnippetIndex = this.currentSnippetIndex;
                 this.lastUpdateInsertPosition = this.currentInsertPosition;
             }
             else
-                base.Draw(spriteBatch, drawShadow);
+                this.DrawAtOffset(this.toOffset, spriteBatch, drawShadow);
 
+            if (this.toOffset != 0)
+            {
+                spriteBatch.Draw(this._textBoxTexture, new Rectangle(this.X, this.Y, 16, this.Height), new Rectangle?(new Rectangle(0, 0, 16, this.Height)), Color.White);
+                spriteBatch.Draw(this._textBoxTexture, new Rectangle(this.X + 16, this.Y, this.toOffset - 32, this.Height), new Rectangle?(new Rectangle(16, 0, 4, this.Height)), Color.White);
+                spriteBatch.Draw(this._textBoxTexture, new Rectangle(this.X + this.toOffset - 16, this.Y, 16, this.Height), new Rectangle?(new Rectangle(this._textBoxTexture.Bounds.Width - 16, 0, 16, this.Height)), Color.White);
+
+                spriteBatch.DrawString(ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode), this.displayTo, new Vector2(this.X + 12, this.Y + 14), Color.White);
+            }
+        }
+
+        private void DrawAtOffset(int offset, SpriteBatch spriteBatch, bool drawShadow = true)
+        {
+            this.X += offset;
+            this.Width -= offset;
+            base.Draw(spriteBatch, drawShadow);
+            this.X -= offset;
+            this.Width += offset;
+        }
+
+        public bool UpdateForNewRecepient(long id)
+        {
+            if (!Context.IsMultiplayer)
+                return false;
+            string to = this.GetOtherPlayerNameFromUniqueId(id);
+            if (to == null)
+            {
+                this.toOffset = 0;
+                this.CurrentRecipientId = -1;
+                return false;
+            }
+
+            this.CurrentRecipientId = id;
+            this.displayTo = $"To: {to}";
+            this.toOffset = (int)ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode)
+                .MeasureString(this.displayTo).X;
+            this.toOffset += 16 + 16;
+            return true;
+        }
+
+        private string GetOtherPlayerNameFromUniqueId(long id)
+        {
+            return Game1.getOnlineFarmers().FirstOrDefault(farmer => farmer.UniqueMultiplayerID == id && farmer.UniqueMultiplayerID != Game1.player.UniqueMultiplayerID)?.Name;
+        }
+
+        private bool TryGetUniqueIdFromName(string name, out long id)
+        {
+            id = Game1.getOnlineFarmers().FirstOrDefault(farmer => farmer.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))?.UniqueMultiplayerID ?? -1;
+            return id != -1;
         }
 
         /// <summary>
@@ -409,8 +508,8 @@ namespace ChatCommands.ClassReplacements
         /// </summary>
         public CommandChatTextBoxState Save()
         {
-            return new CommandChatTextBoxState(this.currentInsertPosition, this.currentSnippetIndex, this.finalText);
-            
+            return new CommandChatTextBoxState(this.currentInsertPosition, this.currentSnippetIndex, this.CurrentRecipientId, this.finalText);
+
         }
 
         /// <summary>
@@ -425,13 +524,16 @@ namespace ChatCommands.ClassReplacements
             {
                 this.currentInsertPosition = state.CurrentInsertPosition;
                 this.currentSnippetIndex = state.CurrentSnippetIndex;
-                
             }
             else
             {
                 this.MoveCursorAllTheWayRight();
             }
+            
+            this.UpdateForNewRecepient(state.CurrentRecipientId);
             this.updateWidth();
         }
+
+        internal Texture2D TextBoxTecture => this._textBoxTexture;
     }
 }

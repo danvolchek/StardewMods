@@ -4,13 +4,14 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using ChatCommands.Commands;
 using Microsoft.Xna.Framework.Input;
 
 namespace ChatCommands
 {
-    // ReSharper disable once ClassNeverInstantiated.Global
     public class ChatCommandsMod : Mod, ICommandHandler
     {
         //TODO: MOUSE TO CLICK/DRAG SCROLL
@@ -23,18 +24,40 @@ namespace ChatCommands
 
         private int repeatWaitPeriod = BaseWaitPeriod;
 
+        private bool wasEscapeDown;
+        private InputState inputState;
         public override void Entry(IModHelper helper)
         {
             this.commandValidator = new CommandValidator(helper.ConsoleCommands);
             this.consoleNotifier = new NotifyingTextWriter(Console.Out, this.OnLineWritten);
 
+            this.inputState = helper.Reflection.GetField<InputState>(typeof(Game1), "input").GetValue();
+
             Console.SetOut(this.consoleNotifier);
             SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
             GameEvents.SecondUpdateTick += this.GameEvents_HalfSecondTick;
+            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
 
             this.modConfig = helper.ReadConfig<ChatCommandsConfig>();
 
-            new ListenCommand(this.Monitor, this.modConfig, this.consoleNotifier).Register(helper.ConsoleCommands);
+            IEnumerable<ICommand> commands = new ICommand[]
+            {
+                new ListenCommand(this.Monitor, this.modConfig, this.consoleNotifier)
+            };
+
+            foreach(ICommand command in commands)
+                command.Register(helper.ConsoleCommands);
+        }
+
+        private void GameEvents_UpdateTick(object sender, EventArgs e)
+        {
+            KeyboardState keyboardState = this.inputState.GetKeyboardState();
+
+            if (keyboardState.IsKeyDown(Keys.Escape) != this.wasEscapeDown)
+            {
+                this.wasEscapeDown = !this.wasEscapeDown;
+                (Game1.chatBox as CommandChatBox)?.EscapeStatusChanged(this.wasEscapeDown);
+            }
         }
 
         /// <summary>
