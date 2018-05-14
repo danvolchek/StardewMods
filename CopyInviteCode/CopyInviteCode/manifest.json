@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Copy Invite Code",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Adds a button to copy invite codes to the clipboard in the menu.",
+  "UniqueID": "cat.copyinvitecode",
+  "EntryDll": "CopyInviteCode.dll",
+  "MinimumApiVersion": "2.6-beta",
+  "UpdateKeys": [ "Nexus:2171" ]
+}
