@@ -139,14 +139,19 @@ namespace ChatCommands.ClassReplacements
                     }
                     else if ((whisperMatch = CommandChatTextBox.WhisperRegex.Match(filtered)).Success)
                     {
-                        this.addMessage(
-                            whisperMatch.Groups[1].Value == Game1.player.Name
+                        string response = null;
+                        if (!Context.IsMultiplayer)
+                            response = "You can't send whispers in singleplayer.";
+
+                        if(response == null)
+                            response = whisperMatch.Groups[1].Value == Game1.player.Name
                                 ? "You can't whisper to yourself."
-                                : $"There isn't anyone named {whisperMatch.Groups[1].Value} online.", Color.Red);
+                                : $"There isn't anyone named {whisperMatch.Groups[1].Value} online.";
+                        this.addMessage(response, Color.Red);
                     }
                     else if (CommandChatTextBox.WhisperReplyRegex.Match(filtered).Success)
                     {
-                        this.addMessage("You can't reply when you haven't received any whispers.", Color.Red);
+                        this.addMessage(!Context.IsMultiplayer ? "You can't reply to whispers in singleplayer." : "You can't reply when you haven't received any whispers.", Color.Red);
                     }
                     else
                     {
