@@ -34,7 +34,6 @@ namespace ChatCommands.ClassReplacements
         private CommandChatTextBoxState currentTypedMessage;
         private int displayLineIndex;
 
-
         private bool ignoreClickAway;
         private bool isEscapeDown;
 
@@ -208,7 +207,11 @@ namespace ChatCommands.ClassReplacements
             else if (this.commandChatTextBox.CurrentRecipientId != -1)
                 this.commandChatTextBox.UpdateForNewRecepient(-1);
             else if (this.commandChatTextBox.finalText.Any())
+            {
                 this.commandChatTextBox.Reset();
+                while (this.bCheatHistoryPosition.GetValue() != -1)
+                    this.receiveKeyPress(Keys.Down);
+            }
             else
                 this.Reset();
         }
@@ -426,6 +429,9 @@ namespace ChatCommands.ClassReplacements
         /// </summary>
         public override void receiveKeyPress(Keys key)
         {
+            if (!this.isActive())
+                return;
+
             if (key == Keys.Up)
             {
                 if (this.bCheatHistoryPosition.GetValue() >= this.sentMessageHistory.Count - 1)
@@ -566,7 +572,7 @@ namespace ChatCommands.ClassReplacements
                         this.yPositionOnScreen - num2 - 8 + (this.chatBox.Selected ? 0 : this.chatBox.Height));
             }
 
-            if (!this.chatBox.Selected)
+            if (!this.isActive())
                 return;
 
             //text entry
@@ -599,6 +605,15 @@ namespace ChatCommands.ClassReplacements
                 return;
             //emoticon list
             this.emojiMenu.draw(b);
+        }
+
+        /// <summary>
+        /// Clears sent message history.
+        /// </summary>
+        internal void ClearHistory()
+        {
+            this.sentMessageHistory.Clear();
+            this.bCheatHistoryPosition.SetValue(-1);
         }
 
         /// <summary>

@@ -60,6 +60,7 @@ namespace ChatCommands
             SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
             GameEvents.SecondUpdateTick += this.GameEvents_HalfSecondTick;
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
+            SaveEvents.AfterReturnToTitle += this.SaveEvents_AfterReturnToTitle;
 
             this.modConfig = helper.ReadConfig<ChatCommandsConfig>();
 
@@ -72,6 +73,11 @@ namespace ChatCommands
 
             foreach (ICommand command in commands)
                 command.Register(helper.ConsoleCommands);
+        }
+
+        private void SaveEvents_AfterReturnToTitle(object sender, EventArgs e)
+        {
+            (Game1.chatBox as CommandChatBox)?.ClearHistory();
         }
 
         private void GameEvents_UpdateTick(object sender, EventArgs e)
