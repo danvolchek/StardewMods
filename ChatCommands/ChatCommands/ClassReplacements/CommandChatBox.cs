@@ -614,6 +614,7 @@ namespace ChatCommands.ClassReplacements
         {
             this.sentMessageHistory.Clear();
             this.bCheatHistoryPosition.SetValue(-1);
+            this.commandChatTextBox.Load(this.currentTypedMessage, true);
         }
 
         /// <summary>
