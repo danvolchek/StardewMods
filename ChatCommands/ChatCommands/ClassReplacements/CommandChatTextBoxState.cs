@@ -1,28 +1,25 @@
-﻿using StardewValley;
-using StardewValley.Menus;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ChatCommands.Util;
+using StardewValley.Menus;
 
 namespace ChatCommands.ClassReplacements
 {
     internal class CommandChatTextBoxState
     {
         internal readonly int CurrentInsertPosition;
+        internal readonly long CurrentRecipientId;
+        internal readonly string CurrentRecipientName;
         internal readonly int CurrentSnippetIndex;
         internal readonly List<ChatSnippet> FinalText = new List<ChatSnippet>();
-        internal readonly long CurrentRecipientId;
 
-        public CommandChatTextBoxState(int currentInsertPosition, int currentSnippetIndex, long currentRecipientId, IEnumerable<ChatSnippet> finalText)
+        public CommandChatTextBoxState(int currentInsertPosition, int currentSnippetIndex, long currentRecipientId,
+            string currentRecipientName, IEnumerable<ChatSnippet> finalText)
         {
             this.CurrentInsertPosition = currentInsertPosition;
             this.CurrentSnippetIndex = currentSnippetIndex;
             this.CurrentRecipientId = currentRecipientId;
-            foreach (ChatSnippet snippet in finalText)
-            {
-                this.FinalText.Add(Utils.CopyChatSnippet(snippet));
-            }
+            this.CurrentRecipientName = currentRecipientName;
+            foreach (ChatSnippet snippet in finalText) this.FinalText.Add(Utils.CopyChatSnippet(snippet));
         }
-
-
     }
 }

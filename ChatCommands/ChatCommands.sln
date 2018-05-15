@@ -1,16 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatCommands", "ChatCommands\ChatCommands.csproj", "{B49CCD76-7D44-41E2-8479-FC94672290CC}"
 EndProject
-Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "StardewModdingAPI", "..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Stardew Valley\StardewModdingAPI.exe", "{E09E8937-B341-4B0C-8480-70D687C214D4}"
+Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "StardewModdingAPI", "D:\Steam\SteamApps\common\Stardew Valley\StardewModdingAPI.exe", "{8CE7C22C-6804-41BC-9B28-7B17B4A90FE8}"
 	ProjectSection(DebuggerProjectSystem) = preProject
 		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\Program Files (x86)\Steam\steamapps\common\Stardew Valley\StardewModdingAPI.exe
-		RemoteMachine = D-LAPTOP-XPS13
-		StartingDirectory = C:\Program Files (x86)\Steam\steamapps\common\Stardew Valley
+		Executable = D:\Steam\SteamApps\common\Stardew Valley\StardewModdingAPI.exe
+		RemoteMachine = DAN-DESKTOP
+		StartingDirectory = D:\Steam\SteamApps\common\Stardew Valley
 		Environment = Default
 		LaunchingEngine = 00000000-0000-0000-0000-000000000000
 		UseLegacyDebugEngines = No
@@ -34,10 +34,10 @@ Global
 		{B49CCD76-7D44-41E2-8479-FC94672290CC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B49CCD76-7D44-41E2-8479-FC94672290CC}.Release|x86.ActiveCfg = Release|Any CPU
 		{B49CCD76-7D44-41E2-8479-FC94672290CC}.Release|x86.Build.0 = Release|Any CPU
-		{E09E8937-B341-4B0C-8480-70D687C214D4}.Debug|Any CPU.ActiveCfg = Release|x86
-		{E09E8937-B341-4B0C-8480-70D687C214D4}.Debug|x86.ActiveCfg = Release|x86
-		{E09E8937-B341-4B0C-8480-70D687C214D4}.Release|Any CPU.ActiveCfg = Release|x86
-		{E09E8937-B341-4B0C-8480-70D687C214D4}.Release|x86.ActiveCfg = Release|x86
+		{8CE7C22C-6804-41BC-9B28-7B17B4A90FE8}.Debug|Any CPU.ActiveCfg = Release|x86
+		{8CE7C22C-6804-41BC-9B28-7B17B4A90FE8}.Debug|x86.ActiveCfg = Release|x86
+		{8CE7C22C-6804-41BC-9B28-7B17B4A90FE8}.Release|Any CPU.ActiveCfg = Release|x86
+		{8CE7C22C-6804-41BC-9B28-7B17B4A90FE8}.Release|x86.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

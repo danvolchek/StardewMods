@@ -1,5 +1,8 @@
 ﻿namespace ChatCommands
 {
+    /// <summary>
+    /// Mod configuration.
+    /// </summary>
     internal class ChatCommandsConfig
     {
         public bool ListenToConsoleOnStartup { get; set; } = false;

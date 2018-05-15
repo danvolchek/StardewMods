@@ -11,7 +11,7 @@ using StardewValley.Menus;
 namespace ChatCommands.Util
 {
     /// <summary>
-    /// Contains various utility methods.
+    ///     Contains various utility methods.
     /// </summary>
     internal static class Utils
     {
@@ -32,7 +32,7 @@ namespace ChatCommands.Util
         };
 
         /// <summary>
-        /// Strips the SMAPI prefix off of the given input.
+        ///     Strips the SMAPI prefix off of the given input.
         /// </summary>
         internal static string StripSMAPIPrefix(string input)
         {
@@ -43,7 +43,7 @@ namespace ChatCommands.Util
         }
 
         /// <summary>
-        /// Converts a <see cref="ConsoleColor"/> to a <see cref="Color"/>.
+        ///     Converts a <see cref="ConsoleColor" /> to a <see cref="Color" />.
         /// </summary>
         internal static Color ConvertConsoleColorToColor(ConsoleColor color)
         {
@@ -56,7 +56,7 @@ namespace ChatCommands.Util
                 // ReSharper disable once AssignNullToNotNullAttribute
                 PropertyInfo colorInfo = typeof(Color).GetProperty(name, BindingFlags.Static | BindingFlags.Public);
                 // ReSharper disable once PossibleNullReferenceException
-                return (Color)colorInfo.GetValue(typeof(Color));
+                return (Color) colorInfo.GetValue(typeof(Color));
             }
             catch
             {
@@ -65,7 +65,7 @@ namespace ChatCommands.Util
         }
 
         /// <summary>
-        /// Whether the given input should be ignored.
+        ///     Whether the given input should be ignored.
         /// </summary>
         internal static bool ShouldIgnore(string input)
         {
@@ -108,26 +108,26 @@ namespace ChatCommands.Util
         }
 
         /// <summary>
-        /// Garble up visible text so users without the mod can't read it at a glance.
+        ///     Garble up visible text so users without the mod can't read it at a glance.
         /// </summary>
         internal static string EncipherText(string text, long key)
         {
-            Random r = new Random((int)key);
+            Random r = new Random((int) key);
             StringBuilder curr = new StringBuilder();
             foreach (char c in text)
-                curr.Append((char)(c + (char)r.Next(-32, 32)));
+                curr.Append((char) (c + (char) r.Next(-32, 32)));
             return string.Concat(curr.ToString().Reverse());
         }
 
         /// <summary>
-        /// Ungarble up visible text so users without the mod can't read it at a glance.
+        ///     Ungarble up visible text so users without the mod can't read it at a glance.
         /// </summary>
         internal static string DecipherText(string text, long key)
         {
-            Random r = new Random((int)key);
+            Random r = new Random((int) key);
             StringBuilder curr = new StringBuilder();
             foreach (char c in text.Reverse())
-                curr.Append((char)(c - (char)r.Next(-32, 32)));
+                curr.Append((char) (c - (char) r.Next(-32, 32)));
             return curr.ToString();
         }
     }

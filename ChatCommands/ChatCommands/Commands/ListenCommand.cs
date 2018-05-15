@@ -2,35 +2,36 @@
 
 namespace ChatCommands.Commands
 {
-    internal class ListenCommand : ICommand
+    /// <summary>
+    /// A command to toggle listening to console output.
+    /// </summary>
+    internal class ListenCommand : BaseCommand
     {
         private readonly NotifyingTextWriter writer;
-        private readonly IMonitor monitor;
 
-        public ListenCommand(IMonitor monitor, ChatCommandsConfig config, NotifyingTextWriter writer)
+        public ListenCommand(IMonitor monitor, ChatCommandsConfig config, NotifyingTextWriter writer) : base(monitor)
         {
             this.writer = writer;
-            this.monitor = monitor;
-           
+
             if (config.ListenToConsoleOnStartup)
                 this.Handle(null, null);
         }
 
         /// <summary>
-        /// Adds this command to SMAPI.
+        ///     Adds this command to SMAPI.
         /// </summary>
-        public void Register(ICommandHelper helper)
+        public override void Register(ICommandHelper helper)
         {
             helper.Add("listen", "Toggles displaying console output in the in game chat box.", this.Handle);
         }
 
         /// <summary>
-        /// Handles the command.
+        ///     Handles the command.
         /// </summary>
         private void Handle(string name, string[] args)
         {
             this.writer.ToggleForceNotify();
-            this.monitor.Log(
+            this.Monitor.Log(
                 this.writer.IsForceNotifying()
                     ? "Listening to console output..."
                     : "Stopped listening to console output.", LogLevel.Info);

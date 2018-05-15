@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 
 namespace ChatCommands.Commands
 {
+    /// <summary>
+    ///     Command interface.
+    /// </summary>
     internal interface ICommand
     {
         void Register(ICommandHelper helper);

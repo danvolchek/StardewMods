@@ -1,31 +1,54 @@
-﻿using ChatCommands.ClassReplacements;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using ChatCommands.ClassReplacements;
+using ChatCommands.Commands;
 using ChatCommands.Util;
+using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using ChatCommands.Commands;
-using Microsoft.Xna.Framework.Input;
 
 namespace ChatCommands
 {
     public class ChatCommandsMod : Mod, ICommandHandler
     {
+        private const int BaseWaitPeriod = 15;
         //TODO: MOUSE TO CLICK/DRAG SCROLL
 
         private CommandValidator commandValidator;
         private NotifyingTextWriter consoleNotifier;
+        private InputState inputState;
         private ChatCommandsConfig modConfig;
-
-        private const int BaseWaitPeriod = 15;
 
         private int repeatWaitPeriod = BaseWaitPeriod;
 
         private bool wasEscapeDown;
-        private InputState inputState;
+
+        /// <summary>
+        ///     Whether this <see cref="ICommandHandler" /> can handle the given input.
+        /// </summary>
+        public bool CanHandle(string input)
+        {
+            return input.Length > 1 && this.commandValidator.IsValidCommand(input.Substring(1));
+        }
+
+        /// <summary>
+        ///     Handles the given input.
+        /// </summary>
+        public void Handle(string input)
+        {
+            input = input.Substring(1);
+            string[] parts = Utils.ParseArgs(input);
+
+            if (parts[0] == "halp")
+                parts[0] = "help";
+
+            this.consoleNotifier.Notify(true);
+            this.Helper.ConsoleCommands.Trigger(parts[0], parts.Skip(1).ToArray());
+            this.consoleNotifier.Notify(false);
+        }
+
         public override void Entry(IModHelper helper)
         {
             this.commandValidator = new CommandValidator(helper.ConsoleCommands);
@@ -42,10 +65,12 @@ namespace ChatCommands
 
             IEnumerable<ICommand> commands = new ICommand[]
             {
-                new ListenCommand(this.Monitor, this.modConfig, this.consoleNotifier)
+                new ListenCommand(this.Monitor, this.modConfig, this.consoleNotifier),
+                new WhisperCommand(this.Monitor),
+                new ReplyCommand(this.Monitor)
             };
 
-            foreach(ICommand command in commands)
+            foreach (ICommand command in commands)
                 command.Register(helper.ConsoleCommands);
         }
 
@@ -61,7 +86,7 @@ namespace ChatCommands
         }
 
         /// <summary>
-        /// Resend the left, right, up, or down keys if one of them is being held.
+        ///     Resend the left, right, up, or down keys if one of them is being held.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -96,31 +121,7 @@ namespace ChatCommands
         }
 
         /// <summary>
-        /// Whether this <see cref="ICommandHandler"/> can handle the given input.
-        /// </summary>
-        public bool CanHandle(string input)
-        {
-            return input.Length > 1 && this.commandValidator.IsValidCommand(input.Substring(1));
-        }
-
-        /// <summary>
-        /// Handles the given input.
-        /// </summary>
-        public void Handle(string input)
-        {
-            input = input.Substring(1);
-            string[] parts = Utils.ParseArgs(input);
-
-            if (parts[0] == "halp")
-                parts[0] = "help";
-
-            this.consoleNotifier.Notify(true);
-            this.Helper.ConsoleCommands.Trigger(parts[0], parts.Skip(1).ToArray());
-            this.consoleNotifier.Notify(false);
-        }
-
-        /// <summary>
-        /// Replace the game's chatbox with a <see cref="CommandChatBox"/>.
+        ///     Replace the game's chatbox with a <see cref="CommandChatBox" />.
         /// </summary>
         private void SaveEvents_AfterLoad(object sender, EventArgs e)
         {
@@ -133,7 +134,7 @@ namespace ChatCommands
         }
 
         /// <summary>
-        /// When a line is written to the console, add it to the chatbox.
+        ///     When a line is written to the console, add it to the chatbox.
         /// </summary>
         private void OnLineWritten(char[] buffer, int index, int count)
         {
@@ -146,7 +147,8 @@ namespace ChatCommands
                 toWrite = noPrefix;
 
             if (!string.IsNullOrWhiteSpace(toWrite))
-                (Game1.chatBox as CommandChatBox)?.AddConsoleMessage(toWrite, Utils.ConvertConsoleColorToColor(Console.ForegroundColor));
+                (Game1.chatBox as CommandChatBox)?.AddConsoleMessage(toWrite,
+                    Utils.ConvertConsoleColorToColor(Console.ForegroundColor));
         }
     }
 }

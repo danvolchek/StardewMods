@@ -52,8 +52,11 @@
     <Compile Include="ClassReplacements\CommandChatTextBox.cs" />
     <Compile Include="ClassReplacements\CommandEmojiMenu.cs" />
     <Compile Include="ClassReplacements\ConsoleChatMessage.cs" />
+    <Compile Include="Commands\BaseCommand.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\ListenCommand.cs" />
+    <Compile Include="Commands\ReplyCommand.cs" />
+    <Compile Include="Commands\WhisperCommand.cs" />
     <Compile Include="NotifyingTextWriter.cs" />
     <Compile Include="ICommandHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ChatCommands.Util;
@@ -13,32 +12,33 @@ namespace ChatCommands.ClassReplacements
 {
     internal class CommandChatTextBox : ChatTextBox
     {
+        internal static readonly Regex WhisperRegex = new Regex(@"^/w (\w+) ",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        internal static readonly Regex WhisperReplyRegex = new Regex(@"^/r ",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
         private int currentInsertPosition;
         private int currentSnippetIndex;
 
-        private int lastUpdateInsertPosition;
+        private string displayTo;
         private int lastUpdatecurrentSnippetIndex;
 
-        private string displayTo = null;
-        private int toOffset = 0;
+        private int lastUpdateInsertPosition;
+        internal long LastWhisperId = -1;
+        private int toOffset;
 
-        private CommandChatBox owner;
-
-        private Regex whisperRegex = new Regex(@"^/w (\w+) ",
-            RegexOptions.Compiled | RegexOptions.CultureInvariant);
-        private Regex whisperReplyRegex = new Regex(@"^/r ",
-            RegexOptions.Compiled | RegexOptions.CultureInvariant);
-        internal long CurrentRecipientId { get; private set; } = -1;
-        internal long lastWhisperId = -1;
-
-        public CommandChatTextBox(CommandChatBox owner, Texture2D textBoxTexture, Texture2D caretTexture, SpriteFont font, Color textColor) : base(textBoxTexture, caretTexture, font, textColor)
+        public CommandChatTextBox(Texture2D textBoxTexture, Texture2D caretTexture, SpriteFont font, Color textColor) :
+            base(textBoxTexture, caretTexture, font, textColor)
         {
-            this.owner = owner;
             this.UpdateForNewRecepient(this.CurrentRecipientId);
         }
 
+        internal long CurrentRecipientId { get; private set; } = -1;
+        internal string CurrentRecipientName { get; private set; }
+
         /// <summary>
-        /// Reset the current state.
+        ///     Reset the current state.
         /// </summary>
         public void Reset()
         {
@@ -49,13 +49,13 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
-        /// Handle command input.
+        ///     Handle command input.
         /// </summary>
         public override void RecieveCommandInput(char command)
         {
             switch (command)
             {
-                case (char)8 when this.Selected:
+                case (char) 8 when this.Selected:
                     this.Backspace();
                     break;
                 default:
@@ -65,7 +65,7 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
-        /// Add text to the text box.
+        ///     Add text to the text box.
         /// </summary>
         public override void RecieveTextInput(string text)
         {
@@ -75,7 +75,9 @@ namespace ChatCommands.ClassReplacements
             if (this.finalText.Count == 0)
                 this.finalText.Add(new ChatSnippet("", LocalizedContentManager.CurrentLanguageCode));
 
-            if ((double)this.currentWidth + ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode).MeasureString(text).X >= (this.Width - 16))
+            if ((double) this.currentWidth +
+                ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode).MeasureString(text).X >=
+                this.Width - 16)
                 return;
 
             if (this.finalText[this.currentSnippetIndex].message == null)
@@ -83,15 +85,17 @@ namespace ChatCommands.ClassReplacements
                 //The current snippet is an emoji
                 if (this.currentInsertPosition == 0) //Create a new text snippet before this one.
                 {
-                    this.finalText.Insert(this.currentSnippetIndex, new ChatSnippet(text, LocalizedContentManager.CurrentLanguageCode));
+                    this.finalText.Insert(this.currentSnippetIndex,
+                        new ChatSnippet(text, LocalizedContentManager.CurrentLanguageCode));
                 }
                 else //Create a new text snippet after this one.
                 {
-                    this.finalText.Insert(this.currentSnippetIndex + 1, new ChatSnippet(text, LocalizedContentManager.CurrentLanguageCode));
+                    this.finalText.Insert(this.currentSnippetIndex + 1,
+                        new ChatSnippet(text, LocalizedContentManager.CurrentLanguageCode));
                     this.currentSnippetIndex++;
                 }
-                this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
 
+                this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
             }
             else
             {
@@ -115,38 +119,35 @@ namespace ChatCommands.ClassReplacements
 
         private bool CheckForWhisper()
         {
-            Match match = this.whisperRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
+            Match match = WhisperRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
             if (!match.Success)
                 return false;
 
             if (this.TryGetUniqueIdFromName(match.Groups[1].Value, out long id))
-            {
                 if (this.UpdateForNewRecepient(id))
                 {
                     //the first snippet must be a text snippet with the text
                     this.finalText[0].message = this.finalText[0].message.Substring(match.Groups[0].Value.Length);
                     this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
                     return true;
-                }            
-            }
+                }
 
             return false;
         }
 
-        private bool CheckForWhisperReply()
+        private void CheckForWhisperReply()
         {
-            Match match = this.whisperReplyRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
-            if (!match.Success || this.lastWhisperId == -1)
-                return false;
+            Match match = WhisperReplyRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
+            if (!match.Success || this.LastWhisperId == -1) return;
 
-            this.UpdateForNewRecepient(this.lastWhisperId);
+            this.UpdateForNewRecepient(this.LastWhisperId);
             //the first snippet must be a text snippet with the text
             this.finalText[0].message = this.finalText[0].message.Substring(match.Groups[0].Value.Length);
             this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
-            return true;
         }
+
         /// <summary>
-        /// Handle the backspace key being pressed.
+        ///     Handle the backspace key being pressed.
         /// </summary>
         public void Backspace()
         {
@@ -182,10 +183,10 @@ namespace ChatCommands.ClassReplacements
                                 this.currentSnippetIndex--;
                             }
                             else
+                            {
                                 ReMeasureSnippetLength(lastSnippet);
+                            }
                         }
-
-
                     }
                     else
                     {
@@ -243,7 +244,9 @@ namespace ChatCommands.ClassReplacements
                         }
                     }
                     else
+                    {
                         this.currentInsertPosition = 0;
+                    }
                 }
                 else
                 {
@@ -262,7 +265,9 @@ namespace ChatCommands.ClassReplacements
                             this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
                         }
                         else
+                        {
                             this.currentInsertPosition = 0;
+                        }
                     }
                     else
                     {
@@ -271,11 +276,12 @@ namespace ChatCommands.ClassReplacements
                     }
                 }
             }
+
             this.updateWidth();
         }
 
         /// <summary>
-        /// Re measures the length of the given snippet.
+        ///     Re measures the length of the given snippet.
         /// </summary>
         /// <param name="snippet"></param>
         private static void ReMeasureSnippetLength(ChatSnippet snippet)
@@ -283,12 +289,12 @@ namespace ChatCommands.ClassReplacements
             if (snippet.message == null)
                 snippet.myLength = 40;
             else
-                snippet.myLength = ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode).MeasureString(snippet.message).X;
-
+                snippet.myLength = ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode)
+                    .MeasureString(snippet.message).X;
         }
 
         /// <summary>
-        /// Gets the last insertion index of the given snippet.
+        ///     Gets the last insertion index of the given snippet.
         /// </summary>
         private static int GetLastIndexOfMessage(ChatSnippet snippet)
         {
@@ -296,7 +302,7 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
-        /// Gets the last insertion index of the current snippet.
+        ///     Gets the last insertion index of the current snippet.
         /// </summary>
         private int GetLastIndexOfCurrentSnippet()
         {
@@ -304,11 +310,11 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
-        /// Add an emoji to the typed text.
+        ///     Add an emoji to the typed text.
         /// </summary>
         public void ReceiveEmoji(int emoji)
         {
-            if (this.currentWidth + 40.0 > (this.Width - 16))
+            if (this.currentWidth + 40.0 > this.Width - 16)
                 return;
             if (this.currentInsertPosition == 0)
             {
@@ -336,17 +342,20 @@ namespace ChatCommands.ClassReplacements
                 string second = orig.message.Substring(this.currentInsertPosition);
 
                 this.finalText.RemoveAt(this.currentSnippetIndex);
-                this.finalText.Insert(this.currentSnippetIndex, new ChatSnippet(second, LocalizedContentManager.CurrentLanguageCode));
+                this.finalText.Insert(this.currentSnippetIndex,
+                    new ChatSnippet(second, LocalizedContentManager.CurrentLanguageCode));
                 this.finalText.Insert(this.currentSnippetIndex, new ChatSnippet(emoji));
-                this.finalText.Insert(this.currentSnippetIndex, new ChatSnippet(first, LocalizedContentManager.CurrentLanguageCode));
+                this.finalText.Insert(this.currentSnippetIndex,
+                    new ChatSnippet(first, LocalizedContentManager.CurrentLanguageCode));
                 this.currentSnippetIndex += 2;
                 this.currentInsertPosition = 0;
             }
+
             this.updateWidth();
         }
 
         /// <summary>
-        /// Draws the chat text box.
+        ///     Draws the chat text box.
         /// </summary>
         public override void Draw(SpriteBatch spriteBatch, bool drawShadow = true)
         {
@@ -357,24 +366,34 @@ namespace ChatCommands.ClassReplacements
                 this.Selected = true;
 
                 bool forceDrawCursor = this.lastUpdateInsertPosition != this.currentInsertPosition ||
-                    this.lastUpdatecurrentSnippetIndex != this.currentSnippetIndex;
+                                       this.lastUpdatecurrentSnippetIndex != this.currentSnippetIndex;
 
                 if (forceDrawCursor || DateTime.Now.Millisecond % 1000 >= 500)
-                    spriteBatch.Draw(Game1.staminaRect, new Rectangle(this.X + this.toOffset + 16 + (int)this.GetCursorOffset() - 3, this.Y + 8, 4, 32), this._textColor);
+                    spriteBatch.Draw(Game1.staminaRect,
+                        new Rectangle(this.X + this.toOffset + 16 + (int) this.GetCursorOffset() - 3, this.Y + 8, 4,
+                            32), this._textColor);
 
                 this.lastUpdatecurrentSnippetIndex = this.currentSnippetIndex;
                 this.lastUpdateInsertPosition = this.currentInsertPosition;
             }
             else
+            {
                 this.DrawAtOffset(this.toOffset, spriteBatch, drawShadow);
+            }
 
             if (this.toOffset != 0)
             {
-                spriteBatch.Draw(this._textBoxTexture, new Rectangle(this.X, this.Y, 16, this.Height), new Rectangle?(new Rectangle(0, 0, 16, this.Height)), Color.White);
-                spriteBatch.Draw(this._textBoxTexture, new Rectangle(this.X + 16, this.Y, this.toOffset - 32, this.Height), new Rectangle?(new Rectangle(16, 0, 4, this.Height)), Color.White);
-                spriteBatch.Draw(this._textBoxTexture, new Rectangle(this.X + this.toOffset - 16, this.Y, 16, this.Height), new Rectangle?(new Rectangle(this._textBoxTexture.Bounds.Width - 16, 0, 16, this.Height)), Color.White);
+                spriteBatch.Draw(this._textBoxTexture, new Rectangle(this.X, this.Y, 16, this.Height),
+                    new Rectangle(0, 0, 16, this.Height), Color.White);
+                spriteBatch.Draw(this._textBoxTexture,
+                    new Rectangle(this.X + 16, this.Y, this.toOffset - 32, this.Height),
+                    new Rectangle(16, 0, 4, this.Height), Color.White);
+                spriteBatch.Draw(this._textBoxTexture,
+                    new Rectangle(this.X + this.toOffset - 16, this.Y, 16, this.Height),
+                    new Rectangle(this._textBoxTexture.Bounds.Width - 16, 0, 16, this.Height), Color.White);
 
-                spriteBatch.DrawString(ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode), this.displayTo, new Vector2(this.X + 12, this.Y + 14), Color.White);
+                spriteBatch.DrawString(ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode), this.displayTo,
+                    new Vector2(this.X + 12, this.Y + 14), Color.White);
             }
         }
 
@@ -387,21 +406,26 @@ namespace ChatCommands.ClassReplacements
             this.Width += offset;
         }
 
-        public bool UpdateForNewRecepient(long id)
+        public bool UpdateForNewRecepient(long id, string to = null)
         {
             if (!Context.IsMultiplayer)
                 return false;
-            string to = this.GetOtherPlayerNameFromUniqueId(id);
+
+            if (to == null)
+                to = this.GetOtherPlayerNameFromUniqueId(id);
+
             if (to == null)
             {
                 this.toOffset = 0;
                 this.CurrentRecipientId = -1;
+                this.CurrentRecipientName = null;
                 return false;
             }
 
             this.CurrentRecipientId = id;
+            this.CurrentRecipientName = to;
             this.displayTo = $"To: {to}";
-            this.toOffset = (int)ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode)
+            this.toOffset = (int) ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode)
                 .MeasureString(this.displayTo).X;
             this.toOffset += 16 + 16;
             return true;
@@ -409,17 +433,21 @@ namespace ChatCommands.ClassReplacements
 
         private string GetOtherPlayerNameFromUniqueId(long id)
         {
-            return Game1.getOnlineFarmers().FirstOrDefault(farmer => farmer.UniqueMultiplayerID == id && farmer.UniqueMultiplayerID != Game1.player.UniqueMultiplayerID)?.Name;
+            return Game1.getOnlineFarmers().FirstOrDefault(farmer =>
+                    farmer.UniqueMultiplayerID == id && farmer.UniqueMultiplayerID != Game1.player.UniqueMultiplayerID)
+                ?.Name;
         }
 
         private bool TryGetUniqueIdFromName(string name, out long id)
         {
-            id = Game1.getOnlineFarmers().FirstOrDefault(farmer => farmer.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))?.UniqueMultiplayerID ?? -1;
+            id = Game1.getOnlineFarmers()
+                     .FirstOrDefault(farmer => farmer.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                     ?.UniqueMultiplayerID ?? -1;
             return id != -1;
         }
 
         /// <summary>
-        /// Gets the current offset of the cursor from the left of the textbox.
+        ///     Gets the current offset of the cursor from the left of the textbox.
         /// </summary>
         private float GetCursorOffset()
         {
@@ -440,7 +468,7 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
-        /// Handle the left arrow key being pressed.
+        ///     Handle the left arrow key being pressed.
         /// </summary>
         public void OnLeftArrowPress()
         {
@@ -458,16 +486,18 @@ namespace ChatCommands.ClassReplacements
 
                 //Move to start if the current snippet is an emoji, or end - 1 if the current snippet
                 //is a text snippet.
-                this.currentInsertPosition = this.finalText[this.currentSnippetIndex].message == null ?
-                    0 : (this.GetLastIndexOfCurrentSnippet() - 1);
-
+                this.currentInsertPosition = this.finalText[this.currentSnippetIndex].message == null
+                    ? 0
+                    : this.GetLastIndexOfCurrentSnippet() - 1;
             }
             else
+            {
                 this.currentInsertPosition--;
+            }
         }
 
         /// <summary>
-        /// Handle the right arrow key being pressed.
+        ///     Handle the right arrow key being pressed.
         /// </summary>
         public void OnRightArrowPress()
         {
@@ -486,14 +516,15 @@ namespace ChatCommands.ClassReplacements
                 //Move to the end of the next snippet if it is an emoji, or the first + 1 of the
                 //next snippet if it is text. This is 1 in both cases.
                 this.currentInsertPosition = 1;
-
             }
             else
+            {
                 this.currentInsertPosition++;
+            }
         }
 
         /// <summary>
-        /// Move the cursor as far right as possible.
+        ///     Move the cursor as far right as possible.
         /// </summary>
         private void MoveCursorAllTheWayRight()
         {
@@ -504,16 +535,16 @@ namespace ChatCommands.ClassReplacements
         }
 
         /// <summary>
-        /// Save the current state, so it can be restored later.
+        ///     Save the current state, so it can be restored later.
         /// </summary>
         public CommandChatTextBoxState Save()
         {
-            return new CommandChatTextBoxState(this.currentInsertPosition, this.currentSnippetIndex, this.CurrentRecipientId, this.finalText);
-
+            return new CommandChatTextBoxState(this.currentInsertPosition, this.currentSnippetIndex,
+                this.CurrentRecipientId, this.CurrentRecipientName, this.finalText);
         }
 
         /// <summary>
-        /// Restored a previously saved state.
+        ///     Restored a previously saved state.
         /// </summary>
         public void Load(CommandChatTextBoxState state, bool useSavedPosition = false)
         {
@@ -529,11 +560,9 @@ namespace ChatCommands.ClassReplacements
             {
                 this.MoveCursorAllTheWayRight();
             }
-            
-            this.UpdateForNewRecepient(state.CurrentRecipientId);
+
+            this.UpdateForNewRecepient(state.CurrentRecipientId, state.CurrentRecipientName);
             this.updateWidth();
         }
-
-        internal Texture2D TextBoxTecture => this._textBoxTexture;
     }
 }

@@ -29,8 +29,10 @@ namespace ChatCommands
             this.callback = callback;
         }
 
+        public override Encoding Encoding => this.original.Encoding;
+
         /// <summary>
-        /// When a write is invoked, send the information over to the callback.
+        ///     When a write is invoked, send the information over to the callback.
         /// </summary>
         public override void Write(char[] buffer, int index, int count)
         {
@@ -43,8 +45,6 @@ namespace ChatCommands
         {
             this.original.Write(ch);
         }
-
-        public override Encoding Encoding => this.original.Encoding;
 
         public bool IsForceNotifying()
         {

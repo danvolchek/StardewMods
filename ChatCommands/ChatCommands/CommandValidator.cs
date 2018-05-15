@@ -1,6 +1,6 @@
-﻿using StardewModdingAPI;
-using System.Reflection;
+﻿using System.Reflection;
 using ChatCommands.Util;
+using StardewModdingAPI;
 
 namespace ChatCommands
 {
@@ -13,11 +13,13 @@ namespace ChatCommands
 
         public CommandValidator(ICommandHelper helper)
         {
-            FieldInfo info = helper.GetType().GetField("CommandManager", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo info = helper.GetType()
+                .GetField("CommandManager", BindingFlags.NonPublic | BindingFlags.Instance);
 
 
             this.commandHelper = info?.GetValue(helper);
-            this.commandHelperGet = this.commandHelper?.GetType().GetMethod("Get", BindingFlags.Public | BindingFlags.Instance);
+            this.commandHelperGet = this.commandHelper?.GetType()
+                .GetMethod("Get", BindingFlags.Public | BindingFlags.Instance);
         }
 
         public bool IsValidCommand(string input)
@@ -25,12 +27,17 @@ namespace ChatCommands
             string first = Utils.ParseArgs(input)[0];
             switch (first)
             {
+                //change help to halp
                 case "halp":
                     return true;
                 case "help":
                     return false;
+                //disallow use of /w and /r
+                case "w":
+                case "r":
+                    return false;
                 default:
-                    return this.commandHelperGet?.Invoke(this.commandHelper, new object[] { first }) != null;
+                    return this.commandHelperGet?.Invoke(this.commandHelper, new object[] {first}) != null;
             }
         }
     }
