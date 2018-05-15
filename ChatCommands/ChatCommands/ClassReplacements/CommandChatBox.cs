@@ -17,7 +17,7 @@ namespace ChatCommands.ClassReplacements
     /// </summary>
     internal class CommandChatBox : ChatBox
     {
-        internal const char WhisperSeparator = (char) 250;
+        internal const char WhisperSeparator = (char)250;
 
         private readonly IReflectedField<int> bCheatHistoryPosition;
         private readonly IReflectedField<bool> bChoosingEmoji;
@@ -131,7 +131,7 @@ namespace ChatCommands.ClassReplacements
                         {
                             this.receiveChatMessage(Game1.player.UniqueMultiplayerID, 0,
                                 LocalizedContentManager.CurrentLanguageCode,
-                                $"{(char) (WhisperSeparator + 1)}{playerName}{WhisperSeparator}{message}");
+                                $"{(char)(WhisperSeparator + 1)}{playerName}{WhisperSeparator}{message}");
                             this.multiplayer.sendChatMessage(LocalizedContentManager.CurrentLanguageCode,
                                 $"{WhisperSeparator}{Utils.EncipherText(identifier, key)}{WhisperSeparator}{Utils.EncipherText(message, key)}");
                         }
@@ -142,7 +142,7 @@ namespace ChatCommands.ClassReplacements
                         if (!Context.IsMultiplayer)
                             response = "You can't send whispers in singleplayer.";
 
-                        if(response == null)
+                        if (response == null)
                             response = whisperMatch.Groups[1].Value == Game1.player.Name
                                 ? "You can't whisper to yourself."
                                 : $"There isn't anyone named {whisperMatch.Groups[1].Value} online.";
@@ -288,7 +288,7 @@ namespace ChatCommands.ClassReplacements
                         text1.Substring(text1.IndexOf(":", StringComparison.InvariantCultureIgnoreCase) + 1);
             string text2 = FixedParseText(text1, this.chatBox.Font, this.chatBox.Width - 16);
 
-            foreach (string part in text2.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None))
+            foreach (string part in text2.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
                 this.AddNewMessage(part, this.messageColor(chatKind), this.chatBox.Font, language);
         }
 
@@ -300,7 +300,7 @@ namespace ChatCommands.ClassReplacements
             string text = FixedParseText(message, this.chatBox.Font, this.chatBox.Width - 8,
                 this.config.UseMonospacedFontForCommandOutput);
 
-            foreach (string part in text.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None))
+            foreach (string part in text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
                 this.AddNewMessage(part, color, this.chatBox.Font, LocalizedContentManager.CurrentLanguageCode, true);
         }
 
@@ -311,7 +311,7 @@ namespace ChatCommands.ClassReplacements
         {
             string text = FixedParseText(message, this.chatBox.Font, this.chatBox.Width - 8);
 
-            foreach (string part in text.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None))
+            foreach (string part in text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
                 this.AddNewMessage(part, color, this.chatBox.Font, LocalizedContentManager.CurrentLanguageCode);
         }
 
@@ -329,7 +329,7 @@ namespace ChatCommands.ClassReplacements
                 : new ChatMessage();
 
             newMessage.timeLeftToDisplay = 600;
-            newMessage.verticalSize = (int) font.MeasureString(message).Y + 4;
+            newMessage.verticalSize = (int)font.MeasureString(message).Y + 4;
             newMessage.color = color;
             newMessage.language = code;
 
@@ -614,6 +614,8 @@ namespace ChatCommands.ClassReplacements
         {
             this.sentMessageHistory.Clear();
             this.bCheatHistoryPosition.SetValue(-1);
+            if (this.currentTypedMessage == null)
+                this.currentTypedMessage = this.commandChatTextBox.Save();
             this.commandChatTextBox.Load(this.currentTypedMessage, true);
         }
 
@@ -656,7 +658,7 @@ namespace ChatCommands.ClassReplacements
             {
                 foreach (char ch in text)
                 {
-                    if (ConsoleChatMessage.MeasureStringWidth(whichFont, str1 + ch, isConsole) > (double) width)
+                    if (ConsoleChatMessage.MeasureStringWidth(whichFont, str1 + ch, isConsole) > (double)width)
                     {
                         str2 = str2 + str1 + Environment.NewLine;
                         str1 = string.Empty;
@@ -669,11 +671,11 @@ namespace ChatCommands.ClassReplacements
             }
 
             string str3 = text;
-            char[] chArray = {' '};
+            char[] chArray = { ' ' };
             foreach (string str4 in str3.Split(chArray))
                 try
                 {
-                    if (ConsoleChatMessage.MeasureStringWidth(whichFont, str1 + str4, isConsole) > (double) width ||
+                    if (ConsoleChatMessage.MeasureStringWidth(whichFont, str1 + str4, isConsole) > (double)width ||
                         str4.Equals(Environment.NewLine))
                     {
                         str2 = str2 + str1 + Environment.NewLine;
