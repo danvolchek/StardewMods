@@ -9,7 +9,7 @@ namespace NoFenceDecay
     internal class NoFenceDecayMod : Mod
     {
         /// <summary>Used to find fences.</summary>
-        private FenceFinder finder = new FenceFinder();
+        private readonly FenceFinder finder = new FenceFinder();
 
         public override void Entry(IModHelper helper)
         {
