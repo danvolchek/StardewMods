@@ -9,7 +9,7 @@ namespace BetterArtisanGoodIcons
     /// <summary>Handles alternate textures from content packs.</summary>
     internal class ContentPackManager
     {
-        private IDictionary<string, Tuple<IManifest, Texture2D>> loadedTextures = new Dictionary<string, Tuple<IManifest, Texture2D>>();
+        private readonly IDictionary<string, Tuple<IManifest, Texture2D>> loadedTextures = new Dictionary<string, Tuple<IManifest, Texture2D>>();
 
         internal ContentPackManager(IModHelper helper, IMonitor monitor, IEnumerable<string> imagesToLoad)
         {

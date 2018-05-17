@@ -1,4 +1,5 @@
-﻿using BetterArtisanGoodIcons.Patches.SObjectPatches;
+﻿using BetterArtisanGoodIcons.Extensions;
+using BetterArtisanGoodIcons.Patches.SObjectPatches;
 using Harmony;
 using StardewModdingAPI;
 using System;

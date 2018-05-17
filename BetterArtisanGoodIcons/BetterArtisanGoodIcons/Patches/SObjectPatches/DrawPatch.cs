@@ -13,8 +13,8 @@ namespace BetterArtisanGoodIcons.Patches.SObjectPatches
         /// tool tip ourselves because draw calls getScale, which actually modifies the object scale based upon <see cref="SObject.readyForHarvest"/>.</remarks>
         public static bool Prefix(SObject __instance, SpriteBatch spriteBatch, int x, int y, float alpha = 1f)
         {
-            if (!__instance.readyForHarvest || !__instance.bigCraftable || __instance.heldObject == null || 
-                !ArtisanGoodsManager.GetDrawInfo(__instance.heldObject, out Texture2D spriteSheet, out Rectangle position, out Rectangle iconPosition))
+            if (!__instance.readyForHarvest.Value || !__instance.bigCraftable.Value || __instance.heldObject.Value == null || 
+                !ArtisanGoodsManager.GetDrawInfo(__instance.heldObject.Value, out Texture2D spriteSheet, out Rectangle position, out Rectangle iconPosition))
                 return true;
             Vector2 vector2 = __instance.getScale() * (float)Game1.pixelZoom;
             Vector2 local = Game1.GlobalToLocal(Game1.viewport, new Vector2((float)(x * Game1.tileSize), (float)(y * Game1.tileSize - Game1.tileSize)));

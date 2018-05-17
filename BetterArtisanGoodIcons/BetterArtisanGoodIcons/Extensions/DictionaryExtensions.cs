@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BetterArtisanGoodIcons
+namespace BetterArtisanGoodIcons.Extensions
 {
     public static class DictionaryExtensions
     {
