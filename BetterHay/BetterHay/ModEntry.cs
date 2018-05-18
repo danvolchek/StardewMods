@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Network;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
 using System;
@@ -34,13 +35,13 @@ namespace BetterHay
             if (config.EnableGettingHayFromGrassAnytime)
             {
                 GameEvents.EighthUpdateTick += this.EighthUpdateTick;
-                LocationEvents.CurrentLocationChanged += this.CurrentLocationChanged;
+                PlayerEvents.Warped += this.CurrentLocationChanged;
             }
 
             if (config.EnableTakingHayFromHoppersAnytime)
             {
-                LocationEvents.CurrentLocationChanged += this.HandleHopperLocationChanged;
-                LocationEvents.LocationObjectsChanged += this.HandleHopperMaybePlacedDown;
+                PlayerEvents.Warped += this.HandleHopperLocationChanged;
+                LocationEvents.ObjectsChanged += this.HandleHopperMaybePlacedDown;
             }
         }
 
@@ -50,13 +51,15 @@ namespace BetterHay
             if (Game1.currentLocation?.terrainFeatures == null || lastTerrainFeatures == null || Game1.currentLocation != currentLocation)
                 return;
 
-            foreach (KeyValuePair<Vector2, TerrainFeature> item in lastTerrainFeatures)
-                if (!Game1.currentLocation.terrainFeatures.Contains(item) && item.Value is Grass)
+
+            foreach (var item in this.lastTerrainFeatures.Where(x=>x.Value is Grass && IsWithinRange(Game1.player.getTileLocation(), x.Key, 4)))
+            {
+                TerrainFeature x = null;
+                if (!this.currentLocation.terrainFeatures.TryGetValue(item.Key, out x) || !(x is Grass))
+                {
                     if (((Game1.IsMultiplayer ? Game1.recentMultiplayerRandom : new Random((int)((double)Game1.uniqueIDForThisGame + (double)item.Key.X * 1000.0 + (double)item.Key.Y * 11.0))).NextDouble() < 0.5))
                         if (Game1.player.CurrentTool is MeleeWeapon && (Game1.player.CurrentTool.Name.Contains("Scythe") || Game1.player.CurrentTool.parentSheetIndex == 47))
                         {
-                            if (IsWithinRange(Game1.player.getTileLocation(), item.Key, 3))
-                            {
                                 if (dropGrassStarterRandom.NextDouble() < config.ChanceToDropGrassStarterInsteadOfHay)
                                 {
                                     AttemptToGiveGrassStarter(item.Key, Game1.getFarm().piecesOfHay == Utility.numSilos() * 240);
@@ -64,10 +67,12 @@ namespace BetterHay
                                 else if (Game1.getFarm().tryToAddHay(1) != 0)
                                     if (!BetterHayGrass.TryAddItemToInventory(178) && config.DropHayOnGroundIfNoRoomInInventory)
                                         BetterHayGrass.DropOnGround(item.Key, 178);
-                            }
+                            
                         }
-
-            lastTerrainFeatures = Game1.currentLocation?.terrainFeatures?.ToDictionary(entry => entry.Key,
+                }
+            }
+            
+            lastTerrainFeatures = Game1.currentLocation?.terrainFeatures?.Pairs.ToDictionary(entry => entry.Key,
                                   entry => entry.Value);
         }
 
@@ -88,7 +93,7 @@ namespace BetterHay
                     added = true;
                 }
                 if (added)
-                    Game1.getFarm().piecesOfHay--;
+                    Game1.getFarm().piecesOfHay.Value--;
             }
         }
 
@@ -101,9 +106,9 @@ namespace BetterHay
         }
 
         //Update the last list of terrain features
-        private void CurrentLocationChanged(object sender, EventArgsCurrentLocationChanged e)
+        private void CurrentLocationChanged(object sender, EventArgsPlayerWarped e)
         {
-            lastTerrainFeatures = Game1.currentLocation?.terrainFeatures?.ToDictionary(entry => entry.Key,
+            lastTerrainFeatures = Game1.currentLocation?.terrainFeatures?.Pairs.ToDictionary(entry => entry.Key,
                                   entry => entry.Value);
         }
 
@@ -117,9 +122,8 @@ namespace BetterHay
 
 
         //Revert the hoppers in the location player left to normal hoppers, convert hoppers in new location to hay anytime hoppers
-        private void HandleHopperLocationChanged(object sender, EventArgsCurrentLocationChanged e)
+        private void HandleHopperLocationChanged(object sender, EventArgsPlayerWarped e)
         {
-
             ConvertHopper<BetterHayHopper, SObject>(e.PriorLocation);
             ConvertHopper<SObject, BetterHayHopper>(e.NewLocation);
             currentLocation = e.NewLocation;
@@ -128,7 +132,7 @@ namespace BetterHay
         //Try and convert a placed down hopper to a hay anytime hopper
         private void HandleHopperMaybePlacedDown(object sender, EventArgsLocationObjectsChanged e)
         {
-            ConvertHopper<SObject, BetterHayHopper>(e.NewObjects);
+            ConvertHopper<SObject, BetterHayHopper>(e.Added.ToDictionary(entry=>entry.Key,entry=>entry.Value));
         }
 
         //Converts all hoppers in location that are FromType to ToType
@@ -138,7 +142,30 @@ namespace BetterHay
         }
 
         //Converts all hoppers in Objects to ToType that are FromType
-        private void ConvertHopper<FromType, ToType>(SerializableDictionary<Vector2, SObject> Objects) where ToType : SObject where FromType : SObject
+        private void ConvertHopper<FromType, ToType>(OverlaidDictionary<Vector2, SObject> Objects) where ToType : SObject where FromType : SObject
+        {
+            if (Objects == null)
+                return;
+
+            IList<Vector2> hopperLocations = new List<Vector2>();
+
+            foreach (KeyValuePair<Vector2, SObject> kvp in Objects.Pairs)
+            {
+                if (typeof(ToType) == typeof(SObject) ? kvp.Value is FromType : kvp.Value.name.Contains("Hopper"))
+                {
+                    hopperLocations.Add(kvp.Key);
+                    break;
+                }
+            }
+
+            foreach (Vector2 hopperLocation in hopperLocations)
+            {
+                Objects[hopperLocation] = (ToType)Activator.CreateInstance(typeof(ToType), new object[] { hopperLocation, 99, false });
+            }
+
+        }
+         //Converts all hoppers in Objects to ToType that are FromType
+        private void ConvertHopper<FromType, ToType>(IDictionary<Vector2, SObject> Objects) where ToType : SObject where FromType : SObject
         {
             if (Objects == null)
                 return;
@@ -160,6 +187,5 @@ namespace BetterHay
             }
 
         }
-
     }
 }
