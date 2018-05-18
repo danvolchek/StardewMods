@@ -1,74 +1,79 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Network;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using SObject = StardewValley.Object;
 
 namespace BetterHay
 {
     public class ModEntry : Mod
     {
-
         //Config
-        public static ModConfig config;
+        public static ModConfig Config;
 
         //Current player location
-        public GameLocation currentLocation = null;
-
-        //Last list of terrain features
-        private Dictionary<Vector2, TerrainFeature> lastTerrainFeatures = null;
+        public GameLocation CurrentLocation;
 
         private Random dropGrassStarterRandom;
 
+        //Last list of terrain features
+        private Dictionary<Vector2, TerrainFeature> lastTerrainFeatures;
+
         public override void Entry(IModHelper helper)
         {
-            config = helper.ReadConfig<ModConfig>();
-            dropGrassStarterRandom = new Random();
+            Config = helper.ReadConfig<ModConfig>();
+            this.dropGrassStarterRandom = new Random();
             SaveEvents.BeforeSave += this.BeforeSave;
 
-            if (config.EnableGettingHayFromGrassAnytime)
+            if (Config.EnableGettingHayFromGrassAnytime)
             {
                 GameEvents.EighthUpdateTick += this.EighthUpdateTick;
-                LocationEvents.CurrentLocationChanged += this.CurrentLocationChanged;
+                PlayerEvents.Warped += this.PlayerEvents_Warped;
             }
 
-            if (config.EnableTakingHayFromHoppersAnytime)
+            if (Config.EnableTakingHayFromHoppersAnytime)
             {
-                LocationEvents.CurrentLocationChanged += this.HandleHopperLocationChanged;
-                LocationEvents.LocationObjectsChanged += this.HandleHopperMaybePlacedDown;
+                PlayerEvents.Warped += this.HandleHopperLocationChanged;
+                LocationEvents.ObjectsChanged += this.HandleHopperMaybePlacedDown;
             }
         }
 
         //Update tick - check for removed grass and spawn hay if appropriate
         private void EighthUpdateTick(object sender, EventArgs e)
         {
-            if (Game1.currentLocation?.terrainFeatures == null || lastTerrainFeatures == null || Game1.currentLocation != currentLocation)
+            if (Game1.player?.currentLocation?.terrainFeatures == null || this.lastTerrainFeatures == null ||
+                Game1.player.currentLocation != this.CurrentLocation)
                 return;
 
-            foreach (KeyValuePair<Vector2, TerrainFeature> item in lastTerrainFeatures)
-                if (!Game1.currentLocation.terrainFeatures.Contains(item) && item.Value is Grass)
-                    if (((Game1.IsMultiplayer ? Game1.recentMultiplayerRandom : new Random((int)((double)Game1.uniqueIDForThisGame + (double)item.Key.X * 1000.0 + (double)item.Key.Y * 11.0))).NextDouble() < 0.5))
-                        if (Game1.player.CurrentTool is MeleeWeapon && (Game1.player.CurrentTool.Name.Contains("Scythe") || Game1.player.CurrentTool.parentSheetIndex == 47))
-                        {
-                            if (IsWithinRange(Game1.player.getTileLocation(), item.Key, 3))
+            foreach (KeyValuePair<Vector2, TerrainFeature> item in this.lastTerrainFeatures)
+                if (!Game1.player.currentLocation.terrainFeatures.FieldDict.ContainsKey(item.Key) && item.Value is Grass grass && grass.numberOfWeeds.Value <= 0 && grass.grassType.Value == 1)
+                    if ((Game1.IsMultiplayer
+                            ? Game1.recentMultiplayerRandom
+                            : new Random((int) (Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0)))
+                        .NextDouble() < 0.5)
+                        if (Game1.player.CurrentTool is MeleeWeapon &&
+                            (Game1.player.CurrentTool.Name.Contains("Scythe") ||
+                             Game1.player.CurrentTool.ParentSheetIndex == 47))
+                            if (this.IsWithinRange(Game1.player.getTileLocation(), item.Key, 3))
                             {
-                                if (dropGrassStarterRandom.NextDouble() < config.ChanceToDropGrassStarterInsteadOfHay)
-                                {
-                                    AttemptToGiveGrassStarter(item.Key, Game1.getFarm().piecesOfHay == Utility.numSilos() * 240);
-                                }
+                                if (this.dropGrassStarterRandom.NextDouble() <
+                                    Config.ChanceToDropGrassStarterInsteadOfHay)
+                                    this.AttemptToGiveGrassStarter(item.Key,
+                                        Game1.getFarm().piecesOfHay.Value == Utility.numSilos() * 240);
                                 else if (Game1.getFarm().tryToAddHay(1) != 0)
-                                    if (!BetterHayGrass.TryAddItemToInventory(178) && config.DropHayOnGroundIfNoRoomInInventory)
+                                    if (!BetterHayGrass.TryAddItemToInventory(178) &&
+                                        Config.DropHayOnGroundIfNoRoomInInventory)
                                         BetterHayGrass.DropOnGround(item.Key, 178);
                             }
-                        }
 
-            lastTerrainFeatures = Game1.currentLocation?.terrainFeatures?.ToDictionary(entry => entry.Key,
-                                  entry => entry.Value);
+            this.lastTerrainFeatures = Game1.player.currentLocation?.terrainFeatures?.FieldDict.ToDictionary(entry => entry.Key,
+                entry => entry.Value.Value);
         }
 
         //Correctly give grass starters instead of hay when silos are full and not full
@@ -76,90 +81,84 @@ namespace BetterHay
         {
             if (silosAreFull)
             {
-                if (!BetterHayGrass.TryAddItemToInventory(297) && config.DropHayOnGroundIfNoRoomInInventory)
+                if (!BetterHayGrass.TryAddItemToInventory(297) && Config.DropHayOnGroundIfNoRoomInInventory)
                     BetterHayGrass.DropOnGround(location, 297);
             }
             else
             {
                 bool added = BetterHayGrass.TryAddItemToInventory(297);
-                if (!added && config.DropHayOnGroundIfNoRoomInInventory)
+                if (!added && Config.DropHayOnGroundIfNoRoomInInventory)
                 {
                     BetterHayGrass.DropOnGround(location, 297);
                     added = true;
                 }
+
                 if (added)
-                    Game1.getFarm().piecesOfHay--;
+                    Game1.getFarm().piecesOfHay.Value -= 1;
             }
         }
 
         //Returns whether the first vector is with range of the second, in euclidian distance
         private bool IsWithinRange(Vector2 first, Vector2 second, double range)
         {
-            if (second == null || first == null)
-                return false;
             return Math.Sqrt(Math.Pow(first.X - second.X, 2) + Math.Pow(first.Y - second.Y, 2)) < range;
         }
 
         //Update the last list of terrain features
-        private void CurrentLocationChanged(object sender, EventArgsCurrentLocationChanged e)
+        private void PlayerEvents_Warped(object sender, EventArgsPlayerWarped e)
         {
-            lastTerrainFeatures = Game1.currentLocation?.terrainFeatures?.ToDictionary(entry => entry.Key,
-                                  entry => entry.Value);
+            this.lastTerrainFeatures = e.NewLocation?.terrainFeatures?.FieldDict.ToDictionary(item => item.Key, item => item.Value.Value);
         }
 
 
         //Revert all hay anytime hoppers to hoppers
         private void BeforeSave(object sender, EventArgs e)
         {
-            if (config.EnableTakingHayFromHoppersAnytime)
-                ConvertHopper<BetterHayHopper, SObject>(this.currentLocation);
+            if (Config.EnableTakingHayFromHoppersAnytime)
+                this.ConvertHopper<BetterHayHopper, SObject>(this.CurrentLocation);
         }
 
 
         //Revert the hoppers in the location player left to normal hoppers, convert hoppers in new location to hay anytime hoppers
-        private void HandleHopperLocationChanged(object sender, EventArgsCurrentLocationChanged e)
+        private void HandleHopperLocationChanged(object sender, EventArgsPlayerWarped e)
         {
-
-            ConvertHopper<BetterHayHopper, SObject>(e.PriorLocation);
-            ConvertHopper<SObject, BetterHayHopper>(e.NewLocation);
-            currentLocation = e.NewLocation;
+            this.ConvertHopper<BetterHayHopper, SObject>(e.PriorLocation);
+            this.ConvertHopper<SObject, BetterHayHopper>(e.NewLocation);
+            this.CurrentLocation = e.NewLocation;
         }
 
         //Try and convert a placed down hopper to a hay anytime hopper
         private void HandleHopperMaybePlacedDown(object sender, EventArgsLocationObjectsChanged e)
         {
-            ConvertHopper<SObject, BetterHayHopper>(e.NewObjects);
+            if(e.Location == Game1.player.currentLocation)
+                this.ConvertHopper<SObject, BetterHayHopper>(e.Location);
         }
 
         //Converts all hoppers in location that are FromType to ToType
-        private void ConvertHopper<FromType, ToType>(GameLocation location) where ToType : SObject where FromType : SObject
+        private void ConvertHopper<TFromType, TToType>(GameLocation location)
+            where TToType : SObject where TFromType : SObject
         {
-            ConvertHopper<FromType, ToType>(location?.Objects);
+            this.ConvertHopperImpl<TFromType, TToType>(location?.Objects);
         }
 
         //Converts all hoppers in Objects to ToType that are FromType
-        private void ConvertHopper<FromType, ToType>(SerializableDictionary<Vector2, SObject> Objects) where ToType : SObject where FromType : SObject
+        private void ConvertHopperImpl<TFromType, TToType>(OverlaidDictionary<Vector2, SObject> Objects)
+            where TToType : SObject where TFromType : SObject
         {
             if (Objects == null)
                 return;
 
             IList<Vector2> hopperLocations = new List<Vector2>();
 
-            foreach (KeyValuePair<Vector2, SObject> kvp in Objects)
-            {
-                if (typeof(ToType) == typeof(SObject) ? kvp.Value is FromType : kvp.Value.name.Contains("Hopper"))
+            foreach (KeyValuePair<Vector2, SObject> kvp in Objects.Pairs)
+                if (typeof(TToType) == typeof(SObject) ? kvp.Value is TFromType : kvp.Value.name.Contains("Hopper"))
                 {
                     hopperLocations.Add(kvp.Key);
                     break;
                 }
-            }
 
             foreach (Vector2 hopperLocation in hopperLocations)
-            {
-                Objects[hopperLocation] = (ToType)Activator.CreateInstance(typeof(ToType), new object[] { hopperLocation, 99, false });
-            }
-
+                Objects[hopperLocation] = (TToType) Activator.CreateInstance(typeof(TToType), hopperLocation, 99, false);
         }
-
     }
 }
