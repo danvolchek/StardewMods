@@ -14,10 +14,10 @@ namespace BetterHay
 
         public override bool checkForAction(StardewValley.Farmer who, bool justCheckingForActivity = false)
         {
-            if (justCheckingForActivity)
+            if (justCheckingForActivity || who == null)
                 return true;
 
-            if (who != null && (who.currentLocation.isObjectAt(who.getTileX(), who.getTileY() - 1) && who.currentLocation.isObjectAt(who.getTileX(), who.getTileY() + 1)) && (who.currentLocation.isObjectAt(who.getTileX() + 1, who.getTileY()) && who.currentLocation.isObjectAt(who.getTileX() - 1, who.getTileY())))
+            if ((who.currentLocation.isObjectAt(who.getTileX(), who.getTileY() - 1) && who.currentLocation.isObjectAt(who.getTileX(), who.getTileY() + 1)) && (who.currentLocation.isObjectAt(who.getTileX() + 1, who.getTileY()) && who.currentLocation.isObjectAt(who.getTileX() - 1, who.getTileY())))
                 this.performToolAction((Tool)null, who.currentLocation);
 
             
