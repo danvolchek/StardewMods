@@ -6,6 +6,10 @@ namespace BetterHay
 {
     public class BetterHayHopper : SObject
     {
+        public BetterHayHopper() : base(Vector2.Zero, 99, false)
+        {
+
+        }
         public BetterHayHopper(Vector2 tileLocation, int parentSheetIndex, bool isRecipe) : base(tileLocation, parentSheetIndex, false)
         {
             if (Game1.getFarm().piecesOfHay.Value > 0)
