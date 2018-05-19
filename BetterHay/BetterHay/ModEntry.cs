@@ -122,8 +122,11 @@ namespace BetterHay
         //Revert the hoppers in the location player left to normal hoppers, convert hoppers in new location to hay anytime hoppers
         private void HandleHopperLocationChanged(object sender, EventArgsPlayerWarped e)
         {
-            this.ConvertHopper<BetterHayHopper, SObject>(e.PriorLocation);
-            this.ConvertHopper<SObject, BetterHayHopper>(e.NewLocation);
+            //this.Monitor.Log($"Player warped from {e.PriorLocation.Name} to {e.NewLocation.Name}");
+            if(!this.AreAnyPlayersInLocation(e.PriorLocation))
+                this.ConvertHopper<BetterHayHopper, SObject>(e.PriorLocation);
+            if(!this.AreAnyPlayersBesidesMeInLocation(e.NewLocation))
+                this.ConvertHopper<SObject, BetterHayHopper>(e.NewLocation);
             this.CurrentLocation = e.NewLocation;
         }
 
@@ -138,6 +141,7 @@ namespace BetterHay
         private void ConvertHopper<TFromType, TToType>(GameLocation location)
             where TToType : SObject where TFromType : SObject
         {
+            //this.Monitor.Log($"Converting from {typeof(TFromType).Name} to {typeof(TToType).Name} in {location.Name}.");
             this.ConvertHopperImpl<TFromType, TToType>(location?.Objects);
         }
 
@@ -151,7 +155,7 @@ namespace BetterHay
             IList<Vector2> hopperLocations = new List<Vector2>();
 
             foreach (KeyValuePair<Vector2, SObject> kvp in Objects.Pairs)
-                if (typeof(TToType) == typeof(SObject) ? kvp.Value is TFromType : kvp.Value.name.Contains("Hopper"))
+                if (kvp.Value.GetType() == typeof(TFromType) && (typeof(TToType) == typeof(SObject) ? kvp.Value is TFromType : kvp.Value.name.Contains("Hopper")))
                 {
                     hopperLocations.Add(kvp.Key);
                     break;
@@ -159,6 +163,16 @@ namespace BetterHay
 
             foreach (Vector2 hopperLocation in hopperLocations)
                 Objects[hopperLocation] = (TToType) Activator.CreateInstance(typeof(TToType), hopperLocation, 99, false);
+        }
+
+        private bool AreAnyPlayersInLocation(GameLocation location)
+        {
+            return Game1.getOnlineFarmers().Any(farmer => farmer.currentLocation == location);
+        }
+
+        private bool AreAnyPlayersBesidesMeInLocation(GameLocation location)
+        {
+            return Game1.getOnlineFarmers().Any(farmer => farmer != Game1.player && farmer.currentLocation == location);
         }
     }
 }
