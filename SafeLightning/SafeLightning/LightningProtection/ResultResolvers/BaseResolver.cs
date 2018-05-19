@@ -1,20 +1,20 @@
-﻿using SafeLightning.LightningProtection.ResultResolvers.SavedFeatureData;
+﻿using System.Collections.Generic;
+using SafeLightning.LightningProtection.ResultResolvers.SavedFeatureData;
 using SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers;
 using StardewModdingAPI;
 using StardewValley;
-using System.Collections.Generic;
 
 namespace SafeLightning.LightningProtection.ResultResolvers
 {
     /// <summary>
-    /// Base class for classes that undo lightning strike results.
+    ///     Base class for classes that undo lightning strike results.
     /// </summary>
     internal abstract class BaseResolver : IResultResolver
     {
         protected IMonitor monitor;
         protected IList<ISideEffectHandler> sideEffectHandlers = new List<ISideEffectHandler>();
 
-        public BaseResolver(IMonitor monitor)
+        protected BaseResolver(IMonitor monitor)
         {
             this.monitor = monitor;
         }

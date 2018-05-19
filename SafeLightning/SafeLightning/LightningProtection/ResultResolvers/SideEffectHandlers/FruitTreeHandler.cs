@@ -6,7 +6,7 @@ using StardewValley;
 namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 {
     /// <summary>
-    /// Removes dropped coal from <see cref="StardewValley.TerrainFeatures.FruitTree"/>s.
+    ///     Removes dropped coal from <see cref="StardewValley.TerrainFeatures.FruitTree" />s.
     /// </summary>
     internal class FruitTreeHandler : BaseHandler
     {
@@ -16,7 +16,7 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 
         public override bool CanHandle(BaseFeatureSaveData featureSaveData)
         {
-            return featureSaveData is FruitTreeSaveData fruitTreeSaveData && fruitTreeSaveData.fruitsOnTree != 0;
+            return featureSaveData is FruitTreeSaveData fruitTreeSaveData && fruitTreeSaveData.FruitsOnTree != 0;
         }
 
         public override void Handle(BaseFeatureSaveData featureSaveData, GameLocation location)
@@ -29,24 +29,27 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
             {
                 Debris debris = location.debris[i];
 
-                if (debris.chunkType == 382 && debris.Chunks.Count == 1 && debris.Chunks[0].debrisType == 382)
+                if (debris.chunkType.Value == 382 && debris.Chunks.Count == 1 && debris.Chunks[0].debrisType == 382)
                 {
-                    if (!WithinRange(debris.Chunks[0].position, GetCoalPosition(numRemoved, featureSaveData.featurePosition), Game1.tileSize * 2))
+                    if (!this.WithinRange(debris.Chunks[0].position.Value,
+                        GetCoalPosition(numRemoved, featureSaveData.FeaturePosition), Game1.tileSize * 2))
                         continue;
 
-                    monitor.Log($"Removed dropped coal from fruit tree {numRemoved + 1}/{fruitTreeSaveData.fruitsOnTree}.", LogLevel.Trace);
+                    this.monitor.Log(
+                        $"Removed dropped coal from fruit tree {numRemoved + 1}/{fruitTreeSaveData.FruitsOnTree}.",
+                        LogLevel.Trace);
                     location.debris.RemoveAt(i);
                     i--;
 
                     numRemoved++;
-                    if (numRemoved == fruitTreeSaveData.fruitsOnTree)
+                    if (numRemoved == fruitTreeSaveData.FruitsOnTree)
                         return;
                 }
             }
         }
 
         /// <summary>
-        /// The code the game uses to determine initial coal position.
+        ///     The code the game uses to determine initial coal position.
         /// </summary>
         /// <param name="which">Which coal piece to determine</param>
         /// <param name="start">Fruit tree position</param>
@@ -57,20 +60,21 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
             switch (which)
             {
                 case 0:
-                    vector2.X = (float)-Game1.tileSize;
+                    vector2.X = -Game1.tileSize;
                     break;
 
                 case 1:
-                    vector2.X = (float)Game1.tileSize;
-                    vector2.Y = (float)(-Game1.tileSize / 2);
+                    vector2.X = Game1.tileSize;
+                    vector2.Y = -Game1.tileSize / 2;
                     break;
 
                 case 2:
-                    vector2.Y = (float)(Game1.tileSize / 2);
+                    vector2.Y = Game1.tileSize / 2;
                     break;
             }
 
-            return new Vector2(start.X * (float)Game1.tileSize + (float)(Game1.tileSize / 2), (start.Y - 3f) * (float)Game1.tileSize + (float)(Game1.tileSize / 2)) + vector2;
+            return new Vector2(start.X * Game1.tileSize + Game1.tileSize / 2,
+                       (start.Y - 3f) * Game1.tileSize + Game1.tileSize / 2) + vector2;
         }
     }
 }

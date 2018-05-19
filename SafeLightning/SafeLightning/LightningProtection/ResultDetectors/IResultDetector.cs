@@ -1,11 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using StardewValley;
-using System.Collections.Generic;
+using StardewValley.TerrainFeatures;
 
 namespace SafeLightning.LightningProtection.ResultDetectors
 {
     /// <summary>
-    /// Detects when a <see cref="TerrainFeature"/> was affected by a lightning strike.
+    ///     Detects when a <see cref="TerrainFeature" /> was affected by a lightning strike.
     /// </summary>
     internal interface IResultDetector : IAvoidsResult
     {

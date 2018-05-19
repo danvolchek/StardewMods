@@ -4,18 +4,19 @@ using StardewValley.TerrainFeatures;
 namespace SafeLightning.LightningProtection.ResultResolvers.SavedFeatureData
 {
     /// <summary>
-    /// Saves all information about a <see cref="TerrainFeature"/> needed for <see cref="IResultResolver"/>s and <see cref="SideEffectHandlers.ISideEffectHandler"/>
-    /// to work properly.
+    ///     Saves all information about a <see cref="TerrainFeature" /> needed for <see cref="IResultResolver" />s and
+    ///     <see cref="SideEffectHandlers.ISideEffectHandler" />
+    ///     to work properly.
     /// </summary>
     internal class BaseFeatureSaveData
     {
-        public TerrainFeature feature;
-        public Vector2 featurePosition;
+        public TerrainFeature Feature;
+        public Vector2 FeaturePosition;
 
         public BaseFeatureSaveData(Vector2 featurePosition, TerrainFeature feature)
         {
-            this.featurePosition = featurePosition;
-            this.feature = feature;
+            this.FeaturePosition = featurePosition;
+            this.Feature = feature;
         }
     }
 }

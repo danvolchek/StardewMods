@@ -1,12 +1,13 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Netcode;
 using StardewValley;
 using StardewValley.TerrainFeatures;
-using System.Collections.Generic;
 
 namespace SafeLightning.CommandParsing.Commands
 {
     /// <summary>
-    /// Grows all trees and fruit trees in the player's farm.
+    ///     Grows all trees and fruit trees in the player's farm.
     /// </summary>
     internal class GrowTreesCommand : BaseCommand
     {
@@ -16,18 +17,18 @@ namespace SafeLightning.CommandParsing.Commands
 
         public override string Parse(string[] args)
         {
-            foreach (KeyValuePair<Vector2, TerrainFeature> item in Game1.getFarm().terrainFeatures)
-            {
-                if (item.Value is Tree t)
+            foreach (KeyValuePair<Vector2, NetRef<TerrainFeature>> item in Game1.getFarm().terrainFeatures.FieldPairs)
+                switch (item.Value.Value)
                 {
-                    t.growthStage++;
+                    case Tree t:
+                        t.growthStage.Value++;
+                        break;
+                    case FruitTree ft:
+                        ft.daysUntilMature.Value -= 4;
+                        ft.dayUpdate(Game1.getFarm(), item.Key);
+                        break;
                 }
-                else if (item.Value is FruitTree ft)
-                {
-                    ft.daysUntilMature -= 4;
-                    ft.dayUpdate(Game1.getFarm(), item.Key);
-                }
-            }
+
             return "Okay, grew trees and fruit trees in your farm.";
         }
     }

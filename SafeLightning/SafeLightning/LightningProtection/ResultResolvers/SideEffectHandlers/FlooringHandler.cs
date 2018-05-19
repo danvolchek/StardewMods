@@ -6,7 +6,7 @@ using StardewValley.TerrainFeatures;
 namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 {
     /// <summary>
-    /// Removes the flooring <see cref="Item"/> that is dropped when the <see cref="Flooring"/> is hit by lightning.
+    ///     Removes the flooring <see cref="Item" /> that is dropped when the <see cref="Flooring" /> is hit by lightning.
     /// </summary>
     internal class FlooringHandler : BaseHandler
     {
@@ -16,22 +16,24 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 
         public override bool CanHandle(BaseFeatureSaveData featureSaveData)
         {
-            return featureSaveData.feature is Flooring;
+            return featureSaveData.Feature is Flooring;
         }
 
         public override void Handle(BaseFeatureSaveData featureSaveData, GameLocation location)
         {
-            Flooring f = location.terrainFeatures[featureSaveData.featurePosition] as Flooring;
+            Flooring f = location.terrainFeatures[featureSaveData.FeaturePosition] as Flooring;
 
             for (int i = 0; i < location.debris.Count; i++)
             {
                 Debris debris = location.debris[i];
 
-                if (debris.item != null && debris.item.parentSheetIndex == GetParentSheetIndexForFlooring(f.whichFloor))
+                if (debris.item != null && debris.item.ParentSheetIndex == GetParentSheetIndexForFlooring(f.whichFloor.Value))
                 {
-                    if (!WithinRange(debris.Chunks[0].position / Game1.tileSize, featureSaveData.featurePosition, 2))
+                    if (!this.WithinRange(debris.Chunks[0].position.Value / Game1.tileSize, featureSaveData.FeaturePosition,
+                        2))
                         continue;
-                    monitor.Log($"Removed flooring with parentSheetIndex {debris.item.parentSheetIndex }.", LogLevel.Trace);
+                    this.monitor.Log($"Removed flooring with parentSheetIndex {debris.item.ParentSheetIndex}.",
+                        LogLevel.Trace);
                     location.debris.RemoveAt(i);
                     return;
                 }
@@ -39,7 +41,7 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
         }
 
         /// <summary>
-        /// Same code the game uses to determine the parentSheetIndex of the floor.
+        ///     Same code the game uses to determine the parentSheetIndex of the floor.
         /// </summary>
         /// <param name="whichFloor">Which floor is it</param>
         /// <returns>The parentSheetIndex of that floor</returns>
@@ -88,6 +90,7 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
                     parentSheetIndex = 415;
                     break;
             }
+
             return parentSheetIndex;
         }
     }

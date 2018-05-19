@@ -1,13 +1,13 @@
-﻿using SafeLightning.LightningProtection.ResultResolvers.SavedFeatureData;
+﻿using System;
+using SafeLightning.LightningProtection.ResultResolvers.SavedFeatureData;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.TerrainFeatures;
-using System;
 
 namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 {
     /// <summary>
-    /// Removes rare items that can drop from <see cref="Grass"/>.
+    ///     Removes rare items that can drop from <see cref="Grass" />.
     /// </summary>
     internal class GrassHandler : BaseHandler
     {
@@ -17,7 +17,7 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 
         public override bool CanHandle(BaseFeatureSaveData featureSaveData)
         {
-            return featureSaveData is GrassSaveData grassSaveData && (grassSaveData.feature as Grass).grassType != 1;
+            return featureSaveData is GrassSaveData grassSaveData && (grassSaveData.Feature as Grass).grassType.Value != 1;
         }
 
         public override void Handle(BaseFeatureSaveData featureSaveData, GameLocation location)
@@ -27,7 +27,11 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
             int numChunks = -1;
             string removalMessage = "";
 
-            Random random = Game1.IsMultiplayer ? Game1.recentMultiplayerRandom : new Random((int)((double)Game1.uniqueIDForThisGame + (double)featureSaveData.featurePosition.X * 1000.0 + (double)featureSaveData.featurePosition.Y * 11.0 + (double)Game1.mine.mineLevel + (double)Game1.player.timesReachedMineBottom));
+            Random random = Game1.IsMultiplayer
+                ? Game1.recentMultiplayerRandom
+                : new Random((int) (Game1.uniqueIDForThisGame + featureSaveData.FeaturePosition.X * 1000.0 +
+                                    featureSaveData.FeaturePosition.Y * 11.0 + Game1.mine.mineLevel +
+                                    Game1.player.timesReachedMineBottom));
             if (random.NextDouble() < 0.005)
             {
                 chunkType = 114;
@@ -58,15 +62,17 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
                 {
                     Debris debris = location.debris[i];
 
-                    if (debris.chunkType == chunkType && debris.debrisType == debrisType && debris.Chunks.Count == numChunks)
+                    if (debris.chunkType.Value == chunkType && debris.debrisType.Value == debrisType &&
+                        debris.Chunks.Count == numChunks)
                     {
-                        if (!WithinRange(featureSaveData.featurePosition, debris.Chunks[0].position / Game1.tileSize, 2))
+                        if (!this.WithinRange(featureSaveData.FeaturePosition,
+                            debris.Chunks[0].position.Value / Game1.tileSize, 2))
                             continue;
 
                         location.debris.RemoveAt(i);
                         i--;
 
-                        monitor.Log($"Removed {removalMessage} for grass.", LogLevel.Trace);
+                        this.monitor.Log($"Removed {removalMessage} for grass.", LogLevel.Trace);
 
                         break;
                     }

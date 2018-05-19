@@ -3,7 +3,7 @@
 namespace SafeLightning.CommandParsing.Commands
 {
     /// <summary>
-    /// Removes every terrain feature in the player's farm.
+    ///     Removes every terrain feature in the player's farm.
     /// </summary>
     internal class RemoveFeaturesCommand : BaseCommand
     {

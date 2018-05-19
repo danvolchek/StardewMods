@@ -6,7 +6,7 @@ using StardewValley.TerrainFeatures;
 namespace SafeLightning.LightningProtection.ResultResolvers
 {
     /// <summary>
-    /// Brings <see cref="Crop"/>s back to life.
+    ///     Brings <see cref="Crop" />s back to life.
     /// </summary>
     internal class CropKilledResolver : BaseResolver
     {
@@ -18,9 +18,10 @@ namespace SafeLightning.LightningProtection.ResultResolvers
 
         public override void Resolve(GameLocation location, BaseFeatureSaveData featureSaveData)
         {
-            Crop crop = (location.terrainFeatures[featureSaveData.featurePosition] as HoeDirt).crop;
-            crop.dead = false;
-            this.monitor.Log($"Restored {crop.indexOfHarvest} at position {featureSaveData.featurePosition} to life.", LogLevel.Trace);
+            Crop crop = (location.terrainFeatures[featureSaveData.FeaturePosition] as HoeDirt).crop;
+            crop.dead.Value = false;
+            this.monitor.Log($"Restored {crop.indexOfHarvest} at position {featureSaveData.FeaturePosition} to life.",
+                LogLevel.Trace);
         }
     }
 }

@@ -1,17 +1,18 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Netcode;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.TerrainFeatures;
-using System.Collections.Generic;
 
 namespace SafeLightning.LightningProtection.ResultDetectors
 {
     /// <summary>
-    /// Detects falling <see cref="Tree"/>s.
+    ///     Detects falling <see cref="Tree" />s.
     /// </summary>
     internal class TreeFallingDetector : IResultDetector
     {
-        private IReflectionHelper reflectionHelper;
+        private readonly IReflectionHelper reflectionHelper;
 
         public TreeFallingDetector(IReflectionHelper reflection)
         {
@@ -23,13 +24,9 @@ namespace SafeLightning.LightningProtection.ResultDetectors
         public IEnumerable<Vector2> Detect(GameLocation location, IEnumerable<Vector2> strikeLocations)
         {
             foreach (Vector2 item in strikeLocations)
-            {
                 if (location.terrainFeatures.ContainsKey(item) && location.terrainFeatures[item] is Tree tree)
-                {
-                    if (reflectionHelper.GetField<bool>(tree, "falling").GetValue() && tree.stump)
+                    if (this.reflectionHelper.GetField<NetBool>(tree, "falling").GetValue().Value && tree.stump.Value)
                         yield return item;
-                }
-            }
         }
     }
 }

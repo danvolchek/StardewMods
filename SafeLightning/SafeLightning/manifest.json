@@ -1,10 +1,10 @@
 ﻿{
   "Name": "Safe Lightning",
   "Author": "Cat",
-  "Version": "1.0.0",
+  "Version": "1.1.0-beta",
   "Description": "Lightning won't harm your farm.",
   "UniqueID": "cat.safelightning",
   "EntryDll": "SafeLightning.dll",
-  "MinimumApiVersion": "2.5",
+  "MinimumApiVersion": "2.6-beta",
   "UpdateKeys": [ "Nexus:2039" ]
 }

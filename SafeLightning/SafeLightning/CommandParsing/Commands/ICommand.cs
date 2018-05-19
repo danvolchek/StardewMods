@@ -1,7 +1,7 @@
 ﻿namespace SafeLightning.CommandParsing.Commands
 {
     /// <summary>
-    /// A console command.
+    ///     A console command.
     /// </summary>
     internal interface ICommand
     {

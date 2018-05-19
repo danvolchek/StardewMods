@@ -4,15 +4,15 @@ using StardewValley.TerrainFeatures;
 namespace SafeLightning.LightningProtection.ResultResolvers.SavedFeatureData
 {
     /// <summary>
-    /// Save the number of fruits on the <see cref="FruitTree"/> before it is modified.
+    ///     Save the number of fruits on the <see cref="FruitTree" /> before it is modified.
     /// </summary>
     internal class FruitTreeSaveData : BaseFeatureSaveData
     {
-        public int fruitsOnTree;
+        public int FruitsOnTree;
 
         public FruitTreeSaveData(Vector2 featurePosition, FruitTree feature) : base(featurePosition, feature)
         {
-            this.fruitsOnTree = feature.fruitsOnTree;
+            this.FruitsOnTree = feature.fruitsOnTree.Value;
         }
     }
 }

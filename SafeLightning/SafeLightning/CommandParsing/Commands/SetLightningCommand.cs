@@ -3,7 +3,7 @@
 namespace SafeLightning.CommandParsing.Commands
 {
     /// <summary>
-    /// Sets the weather for today and tomorrow as lightning.
+    ///     Sets the weather for today and tomorrow as lightning.
     /// </summary>
     internal class SetLightningCommand : BaseCommand
     {

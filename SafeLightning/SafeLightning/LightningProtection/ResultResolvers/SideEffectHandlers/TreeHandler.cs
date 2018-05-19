@@ -6,7 +6,7 @@ using StardewValley.TerrainFeatures;
 namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 {
     /// <summary>
-    /// Removes wood and sapped dropped by the <see cref="Tree"/> when it is hit by lightning.
+    ///     Removes wood and sapped dropped by the <see cref="Tree" /> when it is hit by lightning.
     /// </summary>
     internal class TreeHandler : BaseHandler
     {
@@ -21,14 +21,14 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 
         public override void Handle(BaseFeatureSaveData featureSaveData, GameLocation location)
         {
-            Tree tree = location.terrainFeatures[featureSaveData.featurePosition] as Tree;
+            Tree tree = location.terrainFeatures[featureSaveData.FeaturePosition] as Tree;
             TreeSaveData treeSaveData = featureSaveData as TreeSaveData;
 
             //Growth stages 0 - 2 are instantly removed, so there are no side effects
 
-            tree.health = treeSaveData.health;
+            tree.health.Value = treeSaveData.health;
 
-            if (tree.growthStage >= 3)
+            if (tree.growthStage.Value >= 3)
             {
                 int min = 5;
                 int max = 8;
@@ -36,23 +36,25 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
 
                 //Trees at growth stage >5 spawn 2 debris with chunkType 92 each with 1 chunk (sap)
                 //This must be a stump.
-                if (tree.growthStage >= 5)
+                if (tree.growthStage.Value >= 5)
                 {
                     int numToRemove = 2;
                     for (int i = 0; i < location.debris.Count; i++)
                     {
                         Debris debris = location.debris[i];
 
-                        if (debris.chunkType == 92 && debris.debrisType == Debris.DebrisType.RESOURCE && debris.Chunks.Count == 1)
+                        if (debris.chunkType.Value == 92 && debris.debrisType.Value == Debris.DebrisType.RESOURCE &&
+                            debris.Chunks.Count == 1)
                         {
-                            if (!WithinRange(featureSaveData.featurePosition, debris.Chunks[0].position / Game1.tileSize, 2))
+                            if (!this.WithinRange(featureSaveData.FeaturePosition,
+                                debris.Chunks[0].position.Value / Game1.tileSize, 2))
                                 continue;
 
                             location.debris.RemoveAt(i);
                             numToRemove--;
                             i--;
 
-                            monitor.Log($"Removing sap for stage 5 stump. {numToRemove} left.", LogLevel.Trace);
+                            this.monitor.Log($"Removing sap for stage 5 stump. {numToRemove} left.", LogLevel.Trace);
 
                             if (numToRemove == 0)
                                 break;
@@ -70,19 +72,19 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
                     {
                         Debris debris = location.debris[i];
 
-                        if (debris.chunkType == 388 && debris.debrisType == Debris.DebrisType.RESOURCE)
-                        {
-                            if (debris.Chunks.Count == 4 && (debris.Chunks[0].debrisType == 388 || debris.Chunks[0].debrisType == 389))
+                        if (debris.chunkType.Value == 388 && debris.debrisType.Value == Debris.DebrisType.RESOURCE)
+                            if (debris.Chunks.Count == 4 &&
+                                (debris.Chunks[0].debrisType == 388 || debris.Chunks[0].debrisType == 389))
                             {
-                                if (!WithinRange(featureSaveData.featurePosition, debris.Chunks[0].position / Game1.tileSize, 2))
+                                if (!this.WithinRange(featureSaveData.FeaturePosition,
+                                    debris.Chunks[0].position.Value / Game1.tileSize, 2))
                                     continue;
 
-                                monitor.Log($"Removing 4 extra wood for tree stages 3 and 4.", LogLevel.Trace);
+                                this.monitor.Log($"Removing 4 extra wood for tree stages 3 and 4.", LogLevel.Trace);
 
                                 location.debris.RemoveAt(i);
                                 break;
                             }
-                        }
                     }
                 }
 
@@ -92,21 +94,24 @@ namespace SafeLightning.LightningProtection.ResultResolvers.SideEffectHandlers
                 {
                     Debris debris = location.debris[i];
 
-                    if (debris.chunkType == 12 && debris.debrisType == Debris.DebrisType.CHUNKS)
-                    {
-                        if (debris.Chunks.Count >= min && debris.Chunks.Count <= max && debris.Chunks[0].debrisType == 12)
+                    if (debris.chunkType.Value == 12 && debris.debrisType.Value == Debris.DebrisType.CHUNKS)
+                        if (debris.Chunks.Count >= min && debris.Chunks.Count <= max &&
+                            debris.Chunks[0].debrisType == 12)
                         {
-                            if (!WithinRange(featureSaveData.featurePosition, debris.Chunks[0].position / Game1.tileSize, 3) || numRemoved + debris.Chunks.Count > total)
+                            if (!this.WithinRange(featureSaveData.FeaturePosition,
+                                    debris.Chunks[0].position.Value / Game1.tileSize, 3) ||
+                                numRemoved + debris.Chunks.Count > total)
                                 continue;
 
-                            monitor.Log($"Removing wood, count: {debris.Chunks.Count}, total: {numRemoved + debris.Chunks.Count}/{total}.", LogLevel.Trace);
+                            this.monitor.Log(
+                                $"Removing wood, count: {debris.Chunks.Count}, total: {numRemoved + debris.Chunks.Count}/{total}.",
+                                LogLevel.Trace);
                             numRemoved += debris.Chunks.Count;
                             location.debris.RemoveAt(i);
                             i--;
                             if (numRemoved == total)
                                 break;
                         }
-                    }
                 }
             }
         }

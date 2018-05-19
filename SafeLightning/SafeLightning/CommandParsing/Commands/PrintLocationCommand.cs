@@ -3,7 +3,7 @@
 namespace SafeLightning.CommandParsing.Commands
 {
     /// <summary>
-    /// Prints the player's location.
+    ///     Prints the player's location.
     /// </summary>
     internal class PrintLocationCommand : BaseCommand
     {

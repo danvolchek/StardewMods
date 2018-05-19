@@ -7,13 +7,13 @@ using StardewValley.TerrainFeatures;
 namespace SafeLightning.LightningProtection.ResultResolvers
 {
     /// <summary>
-    /// Keeps <see cref="FruitTree"/>s from turning to coal trees and handles side effects of doing so.
+    ///     Keeps <see cref="FruitTree" />s from turning to coal trees and handles side effects of doing so.
     /// </summary>
     internal class FruitTreeCoalResolver : BaseResolver
     {
         public FruitTreeCoalResolver(IMonitor monitor) : base(monitor)
         {
-            sideEffectHandlers.Add(new FruitTreeHandler(monitor));
+            this.sideEffectHandlers.Add(new FruitTreeHandler(monitor));
         }
 
         public override LightningStrikeResult Result => LightningStrikeResult.FruitTreeTurnedToCoal;
@@ -22,15 +22,17 @@ namespace SafeLightning.LightningProtection.ResultResolvers
         {
             FruitTreeSaveData fruitTreeSaveData = featureSaveData as FruitTreeSaveData;
 
-            FruitTree fruitTree = location.terrainFeatures[featureSaveData.featurePosition] as FruitTree;
+            FruitTree fruitTree = location.terrainFeatures[featureSaveData.FeaturePosition] as FruitTree;
 
-            fruitTree.struckByLightningCountdown = 0;
-            fruitTree.fruitsOnTree = fruitTreeSaveData.fruitsOnTree;
-            monitor.Log($"Turned {fruitTree.GetType()} at position {featureSaveData.featurePosition} back to fruit.", LogLevel.Trace);
+            fruitTree.struckByLightningCountdown.Value = 0;
+            fruitTree.fruitsOnTree.Value = fruitTreeSaveData.FruitsOnTree;
+            this.monitor.Log(
+                $"Turned {fruitTree.GetType()} at position {featureSaveData.FeaturePosition} back to fruit.",
+                LogLevel.Trace);
 
             //Handle the dropped coal
-            if (sideEffectHandlers[0].CanHandle(fruitTreeSaveData))
-                sideEffectHandlers[0].Handle(fruitTreeSaveData, location);
+            if (this.sideEffectHandlers[0].CanHandle(fruitTreeSaveData))
+                this.sideEffectHandlers[0].Handle(fruitTreeSaveData, location);
         }
     }
 }
