@@ -1,44 +1,35 @@
-﻿using BetterSlingshots.Slingshot;
+﻿using System;
+using System.Collections.Generic;
+using BetterSlingshots.Slingshot;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
-using System;
-using System.Collections.Generic;
-using SObject = StardewValley.Object;
 
 namespace BetterSlingshots
 {
     public class BetterSlingshotsMod : Mod
     {
-        private bool wasUsingSlingshot = false;
         private BetterSlingshotsConfig config;
         private SlingshotManager manager;
-
-        //Projectile ideas
-        //Ricochet
-        //Homing
-        //explode into bullets
-        //boomerang
-        //auto reload
-        //slime
+        private bool wasUsingSlingshot;
 
         public override void Entry(IModHelper helper)
         {
-            config = helper.ReadConfig<BetterSlingshotsConfig>();
-            if (config.GalaxySlingshotPrice < 0)
+            this.config = helper.ReadConfig<BetterSlingshotsConfig>();
+            if (this.config.GalaxySlingshotPrice < 0)
             {
-                config.GalaxySlingshotPrice = new BetterSlingshotsConfig().GalaxySlingshotPrice;
-                helper.WriteConfig(config);
+                this.config.GalaxySlingshotPrice = new BetterSlingshotsConfig().GalaxySlingshotPrice;
+                helper.WriteConfig(this.config);
             }
 
-            manager = new SlingshotManager(config, helper.Reflection);
+            this.manager = new SlingshotManager(this.config, helper.Reflection);
 
-            InputEvents.ButtonPressed += InputEvents_ButtonPressed;
-            InputEvents.ButtonReleased += InputEvents_ButtonReleased;
-            GameEvents.UpdateTick += GameEvents_UpdateTick;
-            MenuEvents.MenuChanged += MenuEvents_MenuChanged;
+            InputEvents.ButtonPressed += this.InputEvents_ButtonPressed;
+            InputEvents.ButtonReleased += this.InputEvents_ButtonReleased;
+            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
+            MenuEvents.MenuChanged += this.MenuEvents_MenuChanged;
         }
 
         private void MenuEvents_MenuChanged(object sender, EventArgsClickableMenuChanged e)
@@ -47,37 +38,51 @@ namespace BetterSlingshots
             {
                 Item slingshotItem = new StardewValley.Tools.Slingshot(34);
 
-                Dictionary<Item, int[]> itemPriceAndStock = Helper.Reflection.GetField<Dictionary<Item, int[]>>(shopMenu, "itemPriceAndStock").GetValue();
-                itemPriceAndStock.Add(slingshotItem, new int[] { config.GalaxySlingshotPrice, 1 });
-                List<Item> forSale = Helper.Reflection.GetField<List<Item>>(shopMenu, "forSale").GetValue();
+                Dictionary<Item, int[]> itemPriceAndStock = this.Helper.Reflection
+                    .GetField<Dictionary<Item, int[]>>(shopMenu, "itemPriceAndStock").GetValue();
+                itemPriceAndStock.Add(slingshotItem, new[] {this.config.GalaxySlingshotPrice, 1});
+                List<Item> forSale = this.Helper.Reflection.GetField<List<Item>>(shopMenu, "forSale").GetValue();
                 forSale.Insert(0, slingshotItem);
             }
         }
 
         private void GameEvents_UpdateTick(object sender, EventArgs e)
         {
-            bool usingSlingshot = Game1.player != null ? Game1.player.usingSlingshot : false;
+            bool usingSlingshot = Game1.player?.usingSlingshot ?? false;
             if (usingSlingshot)
             {
-                if (!wasUsingSlingshot)
-                    manager.PrepareForFiring();
+                if (!this.wasUsingSlingshot) this.manager.PrepareForFiring();
             }
-            else if (wasUsingSlingshot)
-                manager.FiringOver();
+            else if (this.wasUsingSlingshot)
+            {
+                this.manager.FiringOver();
+            }
 
-            wasUsingSlingshot = usingSlingshot;
+            /*//this fixes the problem, which means that for some reason the finish event is not getting sent. No idea why
+            //it does it when we can only detect the issue - when they scroll away
+            foreach (Farmer farmer in Game1.getAllFarmers())
+            {
+                if (farmer.usingSlingshot && !(farmer.CurrentTool is StardewValley.Tools.Slingshot))
+                {
+                    farmer.usingSlingshot = false;
+                    farmer.canReleaseTool = true;
+                    farmer.UsingTool = false;
+                    farmer.canMove = true;
+                    farmer.Halt();
+                }
+            }*/
+
+            this.wasUsingSlingshot = usingSlingshot;
         }
 
         private void InputEvents_ButtonReleased(object sender, EventArgsInput e)
         {
-            if (e.IsActionButton)
-                manager.SetActionButtonDownState(false);
+            if (e.IsActionButton) this.manager.SetActionButtonDownState(false);
         }
 
         private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
         {
-            if (e.IsActionButton)
-                manager.SetActionButtonDownState(true);
+            if (e.IsActionButton) this.manager.SetActionButtonDownState(true);
         }
     }
 }
