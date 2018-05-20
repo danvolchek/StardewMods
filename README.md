@@ -22,3 +22,4 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Chat Commands](/ChatCommands): Lets you run SMAPI console commands in the in game chat box. Also adds scrolling, command history, and better text entry.
 - [Better Artisan Good Icons](/BetterArtisanGoodIcons): Draws a different texture for different wines, juices, jellies, and honey based on what was used to make them.
 - [Copy Invite Code](/CopyInviteCode): Adds an option to copy your invite code to your clipboard in the show invite code menu.
+- [Better Garden Pots](/BetterGardenPots): Makes garden pots way better. Makes sprinklers water them, bee houses notice them, and more!

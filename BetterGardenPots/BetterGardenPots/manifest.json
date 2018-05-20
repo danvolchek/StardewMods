@@ -1,0 +1,10 @@
+﻿{
+  "Name": "BetterGardenPots",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Makes garden pots way better!",
+  "UniqueID": "cat.bettergardenpots",
+  "EntryDll": "BetterGardenPots.dll",
+  "MinimumApiVersion": "2.6-beta",
+  "UpdateKeys": ["Nexus:2209"]
+}
