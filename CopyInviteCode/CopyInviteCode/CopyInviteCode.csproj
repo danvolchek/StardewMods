@@ -44,8 +44,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClipboardItem.cs" />
+    <Compile Include="ClipboardManagers\IClipboardManager.cs" />
+    <Compile Include="ClipboardManagers\LinuxClipboardManager.cs" />
+    <Compile Include="ClipboardManagers\WindowsClipboardManager.cs" />
     <Compile Include="CopyInviteCodeMod.cs" />
+    <Compile Include="ClipboardManagers\MacClipboardManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ClipboardManagers\UnixClipboardManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
