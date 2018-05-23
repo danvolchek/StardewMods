@@ -22,10 +22,16 @@ namespace BetterFruitTrees.Patches
     {
         internal static IReflectionHelper Reflection;
         internal static bool HarvestThreeAtOnce { get; set; }
+        internal static bool DisableTownPlanting { get; set; }
 
         internal static bool CanTreeBeHarvested(FruitTree tree)
         {
             return HarvestThreeAtOnce ? tree.fruitsOnTree.Value == 3 : tree.fruitsOnTree.Value > 0;
+        }
+
+        internal static bool CanPlantOutsideFarm()
+        {
+            return (DisableTownPlanting = false);
         }
 
         /// <summary>

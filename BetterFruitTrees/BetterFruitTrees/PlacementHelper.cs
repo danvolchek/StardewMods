@@ -141,6 +141,9 @@ namespace BetterFruitTrees
                     break;
             }
 
+            if(!(location is Farm) && !Utils.DisableTownPlanting){
+                thingsAround = true;
+            }
             if (!thingsAround)
                 return false;
             //We only continue if the game already returned.
@@ -153,7 +156,7 @@ namespace BetterFruitTrees
                 location.terrainFeatures.Remove(index1);
             }
 
-            if (location is Farm &&
+            if ((location is Farm || !Utils.DisableTownPlanting) &&
                 (location.doesTileHaveProperty((int) index1.X, (int) index1.Y, "Diggable", "Back") != null || location
                      .doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "Type", "Back").Equals("Grass")) &&
                 !location.doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "NoSpawn", "Back")

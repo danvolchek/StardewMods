@@ -34,6 +34,9 @@ namespace BetterFruitTrees
 
             BetterFruitTreesConfig config = helper.ReadConfig<BetterFruitTreesConfig>();
 
+            Utils.DisableTownPlanting =
+                config.Disable_Planting_Fruit_Trees_Outside_Farm;
+
             IInitializable pHelper = new PlacementHelper();
             pHelper.Init();
 
