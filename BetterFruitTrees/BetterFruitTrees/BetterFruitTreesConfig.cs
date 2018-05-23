@@ -9,5 +9,7 @@
             get;
             set;
         } = false;
+
+        public bool Allow_Placing_Fruit_Trees_Outside_Farm { get; set; } = false;
     }
 }

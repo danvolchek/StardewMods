@@ -19,6 +19,12 @@ namespace BetterFruitTrees
     {
         private int removeChecks;
 
+        private BetterFruitTreesConfig config;
+
+        public PlacementHelper(BetterFruitTreesConfig config)
+        {
+            this.config = config;
+        }
         /// <summary>
         ///     Initialize event handlers.
         /// </summary>
@@ -99,7 +105,7 @@ namespace BetterFruitTrees
 
             if (Utility.playerCanPlaceItemHere(location, item, x, y, Game1.player))
             {
-                if (!this.PlaceSaplingRegardlessOfNearbyTrees((Object) item, location, x, y, Game1.player))
+                if (!this.ForcePlaceSapling((Object) item, location, x, y, Game1.player))
                     return;
 
                 Game1.player.reduceActiveItemByOne();
@@ -112,14 +118,10 @@ namespace BetterFruitTrees
         }
 
         /// <summary>
-        ///     Place a sapling regardless of other trees.
+        /// Whether there are trees nearby the given position.
         /// </summary>
-        /// <returns>Whether placement was successful.</returns>
-        private bool PlaceSaplingRegardlessOfNearbyTrees(Object item, GameLocation location, int x, int y,
-            Farmer who = null)
+        private static bool AreTreesNearby(GameLocation location, int x, int y)
         {
-            Vector2 index1 = new Vector2(x / Game1.tileSize, y / Game1.tileSize);
-
             Vector2 key2 = new Vector2();
             bool thingsAround = false;
             for (int index2 = x / Game1.tileSize - 2; index2 <= x / Game1.tileSize + 2; ++index2)
@@ -131,7 +133,6 @@ namespace BetterFruitTrees
                     if (location.terrainFeatures.ContainsKey(key2) &&
                         (location.terrainFeatures[key2] is Tree || location.terrainFeatures[key2] is FruitTree))
                     {
-                        //The game would return false here.
                         thingsAround = true;
                         break;
                     }
@@ -141,20 +142,35 @@ namespace BetterFruitTrees
                     break;
             }
 
-            if (!thingsAround)
+            return thingsAround;
+        }
+
+        /// <summary>
+        ///     Place a sapling regardless of other trees.
+        /// </summary>
+        /// <returns>Whether placement was successful.</returns>
+        private bool ForcePlaceSapling(Object item, GameLocation location, int x, int y,
+            Farmer who = null)
+        {
+            //Don't place a sapling if the player could place one here
+            bool shouldPlace = location is Farm
+                ? AreTreesNearby(location, x, y)
+                : this.config.Allow_Placing_Fruit_Trees_Outside_Farm;
+
+            if (!shouldPlace)
                 return false;
-            //We only continue if the game already returned.
+
+            Vector2 index1 = new Vector2(x / Game1.tileSize, y / Game1.tileSize);
 
             if (location.terrainFeatures.ContainsKey(index1))
             {
-                if (!(location.terrainFeatures[index1] is HoeDirt) ||
-                    (location.terrainFeatures[index1] as HoeDirt).crop != null)
+                if (!(location.terrainFeatures[index1] is HoeDirt hoeDirt) ||
+                    hoeDirt.crop != null)
                     return false;
                 location.terrainFeatures.Remove(index1);
             }
 
-            if (location is Farm &&
-                (location.doesTileHaveProperty((int) index1.X, (int) index1.Y, "Diggable", "Back") != null || location
+            if ((location.doesTileHaveProperty((int) index1.X, (int) index1.Y, "Diggable", "Back") != null || location
                      .doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "Type", "Back").Equals("Grass")) &&
                 !location.doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "NoSpawn", "Back")
                     .Equals("Tree") || location.Name.Equals("Greenhouse") &&

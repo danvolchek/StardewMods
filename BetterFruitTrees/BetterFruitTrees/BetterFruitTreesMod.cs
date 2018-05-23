@@ -34,7 +34,7 @@ namespace BetterFruitTrees
 
             BetterFruitTreesConfig config = helper.ReadConfig<BetterFruitTreesConfig>();
 
-            IInitializable pHelper = new PlacementHelper();
+            IInitializable pHelper = new PlacementHelper(config);
             pHelper.Init();
 
             if (config.Disable_Fruit_Tree_Junimo_Harvesting)
