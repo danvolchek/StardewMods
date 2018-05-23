@@ -36,7 +36,6 @@ namespace StackEverything
             IDictionary<string, Type> patchedTypeReplacements = new Dictionary<string, Type>
             {
                 {"maximumStackSize", typeof(MaximumStackSizePatch)},
-                //{"getStack", typeof(GetStackPatch)},
                 {"addToStack", typeof(AddToStackPatch)},
                 {"drawInMenu", typeof(DrawInMenuPatch)}
             };

@@ -9,9 +9,9 @@ namespace StackEverything.Patches
     /// <summary>Draw stack size in inventories.</summary>
     internal class DrawInMenuPatch
     {
-        public static void Postfix(Item __instance, SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
+        public static void Postfix(Item __instance, SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber, Color color, bool drawShadow)
         {
-            if (!(__instance is SObject objInstance && !objInstance.bigCraftable) && !StackEverythingMod.PatchedTypes.Any(item => __instance.GetType().IsAssignableFrom(item)))
+            if (!((__instance is SObject objInstance && objInstance.bigCraftable.Value) || StackEverythingMod.PatchedTypes.Any(item => __instance.GetType().IsAssignableFrom(item))))
                 return;
 
             if (drawStackNumber && __instance.maximumStackSize() > 1 && ((double)scaleSize > 0.3 && __instance.Stack != int.MaxValue) && __instance.Stack > 1)
