@@ -146,7 +146,7 @@ namespace BetterFruitTrees
         }
 
         /// <summary>
-        ///     Place a sapling regardless of other trees.
+        ///     Force a sapling to be placed if the given tile allows for saplings.
         /// </summary>
         /// <returns>Whether placement was successful.</returns>
         private bool ForcePlaceSapling(Object item, GameLocation location, int x, int y,
