@@ -8,7 +8,7 @@ namespace BetterGardenPots.Patches.Utility
 {
     internal class FindCloseFlowerPatch
     {
-        public static bool Prefix(GameLocation location, Vector2 startTileLocation, Crop __result)
+        public static bool Prefix(GameLocation location, Vector2 startTileLocation, ref Crop __result)
         {
             __result = null;
 
