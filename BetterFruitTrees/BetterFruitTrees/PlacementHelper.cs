@@ -53,7 +53,7 @@ namespace BetterFruitTrees
                         return;
                     if (Game1.player.isRidingHorse())
                     {
-                        Game1.player.getMount().checkAction(Game1.player, Game1.player.currentLocation);
+                        Game1.player.mount.checkAction(Game1.player, Game1.player.currentLocation);
                         return;
                     }
 
