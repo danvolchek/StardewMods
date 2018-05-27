@@ -1,0 +1,10 @@
+﻿{
+	"Name": "Mod Update Menu",
+	"Author": "Cat",
+	"Version": "1.0.0",
+	"Description": "Shows an in game menu on the title screen about mods that need updates.",
+	"UniqueID": "cat.modupdatemenu",
+	"EntryDll": "ModUpdateMenu.dll",
+	"MinimumApiVersion": "2.0",
+	"UpdateKeys": []
+}
