@@ -61,7 +61,7 @@ namespace ModUpdateMenu
         private void GameEvents_UpdateTick(object sender, EventArgs e)
         {
             if (Game1.activeClickableMenu is TitleMenu titleMenu && TitleMenu.subMenu == null && !this.Helper.Reflection
-                    .GetField<bool>(titleMenu, "isTransitioningButtons").GetValue() && !titleMenu.)
+                    .GetField<bool>(titleMenu, "isTransitioningButtons").GetValue())
                 this.button.ShowUpdateButton = true;
             else
                 this.button.ShowUpdateButton = false;
