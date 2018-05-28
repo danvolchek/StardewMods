@@ -4,6 +4,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using xTile.Dimensions;
+using xTile.Layers;
 using xTile.Tiles;
 
 namespace DesertObelisk
@@ -105,13 +106,13 @@ namespace DesertObelisk
         {
             if (!Context.IsWorldReady)
                 return;
-            var desert = Game1.getLocationFromName("Desert");
-            var markerTileSheet = new TileSheet("zDesertObeliskTileSheet", desert.map,
-                this.helper.Content.GetActualAssetKey("assets/markerTiles") + ".xnb", new Size(2, 3), new Size(16, 16));
+            GameLocation desert = Game1.getLocationFromName("Desert");
+            TileSheet markerTileSheet = new TileSheet("zDesertObeliskTileSheet", desert.map,
+                this.helper.Content.GetActualAssetKey("assets/markerTiles"), new Size(2, 3), new Size(16, 16));
 
             desert.map.AddTileSheet(markerTileSheet);
-            var frontLayer = desert.map.GetLayer("Front");
-            var buildingsLayer = desert.map.GetLayer("Buildings");
+            Layer frontLayer = desert.map.GetLayer("Front");
+            Layer buildingsLayer = desert.map.GetLayer("Buildings");
             frontLayer.Tiles[this.desertWarpX, 40] = new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 0);
             frontLayer.Tiles[this.desertWarpX + 1, 40] =
                 new StaticTile(frontLayer, markerTileSheet, BlendMode.Alpha, 1);
