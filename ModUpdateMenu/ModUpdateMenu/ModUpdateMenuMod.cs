@@ -32,12 +32,12 @@ namespace ModUpdateMenu
                     new ModStatus(UpdateStatus.UpToDate, "Stack Everything", "Cat", "https://www.nexusmods.com/stardewvalley/mods/2053", "2.7.0-beta"),
                     new ModStatus(UpdateStatus.UpToDate, "Content Patcher", "Pathoschild", "https://www.nexusmods.com/stardewvalley/mods/1915", "1.4.-beta.3"),
                     /*new ModStatus(UpdateStatus.Error, "Shmoopyaaaaaaaaaa", "bloooooooooooorg", "https://www.nexusmods.com/stardewvalley/mods/2223", "1.0.0", null, "No update key found."),
-                    new ModStatus(UpdateStatus.Skipped, "bldargo", "flargo", "https://github.com/babies", "1.0.0", null, "Too old my bibba"),
+                    new ModStatus(UpdateStatus.Skipped, "bldargo", "flargo", "https://github.com/babies", "1.0.0", null, "old"),
                     new ModStatus(UpdateStatus.Error, "Shmoopyaaaaaaaaaa", "bloooooooooooorg", "https://www.nexusmods.com/stardewvalley/mods/2223", "1.0.0", null, "No update key found."),
-                    new ModStatus(UpdateStatus.OutOfDate, "Doopy", "baby jesus", "https://community.playstarbound.com/threads/treetransplant.135549/", "1.1.0", "1.2.0"),
-                    new ModStatus(UpdateStatus.OutOfDate, "Doopy", "baby jesus", "https://community.playstarbound.com/threads/treetransplant.135549/", "1.1.0", "1.2.0"),
+                    new ModStatus(UpdateStatus.OutOfDate, "Doopy", "aaaa", "https://community.playstarbound.com/threads/treetransplant.135549/", "1.1.0", "1.2.0"),
+                    new ModStatus(UpdateStatus.OutOfDate, "Doopy", "aaaas", "https://community.playstarbound.com/threads/treetransplant.135549/", "1.1.0", "1.2.0"),
                     new ModStatus(UpdateStatus.Error, "Shmoopyaaaaaaaaaa", "bloooooooooooorg", "https://www.nexusmods.com/stardewvalley/mods/2223", "1.0.0", null, "No update key found."),
-                    new ModStatus(UpdateStatus.Skipped, "bldargo", "flargo", "https://github.com/babies", "1.0.0", null, "Too old my bibba")*/
+                    new ModStatus(UpdateStatus.Skipped, "bldargo", "flargo", "https://github.com/babies", "1.0.0", null, "old")*/
                 });
             }).Start();
 
