@@ -108,6 +108,7 @@ namespace BetterHay
         private void PlayerEvents_Warped(object sender, EventArgsPlayerWarped e)
         {
             this.lastTerrainFeatures = e.NewLocation?.terrainFeatures?.FieldDict.ToDictionary(item => item.Key, item => item.Value.Value);
+            this.CurrentLocation = e.NewLocation;
         }
 
 
