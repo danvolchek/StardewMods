@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BetterGardenPots.APIs;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Locations;
 using StardewValley.Objects;
 using SObject = StardewValley.Object;
 
 namespace BetterGardenPots.Subscribers
 {
-    class GardenPotSprinklerHandler : IEventSubscriber
+    internal class GardenPotSprinklerHandler : IEventSubscriber
     {
         private ISimpleSprinklersAPI simpleSprinklersAPI;
         private IBetterSprinklersAPI betterSprinklersAPI;
@@ -60,7 +62,7 @@ namespace BetterGardenPots.Subscribers
 
         private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
         {
-            foreach (GameLocation location in Game1.locations)
+            foreach (GameLocation location in GetMainAndInnerLocations(Game1.locations))
                 foreach (Vector2 wateredTile in this.GetWateredTiles(location))
                 {
                     if (location.Objects.TryGetValue(wateredTile, out SObject item) && item is IndoorPot pot && pot.hoeDirt.Value != null)
@@ -71,6 +73,17 @@ namespace BetterGardenPots.Subscribers
                 }
         }
 
+        private static IEnumerable<GameLocation> GetMainAndInnerLocations(IEnumerable<GameLocation> locations)
+        {
+            foreach (GameLocation loc in locations)
+            {
+                yield return loc;
+                if (loc is BuildableGameLocation buildableLoc)
+                    foreach (GameLocation l in buildableLoc.buildings.Select(item => item.indoors.Value))
+                        yield return l;
+            }
+        }
+
         private IEnumerable<Vector2> GetWateredTiles(GameLocation location)
         {
             if (location == null)
@@ -78,12 +91,12 @@ namespace BetterGardenPots.Subscribers
 
             foreach (KeyValuePair<Vector2, SObject> item in location.Objects.Pairs)
                 if (item.Value.Name.ToLower().Contains("sprinkler"))
-                    foreach (Vector2 pos in this.GetRange(item.Value, item.Key, location))
+                    foreach (Vector2 pos in this.GetRange(item.Value, item.Key))
                         yield return pos;
         }
 
 
-        public IEnumerable<Vector2> GetRange(SObject obj, Vector2 position, GameLocation location)
+        public IEnumerable<Vector2> GetRange(SObject obj, Vector2 position)
         {
             if (this.betterSprinklersAPI == null)
             {

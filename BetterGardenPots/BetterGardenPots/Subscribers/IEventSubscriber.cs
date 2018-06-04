@@ -1,6 +1,6 @@
 ﻿namespace BetterGardenPots.Subscribers
 {
-    interface IEventSubscriber
+    internal interface IEventSubscriber
     {
         void Subscribe();
         void Unsubscribe();

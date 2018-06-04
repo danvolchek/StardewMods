@@ -1,6 +1,6 @@
 ﻿namespace BetterGardenPots
 {
-    class BetterGardenPotsModConfig
+    internal class BetterGardenPotsModConfig
     {
         public bool MakeBeeHousesNoticeFlowersInGardenPots { get; set; } = true;
         public bool MakeSprinklersWaterGardenPots { get; set; } = true;

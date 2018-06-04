@@ -14,7 +14,7 @@ namespace BetterGardenPots
 {
     public class BetterGardenPotsMod : Mod
     {
-        private IList<IEventSubscriber> subscribers = new List<IEventSubscriber>();
+        private readonly IList<IEventSubscriber> subscribers = new List<IEventSubscriber>();
 
         public override void Entry(IModHelper helper)
         {
