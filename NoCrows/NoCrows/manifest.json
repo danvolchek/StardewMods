@@ -1,13 +1,10 @@
 ﻿{
   "Name": "NoCrows",
   "Author": "Cat",
-  "Version": {
-    "MajorVersion": 1,
-    "MinorVersion": 0,
-    "PatchVersion": 0,
-    "Build": null
-  },
+  "Version": "2.0.0",
   "Description": "Crows will never eat your crops.",
   "UniqueID": "cat.nocrows",
-  "EntryDll": "NoCrows.dll"
+  "EntryDll": "NoCrows.dll",
+  "MinimumApiVersion": "2.0",
+  "UpdateKeys": [ "Nexus:1682" ]
 }
