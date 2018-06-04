@@ -59,14 +59,15 @@ namespace StackEverything
             //fix furniture pickup in decoratable locations and item placement putting down the whole furniture stack
             IDictionary<string, Tuple<Type, Type>> otherReplacements = new Dictionary<string, Tuple<Type, Type>>()
             {
-                {"leftClick", new Tuple<Type, Type>(typeof(DecoratableLocation), typeof(FurniturePickupPatch))},
-                {"tryToPlaceItem", new Tuple<Type, Type>(typeof(Utility), typeof(TryToPlaceItemPatch))}
+                {"leftClick", new Tuple<Type, Type>(GetSDVType("Locations.DecoratableLocation"), typeof(FurniturePickupPatch))},
+                {"tryToPlaceItem", new Tuple<Type, Type>(GetSDVType("Utility"), typeof(TryToPlaceItemPatch))},
+                {"doDoneFishing", new Tuple<Type, Type>(GetSDVType("Tools.FishingRod"), typeof(DoDoneFishingPatch))}
             };
 
             foreach (KeyValuePair<string, Tuple<Type, Type>> replacement in otherReplacements)
             {
                 MethodInfo original = replacement.Value.Item1
-                    .GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).FirstOrDefault(m => m.Name == replacement.Key);
+                    .GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic).FirstOrDefault(m => m.Name == replacement.Key);
 
                 MethodInfo prefix = replacement.Value.Item2
                     .GetMethods(BindingFlags.Static | BindingFlags.Public).FirstOrDefault(item => item.Name == "Prefix");
