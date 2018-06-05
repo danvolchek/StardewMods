@@ -192,7 +192,7 @@ namespace SafeLightning
                 this.Monitor.Log($"Failed to restore {affectedFeatures.Count} features.", LogLevel.Trace);
                 foreach(KeyValuePair<Vector2, BaseFeatureSaveData> unresolvedFeature in affectedFeatures)
                 {
-                    this.Monitor.Log($"{unresolvedFeature.Key} - {unresolvedFeature.Value.GetType()} ({unresolvedFeature.Value.Feature.GetType()})");
+                    this.Monitor.Log($"{unresolvedFeature.Key} - {unresolvedFeature.Value.GetType()} ({unresolvedFeature.Value.Feature.GetType()})", LogLevel.Trace);
                 }
                 this.featuresBeforeTheyWereHit.Clear();
             }
