@@ -71,6 +71,9 @@ namespace CopyInviteCode
         {
             ConfirmationDialog confDialog = Game1.activeClickableMenu as ConfirmationDialog;
 
+            if (confDialog == null)
+                return;
+
             string code = this.Helper.Reflection.GetField<string>(confDialog, "message").GetValue()
                 .Replace(GetFirstPartOfInviteMessage(), "")
                 .Trim();
