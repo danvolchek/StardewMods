@@ -189,7 +189,11 @@ namespace SafeLightning
         {
             if (!this.RestoreLocation(Game1.getFarm(), affectedFeatures))
             {
-                this.Monitor.Log($"Failed to restore some features. They're being ignored.", LogLevel.Trace);
+                this.Monitor.Log($"Failed to restore {affectedFeatures.Count} features.", LogLevel.Trace);
+                foreach(KeyValuePair<Vector2, BaseFeatureSaveData> unresolvedFeature in affectedFeatures)
+                {
+                    this.Monitor.Log($"{unresolvedFeature.Key} - {unresolvedFeature.Value.GetType()} ({unresolvedFeature.Value.Feature.GetType()})");
+                }
                 this.featuresBeforeTheyWereHit.Clear();
             }
         }
