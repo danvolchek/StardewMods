@@ -24,7 +24,7 @@ namespace StackEverything.Patches
                 if (tackle.Stack > 1)
                 {
                     tackle.Stack--;
-                    tackle.scale.Y = 1;
+                    tackle.uses.Value = 0;
                     __instance.attachments[1] = tackle;
 
                     string displayedMessage = new HUDMessage(Game1.content.LoadString("Strings\\StringsFromCSFiles:FishingRod.cs.14086"), "").Message;
