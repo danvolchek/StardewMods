@@ -25,3 +25,4 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Better Garden Pots](/BetterGardenPots): Makes garden pots way better. Makes sprinklers water them, bee houses notice them, and more!
 - [Removable Horse Hats](/RemovableHorseHats): Lets you remove the hat from your horse.
 - [Mod Update Menu](/ModUpdateMenu): Adds an in game menu that notifies users about mod updates.
+- [Custom Transparency](/CustomTransparency): Lets you choose how transparent buildings/trees are when you walk behind them.
