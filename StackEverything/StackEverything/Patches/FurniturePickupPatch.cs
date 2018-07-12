@@ -23,7 +23,7 @@ namespace StackEverything.Patches
                 {
                     if (current.flaggedForPickUp && who.couldInventoryAcceptThisItem(current))
                     {
-                        current.flaggedForPickUp.Value = false;
+                        current.flaggedForPickUp = false;
                         current.performRemoveAction(new Vector2(x / Game1.tileSize, y / Game1.tileSize), __instance);
 
                         Item item = who.addItemToInventory(current);

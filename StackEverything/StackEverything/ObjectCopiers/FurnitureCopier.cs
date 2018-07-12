@@ -15,24 +15,24 @@ namespace StackEverything.ObjectCopiers
         {
             Furniture toCopy = obj as Furniture;
 
-            Furniture furniture = new Furniture(toCopy.parentSheetIndex.Value, toCopy.tileLocation.Value);
+            Furniture furniture = new Furniture(toCopy.ParentSheetIndex, toCopy.TileLocation);
 
-            furniture.defaultBoundingBox.Value = toCopy.defaultBoundingBox;
-            furniture.boundingBox.Value = toCopy.boundingBox;
-            furniture.rotations.Value = toCopy.rotations;
+            furniture.defaultBoundingBox.Value = toCopy.defaultBoundingBox.Value;
+            furniture.boundingBox.Value = toCopy.boundingBox.Value;
+            furniture.rotations.Value = toCopy.rotations.Value;
             furniture.currentRotation.Value = 0;
-            furniture.quality.Value = toCopy.quality;
+            furniture.Quality = toCopy.Quality;
             
 
             furniture.updateDrawPosition();
 
-            if (toCopy.rotations == 2)
+            if (toCopy.rotations.Value == 2)
                 furniture.currentRotation.Value = toCopy.currentRotation.Value;
 
             for (int i = 0; i < toCopy.currentRotation.Value; i++)
                 furniture.rotate();
 
-            furniture.initializeLightSource(toCopy.tileLocation.Value);
+            furniture.initializeLightSource(toCopy.TileLocation);
             return furniture;
         }
     }

@@ -108,7 +108,7 @@ namespace StackEverything
                 for (int i = 0; i < decLoc.furniture.Count; i++)
                 {
                     Furniture f = decLoc.furniture[i];
-                    if (!this.lastKnownFurniture.Contains(f) && Game1.player.items.Contains(f))
+                    if (!this.lastKnownFurniture.Contains(f) && Game1.player.Items.Contains(f))
                     {
                         this.Monitor.Log($"{f.GetType().Name} was placed down and exists in the inventory.",
                             LogLevel.Trace);
@@ -131,7 +131,7 @@ namespace StackEverything
 
             IDictionary<Vector2, SObject> toReplace = new Dictionary<Vector2, SObject>();
             foreach (KeyValuePair<Vector2, SObject> item in e.Added)
-                if (Game1.player.items.Contains(item.Value))
+                if (Game1.player.Items.Contains(item.Value))
                 {
                     this.Monitor.Log($"{item.Value.GetType().Name} was placed down and exists in the inventory.",
                         LogLevel.Trace);

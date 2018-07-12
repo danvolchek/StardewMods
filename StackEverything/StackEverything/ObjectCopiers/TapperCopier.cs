@@ -14,8 +14,8 @@ namespace StackEverything.ObjectCopiers
         {
             SObject copy = (SObject)obj.getOne();
             copy.heldObject.Value = obj.heldObject.Value;
-            copy.minutesUntilReady.Value = obj.minutesUntilReady.Value;
-            copy.quality.Value = obj.quality.Value;
+            copy.MinutesUntilReady = obj.MinutesUntilReady;
+            copy.Quality = obj.Quality;
             return copy;
         }
     }
