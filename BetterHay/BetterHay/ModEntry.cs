@@ -116,7 +116,8 @@ namespace BetterHay
         private void BeforeSave(object sender, EventArgs e)
         {
             if (Config.EnableTakingHayFromHoppersAnytime)
-                this.ConvertHopper<BetterHayHopper, SObject>(this.CurrentLocation);
+                foreach(GameLocation loc in Game1.locations)
+                    this.ConvertHopper<BetterHayHopper, SObject>(loc);
         }
 
 
