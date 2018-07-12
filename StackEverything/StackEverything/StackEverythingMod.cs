@@ -40,7 +40,23 @@ namespace StackEverything
                 {"drawInMenu", typeof(DrawInMenuPatch)}
             };
 
-            foreach (Type t in PatchedTypes.Union(new[] { GetSDVType("Object") }))
+            IList<Type> typesToPatch = PatchedTypes.Union(new[] { GetSDVType("Object") }).ToList();
+
+
+            if (helper.ModRegistry.IsLoaded("Platonymous.CustomFarming"))
+            {
+                try
+                {
+                    typesToPatch.Add(Type.GetType("CustomFarmingRedux.CustomMachine, CustomFarmingRedux"));
+                }
+                catch (Exception e)
+                {
+                    this.Monitor.Log("Failed to add support for CFR machines.", LogLevel.Debug);
+                    this.Monitor.Log(e.ToString(), LogLevel.Debug);
+                }
+            }
+
+            foreach (Type t in typesToPatch)
                 foreach (KeyValuePair<string, Type> replacement in patchedTypeReplacements)
                 {
                     MethodInfo original = t.GetMethods(BindingFlags.Instance | BindingFlags.Public).FirstOrDefault(m => m.Name == replacement.Key);
