@@ -30,6 +30,9 @@ namespace ModUpdateMenu.Menus
         private string hoverText;
         private Point hoverTextDimensions;
 
+        private int currentSortColumn = -1;
+        private int currentSortDirection;
+
         private IList<ModStatus> originalStatuses;
 
         private IList<ModStatus> statuses;
@@ -37,12 +40,13 @@ namespace ModUpdateMenu.Menus
 
         private int numDisplayableMods;
         private int displayIndex;
-        //TODO: on resize, if new height can hold all item (what if more than curr but not all, what if smaller) update displayindex somehow
-        //TODO: global stats (# mods, # skipped, #etc), smapi + sdv version in corner
-        //TODO: something about links (they're lonk bois)
 
-        public UpdateMenu()
+        private bool hideSkipped = false;
+
+        public UpdateMenu(bool hideSkipped)
         {
+            this.hideSkipped = hideSkipped;
+
             this.SizeMaybeChanged();
 
             this.updateProgressDimensions = GetHalfDimensions(UpdateMenu.UpdateProgress);
@@ -54,7 +58,7 @@ namespace ModUpdateMenu.Menus
 
         public override void draw(SpriteBatch b)
         {
-            Vector2 centeringOnScreen = Utility.getTopLeftPositionForCenteringOnScreen(this.width, ((IClickableMenu) this).height - 100, 0, 0);
+            Vector2 centeringOnScreen = Utility.getTopLeftPositionForCenteringOnScreen(this.width, ((IClickableMenu)this).height - 100, 0, 0);
             b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.75f);
             IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(473, 36, 24, 24), (int)centeringOnScreen.X, (int)centeringOnScreen.Y, this.width, ((IClickableMenu)this).height - 150, Color.White, 4f, true);
 
@@ -63,12 +67,18 @@ namespace ModUpdateMenu.Menus
 
             for (int i = 0; i < UpdateMenu.sections.Length; i++)
             {
-                int xOffset = (i * this.width) / UpdateMenu.sections.Length;
+                double width = this.GetColumnWidth(i);
+                int xOffset = 0;
+                for (int j = 0; j < i; j++)
+                    xOffset += this.GetColumnWidth(j);
+
                 if (i != 0)
                     SpriteText.drawString(b, UpdateMenu.HeaderDivider, startX + xOffset - this.headerDividerDimensions.X, startY, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
 
-                xOffset += (this.width / UpdateMenu.sections.Length) / 2 - SpriteText.getWidthOfString(UpdateMenu.sections[i]) / 2;
-                SpriteText.drawString(b, UpdateMenu.sections[i], startX + xOffset, startY, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+                string headerText = UpdateMenu.sections[i] +
+                                    (this.currentSortColumn == i ? (this.currentSortDirection == 0 ? " A" : " V") : "");
+                xOffset += (int)(width / 2) - SpriteText.getWidthOfString(UpdateMenu.sections[i]) / 2;
+                SpriteText.drawString(b, headerText, startX + xOffset, startY, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
             }
 
 
@@ -89,7 +99,7 @@ namespace ModUpdateMenu.Menus
                 foreach (ModStatus status in this.statuses)
                 {
                     string modName = status.ModName;
-                    while (SpriteText.getWidthOfString(modName) > this.width / UpdateMenu.sections.Length)
+                    while (SpriteText.getWidthOfString(modName) > this.GetColumnWidth(0))
                     {
                         modName = modName.Substring(0, modName.Length - 1);
                     }
@@ -97,8 +107,8 @@ namespace ModUpdateMenu.Menus
                     if (modName != status.ModName)
                         modName = modName.Substring(0, modName.Length - 3) + "...";
                     SpriteText.drawString(b, modName, startX, yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
-                    SpriteText.drawString(b, status.UpdateStatus.ToString(), startX + this.width / UpdateMenu.sections.Length, yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", UpdateMenu.GetColorForStatus(status.UpdateStatus));
-                    SpriteText.drawString(b, status.UpdateURLType, startX + 2 * this.width / UpdateMenu.sections.Length, yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+                    SpriteText.drawString(b, status.UpdateStatus.ToString(), startX + (int)this.GetColumnWidth(0), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", UpdateMenu.GetColorForStatus(status.UpdateStatus));
+                    SpriteText.drawString(b, status.UpdateURLType, startX + (int)this.GetColumnWidth(0) + (int)this.GetColumnWidth(1), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
                     yOffset += 64;
 
 
@@ -109,11 +119,36 @@ namespace ModUpdateMenu.Menus
                     int xPos = Game1.getMouseX() + 32;
                     if (xPos > Game1.viewport.Width / 2)
                         xPos -= this.hoverTextDimensions.X + 32;
-                    IClickableMenu.drawTextureBox(b, Game1.menuTexture, new Rectangle(0, 256, 60, 60), xPos, Game1.getMouseY() + 32, this.hoverTextDimensions.X + 32, this.hoverTextDimensions.Y + 32, Color.White);
-                    SpriteText.drawString(b, this.hoverText, xPos + 16, Game1.getMouseY() + 32 + 16, 9999, -1, 9999, 1f, 0.88f, false, -1, "", SpriteText.color_Gray);
+                    int yPos = Game1.getMouseY() + 32 + 16;
+                    if (yPos > Game1.viewport.Height * (3.0 / 4))
+                        yPos -= this.hoverTextDimensions.Y + 64;
+                    IClickableMenu.drawTextureBox(b, Game1.menuTexture, new Rectangle(0, 256, 60, 60), xPos, yPos - 16, this.hoverTextDimensions.X + 32, this.hoverTextDimensions.Y + 32, Color.White);
+                    SpriteText.drawString(b, this.hoverText, xPos + 16, yPos, 9999, -1, 9999, 1f, 0.88f, false, -1, "", SpriteText.color_Gray);
+                }
+
+                if (this.statuses != null)
+                {
+                    int numSteps = this.originalStatuses.Count - this.numDisplayableMods;
+                    yOffset = (int)((((float)this.displayIndex) / numSteps) * (((IClickableMenu) this).height - 200 + 16));
+
+                    drawTextureBox(b, Game1.mouseCursors, new Rectangle(325, 448, 5, 17),
+                        (int)centeringOnScreen.X + this.width,
+                        (int)centeringOnScreen.Y + yOffset, 16, 32, Color.White, 4f, false);
                 }
             }
 
+        }
+
+        private int GetColumnWidth(int i)
+        {
+            double divisor;
+            if (i == 0)
+                divisor = 2;
+            else if (i == 1)
+                divisor = 4.3;
+            else
+                divisor = 4;
+            return (int)(this.width / divisor);
         }
 
         public override void update(GameTime time)
@@ -132,7 +167,7 @@ namespace ModUpdateMenu.Menus
 
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
-            this.CheckPosition(x, y, ComponentClicked);
+            this.CheckPosition(x, y, this.ComponentClicked);
         }
 
         public override void performHoverAction(int x, int y)
@@ -142,11 +177,20 @@ namespace ModUpdateMenu.Menus
 
         private void CheckPosition(int x, int y, ComponentAction action, Action onNoMatch = null)
         {
-            for (int i = 0; i < this.components.Count; i++)
+            if (this.components.Count == 0)
+                return;
+
+            for (int i = 0; i < 3; i++)
+                if (this.components[i].containsPoint(x, y))
+                {
+                    action(null, i);
+                    return;
+                }
+            for (int i = 3; i < this.components.Count; i++)
             {
                 if (this.components[i].containsPoint(x, y))
                 {
-                    action(this.statuses[i / UpdateMenu.sections.Length], i % UpdateMenu.sections.Length);
+                    action(this.statuses[(i - 3) / UpdateMenu.sections.Length], i % UpdateMenu.sections.Length);
                     return;
                 }
             }
@@ -158,55 +202,170 @@ namespace ModUpdateMenu.Menus
 
         private void ComponentHovered(ModStatus which, int offset)
         {
-            switch (offset)
+            if (which == null)
             {
-                case 0:
-                    this.hoverText = $"{which.ModName}^By: {which.ModAuthor}";
-                    break;
-                case 1:
-                    switch (which.UpdateStatus)
+                if (this.currentSortColumn == -1 || offset != this.currentSortColumn)
+                {
+                    this.hoverText = "Click to Sort By:^Mod ";
+                    switch (offset)
                     {
-                        case UpdateStatus.UpToDate:
-                            this.hoverText = $"You have: {which.CurrentVersion}.";
+                        case 0:
+                            this.hoverText += "Name";
                             break;
-                        case UpdateStatus.OutOfDate:
-                            this.hoverText = $"You have: {which.CurrentVersion}^Latest version: {which.NewVersion}";
+                        case 1:
+                            this.hoverText += "Status";
                             break;
-                        case UpdateStatus.Error:
-                            this.hoverText = $"Failed to check updates: ^{which.ErrorReason}";
-                            break;
-                        case UpdateStatus.Skipped:
-                            this.hoverText = $"Mod not loaded: ^{which.ErrorReason}";
+                        case 2:
+                            this.hoverText += "Link";
                             break;
                     }
-                    break;
-                case 2:
-                    this.hoverText = $"Click to go to: ^{which.UpdateURL}";
-                    break;
+                }
+                else if (offset == this.currentSortColumn)
+                    this.hoverText = "Currently Sorting:^" +
+                                     (this.currentSortDirection == 0 ? "Ascending" : "Descending");
             }
+            else
+                switch (offset)
+                {
+                    case 0:
+                        this.hoverText = $"{which.ModName}^By: {which.ModAuthor}";
+                        break;
+                    case 1:
+                        switch (which.UpdateStatus)
+                        {
+                            case UpdateStatus.UpToDate:
+                                this.hoverText = $"You have: {which.CurrentVersion}.";
+                                break;
+                            case UpdateStatus.OutOfDate:
+                                this.hoverText = $"You have: {which.CurrentVersion}^Latest version: {which.NewVersion}";
+                                break;
+                            case UpdateStatus.Error:
+                                this.hoverText = $"Failed to check updates: ^{which.ErrorReason}";
+                                break;
+                            case UpdateStatus.Skipped:
+                                this.hoverText = $"Mod not loaded: ^{which.ErrorReason}";
+                                break;
+                        }
+                        break;
+                    case 2:
+                        if (which.UpdateURLType != "???")
+                            this.hoverText = $"Click to go to: ^{which.UpdateURL}";
+                        else
+                            this.hoverText = "Unknown update link.";
+                        break;
+                }
 
+            this.SplitHoverText();
             this.hoverTextDimensions = UpdateMenu.GetDimensions(this.hoverText);
         }
 
-        private static void ComponentClicked(ModStatus which, int offset)
+        private void SplitHoverText()
         {
-            if (offset == 2)
+            if (this.hoverText == null)
+                return;
+
+            IList<string> lines = this.hoverText.Split('^');
+            IList<string> result = new List<string>();
+            foreach (string line in lines)
+            {
+                if (line.Length > 30)
+                {
+                    IEnumerable<string> parts = this.GetSmallerParts(line, ' ');
+                    if (parts.Count() == 1)
+                        parts = this.GetSmallerParts(line, '/');
+                    foreach (string part in parts)
+                        result.Add(part);
+                }
+                else
+                    result.Add(line);
+            }
+
+            this.hoverText = string.Join("^", result);
+        }
+
+        private IEnumerable<string> GetSmallerParts(string line, char separator)
+        {
+            IList<string> result = new List<string>();
+
+            StringBuilder curr = new StringBuilder();
+            foreach (string part in line.Split(separator))
+            {
+                curr.Append(part);
+                curr.Append(separator);
+                if (curr.ToString().Length > 15)
+                {
+                    result.Add(curr.ToString());
+                    curr.Clear();
+                }
+            }
+            if (curr.Length != 0)
+                result.Add(curr.ToString());
+
+            if (result.Count == 0)
+                result.Add(line);
+
+            return result;
+        }
+
+        private void ComponentClicked(ModStatus which, int offset)
+        {
+            if (which == null)
+            {
+                if (this.currentSortColumn == -1)
+                {
+                    this.currentSortColumn = offset;
+                    this.currentSortDirection = 0;
+                }
+                else if (this.currentSortColumn == offset)
+                {
+                    switch (this.currentSortDirection)
+                    {
+                        case 0:
+                            this.currentSortDirection = 1;
+                            break;
+                        case 1:
+                            this.currentSortColumn = -1;
+                            this.currentSortDirection = 0;
+                            break;
+                    }
+                }
+                else
+                {
+                    this.currentSortColumn = offset;
+                    this.currentSortDirection = 0;
+                }
+
+                this.displayIndex = 0;
+
+                this.UpdateComponents();
+
+                if (this.currentSortColumn != -1)
+                    this.ComponentHovered(null, this.currentSortColumn);
+            }
+            else if (offset == 2)
             {
                 Game1.playSound("bigSelect");
-                try
-                {
-                    Process.Start(which.UpdateURL);
-                }
-                catch
-                {
-                }
+                if (which.UpdateURLType != "???")
+                    try
+                    {
+                        Process.Start(which.UpdateURL);
+                    }
+                    catch
+                    {
+                    }
             }
         }
 
         public void Notify(IList<ModStatus> statuses)
         {
             this.notified = true;
-            this.originalStatuses = statuses?.OrderBy(item => item.ModName).ToList();
+            if (this.hideSkipped)
+                statuses = statuses?.Where(status => status.UpdateStatus != UpdateStatus.Skipped).ToList();
+            this.originalStatuses = statuses?.ToList();
+            this.displayIndex = 0;
+            this.currentSortColumn = -1;
+            this.currentSortDirection = 0;
+
             this.UpdateComponents();
         }
 
@@ -217,28 +376,57 @@ namespace ModUpdateMenu.Menus
 
         private void UpdateComponents()
         {
-            this.UpdateComponentsImpl(this.originalStatuses?.Skip(this.displayIndex).ToList());
+            IEnumerable<ModStatus> temp = this.originalStatuses?.Select(item => item);
+            if (temp != null && this.currentSortColumn != -1)
+            {
+                switch (this.currentSortColumn)
+                {
+                    case 0:
+                        temp = temp.OrderBy(status => status.ModName);
+                        break;
+                    case 1:
+                        temp = temp.OrderBy(status => status.UpdateStatus);
+                        break;
+                    case 2:
+                        temp = temp.OrderBy(status => status.UpdateURLType);
+                        break;
+                }
+
+                if (this.currentSortDirection == 1)
+                    temp = temp.Reverse();
+            }
+
+            this.UpdateComponentsImpl(temp?.Skip(this.displayIndex).ToList());
         }
 
-        private void UpdateComponentsImpl(IList<ModStatus> statuses)
+        private void UpdateComponentsImpl(IEnumerable<ModStatus> statuses)
         {
-            this.statuses = statuses;
+            this.statuses = statuses?.ToList();
             this.components.Clear();
 
-            if (statuses == null)
+            if (this.statuses == null)
                 return;
 
             Vector2 centeringOnScreen = Utility.getTopLeftPositionForCenteringOnScreen(this.width, (((IClickableMenu)this).height - 100), 0, 0);
             int startX = (int)centeringOnScreen.X + 32;
             int startY = (int)centeringOnScreen.Y + 32;
 
+            for (int i = 0; i < UpdateMenu.sections.Length; i++)
+            {
+                int xOffset = 0;
+                for (int j = 0; j < i; j++)
+                    xOffset += this.GetColumnWidth(j);
+
+                this.components.Add(new ClickableComponent(new Rectangle(startX + xOffset, startY, this.GetColumnWidth(i), 64), ""));
+            }
+
             startX += this.headerDividerDimensions.X;
             int yOffset = startY + 64 + 16;
-            for (int i = 0; i < statuses.Count; i++)
+            for (int i = 0; i < this.statuses.Count; i++)
             {
-                this.components.Add(new ClickableComponent(new Rectangle(startX, yOffset, this.width / UpdateMenu.sections.Length, 64), ""));
-                this.components.Add(new ClickableComponent(new Rectangle(startX + this.width / UpdateMenu.sections.Length, yOffset, this.width / UpdateMenu.sections.Length, 64), ""));
-                this.components.Add(new ClickableComponent(new Rectangle(startX + 2 * this.width / UpdateMenu.sections.Length, yOffset, this.width / UpdateMenu.sections.Length, 64), ""));
+                this.components.Add(new ClickableComponent(new Rectangle(startX, yOffset, this.GetColumnWidth(0), 64), ""));
+                this.components.Add(new ClickableComponent(new Rectangle(startX + this.GetColumnWidth(0), yOffset, this.GetColumnWidth(1), 64), ""));
+                this.components.Add(new ClickableComponent(new Rectangle(startX + this.GetColumnWidth(0) + this.GetColumnWidth(1), yOffset, this.GetColumnWidth(2), 64), ""));
 
                 yOffset += 64;
 
@@ -293,7 +481,7 @@ namespace ModUpdateMenu.Menus
         private void SizeMaybeChanged()
         {
             this.width = Game1.viewport.Width - 200;
-            ((IClickableMenu) this).height = Game1.viewport.Height - 50;
+            ((IClickableMenu)this).height = Game1.viewport.Height - 50;
             this.numDisplayableMods = (((IClickableMenu)this).height - 150 - 64 - 16) / 64;
             int modDividerWidth = SpriteText.getWidthOfString("_");
             StringBuilder builder = new StringBuilder();

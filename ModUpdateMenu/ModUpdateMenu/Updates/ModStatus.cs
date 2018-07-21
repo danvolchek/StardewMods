@@ -10,10 +10,12 @@
         public string ModName { get; }
         public string ModAuthor { get; }
         public string ErrorReason { get; }
+        public string Id { get; }
 
-        private ModStatus(UpdateStatus updateStatus, string name, string author, string updateURL)
+        private ModStatus(UpdateStatus updateStatus, string Id, string name, string author, string updateURL)
         {
             this.UpdateStatus = updateStatus;
+            this.Id = Id;
             this.ModName = name;
             this.ModAuthor = author;
             this.UpdateURL = updateURL;
@@ -26,7 +28,7 @@
             else this.UpdateURLType = "???";
         }
 
-        public ModStatus(UpdateStatus updateStatus, string name, string author, string updateURL, string currentVersion, string newVersion = null, string errorReason = null) : this(updateStatus, name, author, updateURL)
+        public ModStatus(UpdateStatus updateStatus, string Id, string name, string author, string updateURL, string currentVersion, string newVersion = null, string errorReason = null) : this(updateStatus, Id, name, author, updateURL)
         {
             this.NewVersion = newVersion;
             this.CurrentVersion = currentVersion;

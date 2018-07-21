@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using ModUpdateMenu.Menus;
 using ModUpdateMenu.Updates;
@@ -17,8 +18,9 @@ namespace ModUpdateMenu
 
         public override void Entry(IModHelper helper)
         {
+            ModUpdateMenuConfig config = this.Helper.ReadConfig<ModUpdateMenuConfig>();
             this.button = new UpdateButton(helper);
-            this.menu = new UpdateMenu();
+            this.menu = new UpdateMenu(config.HideSkippedMods);
 
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
             GraphicsEvents.OnPostRenderEvent += this.GraphicsEvents_OnPostRenderHudEvent;
@@ -26,22 +28,32 @@ namespace ModUpdateMenu
 
             new Thread(() =>
             {
-                Thread.Sleep(4000);
-                this.Notify(new List<ModStatus>()
+                IUpdateStatusRetriever statusRetriever = new UpdateStatusRetriever(this.Helper);
+                int attempts = 20;
+                while (true)
                 {
-                    new ModStatus(UpdateStatus.UpToDate, "Stack Everything", "Cat", "https://www.nexusmods.com/stardewvalley/mods/2053", "2.7.0-beta"),
-                    new ModStatus(UpdateStatus.UpToDate, "Content Patcher", "Pathoschild", "https://www.nexusmods.com/stardewvalley/mods/1915", "1.4.-beta.3"),
-                    /*new ModStatus(UpdateStatus.Error, "Shmoopyaaaaaaaaaa", "bloooooooooooorg", "https://www.nexusmods.com/stardewvalley/mods/2223", "1.0.0", null, "No update key found."),
-                    new ModStatus(UpdateStatus.Skipped, "bldargo", "flargo", "https://github.com/babies", "1.0.0", null, "old"),
-                    new ModStatus(UpdateStatus.Error, "Shmoopyaaaaaaaaaa", "bloooooooooooorg", "https://www.nexusmods.com/stardewvalley/mods/2223", "1.0.0", null, "No update key found."),
-                    new ModStatus(UpdateStatus.OutOfDate, "Doopy", "aaaa", "https://community.playstarbound.com/threads/treetransplant.135549/", "1.1.0", "1.2.0"),
-                    new ModStatus(UpdateStatus.OutOfDate, "Doopy", "aaaas", "https://community.playstarbound.com/threads/treetransplant.135549/", "1.1.0", "1.2.0"),
-                    new ModStatus(UpdateStatus.Error, "Shmoopyaaaaaaaaaa", "bloooooooooooorg", "https://www.nexusmods.com/stardewvalley/mods/2223", "1.0.0", null, "No update key found."),
-                    new ModStatus(UpdateStatus.Skipped, "bldargo", "flargo", "https://github.com/babies", "1.0.0", null, "old")*/
-                });
-            }).Start();
+                    Thread.Sleep(2000);
+                    try
+                    {
+                        if (statusRetriever.GetUpdateStatuses(out IList<ModStatus> statuses))
+                        {
+                            this.Notify(statuses);
+                            break;
+                        }
 
-            //new SMAPIUpdateManager(this);
+                        attempts--;
+                        if(attempts == 0)
+                            throw new Exception("All update attempts failed.");
+                    }
+                    catch (Exception e)
+                    {
+                        this.Monitor.Log("Failed retreiving update info from SMAPI: ", LogLevel.Debug);
+                        this.Monitor.Log(e.ToString(), LogLevel.Debug);
+                        this.Notify(null);
+                        break;
+                    }
+                }
+            }).Start();
         }
 
         private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
@@ -60,16 +72,13 @@ namespace ModUpdateMenu
 
         private void GameEvents_UpdateTick(object sender, EventArgs e)
         {
-            if (Game1.activeClickableMenu is TitleMenu titleMenu && TitleMenu.subMenu == null && !this.Helper.Reflection
-                    .GetField<bool>(titleMenu, "isTransitioningButtons").GetValue())
-                this.button.ShowUpdateButton = true;
-            else
-                this.button.ShowUpdateButton = false;
+            this.button.ShowUpdateButton = this.ShouldDrawUpdateButton();
         }
 
         private void GraphicsEvents_OnPostRenderHudEvent(object sender, EventArgs e)
         {
-            this.button.Draw(Game1.spriteBatch);
+            if (Game1.activeClickableMenu is TitleMenu titleMenu && this.ShouldDrawUpdateButton())
+                this.button.Draw(Game1.spriteBatch);
         }
 
         public void Notify(IList<ModStatus> statuses)
@@ -77,5 +86,20 @@ namespace ModUpdateMenu
             this.menu.Notify(statuses);
             this.button.Notify(statuses);
         }
+
+        private bool ShouldDrawUpdateButton()
+        {
+            if (!(Game1.activeClickableMenu is TitleMenu titleMenu))
+                return false;
+
+            return TitleMenu.subMenu == null && !this.GetPrivateBool(titleMenu, "isTransitioningButtons") &&
+                   (this.GetPrivateBool(titleMenu,"titleInPosition") && !this.GetPrivateBool(titleMenu, "transitioningCharacterCreationMenu"));
+        }
+
+        private bool GetPrivateBool(object obj, string name)
+        {
+            return this.Helper.Reflection.GetField<bool>(obj, name).GetValue();
+        }
+
     }
 }
