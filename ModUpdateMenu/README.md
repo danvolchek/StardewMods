@@ -1,7 +1,7 @@
 # Mod Update Menu
 
 
-See [This link](http://www.nexusmods.com/stardewvalley/mods/) for the NexusMods mod page, which has a description, screenshots, and a download of the built mod.
+See [This link](https://www.nexusmods.com/stardewvalley/mods/2536/) for the NexusMods mod page, which has a description, screenshots, and a download of the built mod.
 
 ## How it works
 
