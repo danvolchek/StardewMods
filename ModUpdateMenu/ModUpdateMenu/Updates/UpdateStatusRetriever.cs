@@ -1,7 +1,9 @@
-﻿using StardewModdingAPI;
+﻿using System;
+using StardewModdingAPI;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using System.Text;
+using StardewModdingAPI.Toolkit.Framework.Clients.WebApi;
 
 namespace ModUpdateMenu.Updates
 {
@@ -18,40 +20,37 @@ namespace ModUpdateMenu.Updates
         {
             statuses = new List<ModStatus>();
 
+
             object registry = this.helper.ModRegistry.GetType()
                 .GetField("Registry", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(this.helper.ModRegistry);
 
-            foreach (object modMetaData in (IEnumerable<object>) registry.GetType()
+            foreach (object modMetaData in (IEnumerable<object>)registry.GetType()
                 .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Instance)
-                .Invoke(registry, new object[] {true, true}))
+                .Invoke(registry, new object[] { true, true }))
             {
-                object updateCheckModel = GetInstanceProperty(modMetaData, "UpdateCheckData");
+                ModEntryModel updateCheckModel = GetInstanceProperty<ModEntryModel>(modMetaData, "UpdateCheckData");
 
                 if (updateCheckModel == null)
                     return false;
 
-                IManifest modManifest = (IManifest) GetInstanceProperty(modMetaData, "Manifest");
+                IManifest modManifest = GetInstanceProperty<IManifest>(modMetaData, "Manifest");
 
+                ModEntryVersionModel latestModEntryVersionModel = updateCheckModel.Main;
+                ModEntryVersionModel optionalModEntryVersionModel = updateCheckModel.Optional;
+                ModEntryVersionModel unofficialModEntryVersionModel = updateCheckModel.Unofficial;
 
-                object latestModEntryVersionModel = GetInstanceProperty(updateCheckModel, "Main");
-                object optionalModEntryVersionModel = GetInstanceProperty(updateCheckModel, "Optional");
-                object unofficialModEntryVersionModel = GetInstanceProperty(updateCheckModel, "Unofficial");
-
-                // parse versions
+                // get versions
                 ISemanticVersion localVersion = modManifest.Version;
-                ISemanticVersion latestVersion =
-                    (ISemanticVersion) GetInstanceProperty(latestModEntryVersionModel, "Version");
-                ISemanticVersion optionalVersion =
-                    (ISemanticVersion) GetInstanceProperty(optionalModEntryVersionModel, "Version");
-                ISemanticVersion unofficialVersion =
-                    (ISemanticVersion) GetInstanceProperty(unofficialModEntryVersionModel, "Version");
+                ISemanticVersion latestVersion = latestModEntryVersionModel?.Version;
+                ISemanticVersion optionalVersion = optionalModEntryVersionModel?.Version;
+                ISemanticVersion unofficialVersion = unofficialModEntryVersionModel?.Version;
 
                 UpdateStatus status = UpdateStatus.OutOfDate;
-                object whichModel = null;
-                ISemanticVersion updateVersion = null;
+                ModEntryVersionModel whichModel = null;
+                ISemanticVersion updateVersion;
                 string error = null;
 
-                // show update alerts
+                // get update alerts
                 if (IsValidUpdate(localVersion, latestVersion, useBetaChannel: true))
                 {
                     whichModel = latestModEntryVersionModel;
@@ -62,20 +61,19 @@ namespace ModUpdateMenu.Updates
                     whichModel = optionalModEntryVersionModel;
                     updateVersion = optionalVersion;
                 }
-                else if (IsValidUpdate(localVersion, unofficialVersion,
-                    useBetaChannel: GetInstanceProperty(modMetaData, "Status") == GetInstanceProperty(modMetaData, "Status").GetType().GetEnumValues()
-                                        .GetValue(1)))
+                else if (IsValidUpdate(localVersion, unofficialVersion, useBetaChannel: true))
+                //Different from SMAPI: useBetaChannel is always true
                 {
                     whichModel = unofficialModEntryVersionModel;
+                    unofficialModEntryVersionModel.Url = $"https://stardewvalleywiki.com/Modding:SMAPI_compatibility#{GenerateAnchor(modManifest.Name)}";
                     updateVersion = unofficialVersion;
                 }
                 else
                 {
-                    string[] errors = (string[])GetInstanceProperty(updateCheckModel, "Errors");
-                    if (errors.Length > 0)
+                    if (updateCheckModel.Errors.Length > 0)
                     {
                         status = UpdateStatus.Error;
-                        error = errors[0];
+                        error = updateCheckModel.Errors[0];
                         updateVersion = modManifest.Version;
                     }
                     else
@@ -88,24 +86,47 @@ namespace ModUpdateMenu.Updates
                         else if (optionalVersion != null && localVersion.Equals(optionalVersion))
                             whichModel = optionalModEntryVersionModel;
                         else if (unofficialVersion != null && localVersion.Equals(unofficialVersion))
-                            whichModel = unofficialVersion;
+                            whichModel = unofficialModEntryVersionModel;
                         else
                             status = UpdateStatus.Skipped;
                     }
                 }
 
                 statuses.Add(new ModStatus(status, modManifest.UniqueID, modManifest.Name, modManifest.Author,
-                    (string) GetInstanceProperty(whichModel, "Url") ?? "",
-                    modManifest.Version.ToString(), updateVersion.ToString(), error));
+                    whichModel?.Url ?? "",
+                    modManifest.Version.ToString(), updateVersion?.ToString() ?? "", error));
             }
 
             return true;
         }
 
-        private static object GetInstanceProperty(object obj, string name, bool isNonPublic = false)
+        private static string GenerateAnchor(string name)
         {
-            return obj?.GetType().GetProperty(name,
-                (isNonPublic ? BindingFlags.NonPublic : BindingFlags.Public) | BindingFlags.Instance).GetValue(obj);
+            name = name.Replace(' ', '_');
+            StringBuilder builder = new StringBuilder();
+            foreach (char c in name)
+            {
+                if (c != '_' && !IsLetterOrDigit(c, out int code))
+                    builder.Append($".{code}");
+                else
+                    builder.Append(c);
+            }
+
+            return builder.ToString();
+        }
+
+        private static bool IsLetterOrDigit(char c, out int code)
+        {
+            code = Convert.ToInt32(c);
+            if (code == -1)
+                code = c;
+            return (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        }
+
+        private static T GetInstanceProperty<T>(object obj, string name, bool isNonPublic = false)
+        {
+            return (T)(obj?.GetType().GetProperty(name,
+                (isNonPublic ? BindingFlags.NonPublic : BindingFlags.Public) | BindingFlags.Instance).GetValue(obj));
         }
 
 

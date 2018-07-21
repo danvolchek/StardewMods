@@ -30,8 +30,8 @@ namespace ModUpdateMenu.Menus
         private string hoverText;
         private Point hoverTextDimensions;
 
-        private int currentSortColumn = -1;
-        private int currentSortDirection;
+        private int currentSortColumn = 1;
+        private int currentSortDirection = 1;
 
         private IList<ModStatus> originalStatuses;
 
@@ -41,7 +41,7 @@ namespace ModUpdateMenu.Menus
         private int numDisplayableMods;
         private int displayIndex;
 
-        private bool hideSkipped = false;
+        private bool hideSkipped;
 
         public UpdateMenu(bool hideSkipped)
         {
@@ -363,8 +363,8 @@ namespace ModUpdateMenu.Menus
                 statuses = statuses?.Where(status => status.UpdateStatus != UpdateStatus.Skipped).ToList();
             this.originalStatuses = statuses?.ToList();
             this.displayIndex = 0;
-            this.currentSortColumn = -1;
-            this.currentSortDirection = 0;
+            this.currentSortColumn = 1;
+            this.currentSortDirection = 1;
 
             this.UpdateComponents();
         }

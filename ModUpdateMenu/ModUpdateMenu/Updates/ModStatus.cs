@@ -25,6 +25,8 @@
                 this.UpdateURLType = "Github";
             else if (updateURL.ToLower().Contains("playstarbound"))
                 this.UpdateURLType = "Forums";
+            else if (updateURL.ToLower().Contains("stardewvalleywiki"))
+                this.UpdateURLType = "Unofficial";
             else this.UpdateURLType = "???";
         }
 
