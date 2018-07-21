@@ -28,7 +28,6 @@ namespace ModUpdateMenu.Menus
 
         private Point mousePosition;
 
-
         public UpdateButton(IModHelper helper)
         {
             Texture2D buttonTexture = helper.Content.Load<Texture2D>("assets/updateButton.png");
@@ -37,7 +36,6 @@ namespace ModUpdateMenu.Menus
             this.updateButton = new ClickableTextureComponent(
                 new Rectangle(36, Game1.viewport.Height - 150 - 48, 81, 75), buttonTexture, new Rectangle(0, 0, 27, 25),
                 3, false);
-
 
             ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;

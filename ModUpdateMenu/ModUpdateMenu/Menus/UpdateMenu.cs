@@ -41,12 +41,8 @@ namespace ModUpdateMenu.Menus
         private int numDisplayableMods;
         private int displayIndex;
 
-        private bool hideSkipped;
-
-        public UpdateMenu(bool hideSkipped)
+        public UpdateMenu()
         {
-            this.hideSkipped = hideSkipped;
-
             this.SizeMaybeChanged();
 
             this.updateProgressDimensions = GetHalfDimensions(UpdateMenu.UpdateProgress);
@@ -359,8 +355,6 @@ namespace ModUpdateMenu.Menus
         public void Notify(IList<ModStatus> statuses)
         {
             this.notified = true;
-            if (this.hideSkipped)
-                statuses = statuses?.Where(status => status.UpdateStatus != UpdateStatus.Skipped).ToList();
             this.originalStatuses = statuses?.ToList();
             this.displayIndex = 0;
             this.currentSortColumn = 1;

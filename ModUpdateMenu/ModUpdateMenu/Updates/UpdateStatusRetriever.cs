@@ -81,11 +81,11 @@ namespace ModUpdateMenu.Updates
                         updateVersion = modManifest.Version;
                         status = UpdateStatus.UpToDate;
 
-                        if (latestVersion != null && localVersion.Equals(latestVersion))
+                        if (latestVersion != null && (latestVersion.Equals(localVersion) || IsValidUpdate(latestVersion, localVersion, true)))
                             whichModel = latestModEntryVersionModel;
-                        else if (optionalVersion != null && localVersion.Equals(optionalVersion))
+                        else if (optionalVersion != null && (optionalVersion.Equals(localVersion) || IsValidUpdate(optionalVersion, localVersion, true)))
                             whichModel = optionalModEntryVersionModel;
-                        else if (unofficialVersion != null && localVersion.Equals(unofficialVersion))
+                        else if (unofficialVersion != null && (unofficialVersion.Equals(localVersion) || IsValidUpdate(unofficialVersion, localVersion, true)))
                             whichModel = unofficialModEntryVersionModel;
                         else
                             status = UpdateStatus.Skipped;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using ModUpdateMenu.Menus;
@@ -15,12 +16,13 @@ namespace ModUpdateMenu
     {
         private UpdateButton button;
         private UpdateMenu menu;
+        private ModUpdateMenuConfig config;
 
         public override void Entry(IModHelper helper)
         {
-            ModUpdateMenuConfig config = this.Helper.ReadConfig<ModUpdateMenuConfig>();
+            this.config = this.Helper.ReadConfig<ModUpdateMenuConfig>();
             this.button = new UpdateButton(helper);
-            this.menu = new UpdateMenu(config.HideSkippedMods);
+            this.menu = new UpdateMenu();
 
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
             GraphicsEvents.OnPostRenderEvent += this.GraphicsEvents_OnPostRenderHudEvent;
@@ -83,6 +85,9 @@ namespace ModUpdateMenu
 
         public void Notify(IList<ModStatus> statuses)
         {
+            if (this.config.HideSkippedMods)
+                statuses = statuses?.Where(status => status.UpdateStatus != UpdateStatus.Skipped).ToList();
+
             this.menu.Notify(statuses);
             this.button.Notify(statuses);
         }
