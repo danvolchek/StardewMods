@@ -4,7 +4,7 @@ namespace BetterArtisanGoodIcons.Content
 {
     /// <inheritdoc />
     /// <summary>A content source that comes from a mod. </summary>
-    internal class ModSource : BaseContentSource
+    internal class ModSource : TextureDataContentSource
     {
         private readonly IModHelper helper;
 

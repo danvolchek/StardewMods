@@ -6,7 +6,7 @@ namespace BetterArtisanGoodIcons.Content
 {
     /// <inheritdoc />
     /// <summary>A basic content source provider - is able to group data from each CustomTextureData together properly.</summary>
-    internal abstract class BaseContentSource : IContentSource
+    internal abstract class TextureDataContentSource : IContentSource
     {
         public abstract CustomTextureData TextureData { get; }
         public abstract T Load<T>(string path);

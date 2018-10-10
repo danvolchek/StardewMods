@@ -4,7 +4,7 @@ namespace BetterArtisanGoodIcons.Content
 {
     /// <inheritdoc />
     /// <summary>A content source that comes from Content Packs. </summary>
-    internal class ContentPackSource : BaseContentSource
+    internal class ContentPackSource : TextureDataContentSource
     {
         private readonly IContentPack pack;
         public override CustomTextureData TextureData { get; }

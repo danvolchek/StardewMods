@@ -35,7 +35,7 @@ namespace BetterArtisanGoodIcons.Content
         }
 
         /// <summary>Tries to load textures for all artisan good types for a given <see cref="IContentSource"/>.</summary>
-        private static IEnumerable<ArtisanGoodTextureProvider> TryLoadContentSource(BaseContentSource contentSource, IMonitor monitor)
+        private static IEnumerable<ArtisanGoodTextureProvider> TryLoadContentSource(TextureDataContentSource contentSource, IMonitor monitor)
         {
             foreach (Tuple<string, List<string>, ArtisanGood> item in contentSource.GetData())
             {
