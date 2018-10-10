@@ -1,10 +1,10 @@
 ﻿{
   "Name": "Better Artisan Good Icons",
   "Author": "Cat",
-  "Version": "1.3.2",
+  "Version": "1.3.3",
   "Description": "Makes jelly, pickles, wine, juice, and honey icons be based on the fruit, vegetable, or flower used to make them.",
   "UniqueID": "cat.betterartisangoodicons",
   "EntryDll": "BetterArtisanGoodIcons.dll",
-  "MinimumApiVersion": "2.6-beta.21",
+  "MinimumApiVersion": "2.8-beta.4",
   "UpdateKeys": [ "Nexus:2080" ]
 }

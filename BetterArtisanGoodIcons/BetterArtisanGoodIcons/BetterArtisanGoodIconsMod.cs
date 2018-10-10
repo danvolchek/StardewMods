@@ -23,7 +23,7 @@ namespace BetterArtisanGoodIcons
 
             //Don't need to override draw for Object because artisan goods can't be placed down.
             Type objectType = GetSDVType("Object");
-            IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>()
+            IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>
             {
                 {"drawWhenHeld", objectType, typeof(DrawWhenHeldPatch)},
                 {"drawInMenu", objectType, typeof(DrawInMenuPatch)},
