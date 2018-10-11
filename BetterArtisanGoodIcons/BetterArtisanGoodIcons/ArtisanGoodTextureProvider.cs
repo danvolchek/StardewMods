@@ -74,7 +74,7 @@ namespace BetterArtisanGoodIcons
         {
             int sourceIndex = this.GetIndexOfSource(item);
             string sourceName = this.GetSourceName(item, sourceIndex);
-            if (item.ParentSheetIndex != (int)this.good || !this.positions.TryGetValue(sourceName, out mainPosition))
+            if (item.ParentSheetIndex != (int)this.good || sourceName == null || !this.positions.TryGetValue(sourceName, out mainPosition))
                 return false;
 
             textureSheet = this.spriteSheet;
