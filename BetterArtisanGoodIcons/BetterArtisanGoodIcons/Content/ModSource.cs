@@ -13,6 +13,9 @@ namespace BetterArtisanGoodIcons.Content
         public ModSource(IModHelper helper)
         {
             this.helper = helper;
+            //1.3.28
+            //this.TextureData = helper.ReadJsonFile<CustomTextureData>("assets/data.json");
+            //1.3.31
             this.TextureData = helper.Data.ReadJsonFile<CustomTextureData>("assets/data.json");
         }
 

@@ -42,12 +42,14 @@ namespace BetterArtisanGoodIcons
         /// <summary>Gets the name of the source item used to create the given item.</summary>
         private string GetSourceName(SObject item, int sourceIndex)
         {
+            //If we failed to find the source of the item, and it happens to be the base item, call it Base. Otherwise return null for failure, which nothing will match.
             if (sourceIndex == -1)
             {
                 if (item.Name == this.good.ToString())
-                    return "Base";         
+                    return "_Base";
                 return null;
             }
+            //Lookup the name from the game's object information.
             return Game1.objectInformation[sourceIndex].Split('/')[0];
         }
 
@@ -63,7 +65,7 @@ namespace BetterArtisanGoodIcons
             if (this.good == ArtisanGood.Honey && item.honeyType.Value.HasValue)
                 return item.honeyType.Value.Value != SObject.HoneyType.Wild ? (int)item.honeyType.Value.Value : 421;
 
-            //Return 0, which happens to be the index of weeds, on failure
+            //Return -1 on failure
             return -1;
         }
 
@@ -76,7 +78,7 @@ namespace BetterArtisanGoodIcons
                 return false;
 
             textureSheet = this.spriteSheet;
-            iconPosition = Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, sourceIndex, 16, 16);
+            iconPosition = sourceIndex != -1 ? Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, sourceIndex, 16, 16): Rectangle.Empty;
 
             return true;
         }
