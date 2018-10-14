@@ -85,6 +85,9 @@ namespace BetterArtisanGoodIcons
         /// <summary>Gets the info needed to draw the right texture for the given item.</summary>
         internal bool GetDrawInfo(SObject item, ref Texture2D textureSheet, ref Rectangle mainPosition, ref Rectangle iconPosition)
         {
+            //TODO: This actually disallows changing the base texture b/c it won't get past the second if statement,
+            //TODO: also the != -1 check will also be false.
+
             //Only yield new textures for base items. If removed, everything *should* still work, but it needs more testing.
             if (item.ParentSheetIndex != (int)this.good)
                 return false;
