@@ -123,14 +123,14 @@ namespace DesertObelisk
 
         private void SaveObelisksToFile(string path)
         {
-            this.Helper.WriteJsonFile<IList<Vector2>>(path,
-                Game1.getFarm().buildings.OfType<DesertObelisk>().Select(item => new Vector2(item.tileX, item.tileY))
+            this.Helper.Data.WriteJsonFile<IList<Vector2>>(path,
+                Game1.getFarm().buildings.OfType<DesertObelisk>().Select(item => new Vector2(item.tileX.Value, item.tileY.Value))
                     .ToList());
         }
 
         private void LoadObelisksFromFile(string path)
         {
-            var saveData = this.Helper.ReadJsonFile<IList<Vector2>>(path);
+            var saveData = this.Helper.Data.ReadJsonFile<IList<Vector2>>(path);
 
             if (saveData != null)
                 foreach (Vector2 item in saveData)
@@ -141,7 +141,7 @@ namespace DesertObelisk
         {
             NetCollection<Building> buildings = Game1.getFarm().buildings;
             for (var i = 0; i < buildings.Count; i++)
-                if (buildings[i].buildingType == "Desert Obelisk" && !(buildings[i] is DesertObelisk))
+                if (buildings[i].buildingType.Value == "Desert Obelisk" && !(buildings[i] is DesertObelisk))
                 {
                     this.Monitor.Log($"Converting {buildings[i].GetType().Name}", LogLevel.Trace);
                     buildings[i] = new DesertObelisk(this.obeliskBlueprint,
