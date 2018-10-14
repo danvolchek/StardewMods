@@ -61,8 +61,8 @@ namespace BetterFruitTrees
                         return;
                     if (Game1.player.ActiveObject != null && !(Game1.player.ActiveObject is Furniture))
                         this.TryToPlaceSapling(Game1.currentLocation, Game1.player.ActiveObject,
-                            (int) vector2.X * Game1.tileSize + Game1.tileSize / 2,
-                            (int) vector2.Y * Game1.tileSize + Game1.tileSize / 2);
+                            (int)vector2.X * Game1.tileSize + Game1.tileSize / 2,
+                            (int)vector2.Y * Game1.tileSize + Game1.tileSize / 2);
                 }
             }
         }
@@ -85,7 +85,7 @@ namespace BetterFruitTrees
                     vector2 = Utility.getTranslatedVector2(vector2, Game1.player.facingDirection, 1f);
             }
 
-            if (!Utility.tileWithinRadiusOfPlayer((int) vector2.X, (int) vector2.Y, 1, Game1.player))
+            if (!Utility.tileWithinRadiusOfPlayer((int)vector2.X, (int)vector2.Y, 1, Game1.player))
             {
                 vector2 = Game1.player.GetGrabTile();
                 if (vector2.Equals(Game1.player.getTileLocation()) && Game1.isAnyGamePadButtonBeingPressed())
@@ -105,7 +105,7 @@ namespace BetterFruitTrees
 
             if (Utility.playerCanPlaceItemHere(location, item, x, y, Game1.player))
             {
-                if (!this.ForcePlaceSapling((Object) item, location, x, y, Game1.player))
+                if (!this.ForcePlaceSapling((Object)item, location, x, y, Game1.player))
                     return;
 
                 Game1.player.reduceActiveItemByOne();
@@ -170,12 +170,12 @@ namespace BetterFruitTrees
                 location.terrainFeatures.Remove(index1);
             }
 
-            if ((location.doesTileHaveProperty((int) index1.X, (int) index1.Y, "Diggable", "Back") != null || location
-                     .doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "Type", "Back").Equals("Grass")) &&
-                !location.doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "NoSpawn", "Back")
+            if ((location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable", "Back") != null || location
+                     .doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type", "Back").Equals("Grass")) &&
+                !location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "NoSpawn", "Back")
                     .Equals("Tree") || location.Name.Equals("Greenhouse") &&
-                (location.doesTileHaveProperty((int) index1.X, (int) index1.Y, "Diggable", "Back") != null || location
-                     .doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "Type", "Back").Equals("Stone")))
+                (location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable", "Back") != null || location
+                     .doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type", "Back").Equals("Stone")))
             {
                 Game1.playSound("dirtyHit");
                 DelayedAction.playSoundAfterDelay("coin", 100);
@@ -183,7 +183,7 @@ namespace BetterFruitTrees
                 {
                     GreenHouseTree = location.IsGreenhouse,
                     GreenHouseTileTree =
-                        location.doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "Type", "Back")
+                        location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type", "Back")
                             .Equals("Stone")
                 });
                 this.RemoveTooCloseHudMessage();
@@ -237,12 +237,13 @@ namespace BetterFruitTrees
         /// </summary>
         private void BeforeSave(object sender, EventArgs e)
         {
+            //1.3.28 = .FieldPairs, NetRef<TerrainFeature>, item.Value.Value, fruitTree.Value.Value
             foreach (GameLocation l in Game1.locations)
-            foreach (KeyValuePair<Vector2, NetRef<TerrainFeature>> fruitTree in l.terrainFeatures.FieldPairs.Where(
-                item =>
-                    item.Value.Value is FruitTree))
-                if (!this.CanFruitTreeGrow(l, fruitTree.Key))
-                    this.SimulateFruitTreeDayUpdate(l, fruitTree.Value.Value as FruitTree);
+                foreach (KeyValuePair<Vector2, TerrainFeature> fruitTree in l.terrainFeatures.Pairs.Where(
+                    item =>
+                        item.Value is FruitTree))
+                    if (!this.CanFruitTreeGrow(l, fruitTree.Key))
+                        this.SimulateFruitTreeDayUpdate(l, fruitTree.Value as FruitTree);
         }
 
         /// <summary>
