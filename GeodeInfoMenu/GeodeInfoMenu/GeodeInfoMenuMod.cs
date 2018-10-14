@@ -360,8 +360,18 @@ namespace GeodeInfoMenu
                                 return 390;//stone
                             case 2:
                                 return 330;//clay
-                            case 3: // geode ? earth crystal : frozen geode ? frozen tear : fire quartz
-                                return parentSheetIndex == 535 ? 86 : (parentSheetIndex == 536 ? 84 : 82);
+                            case 3:
+                                switch (parentSheetIndex)
+                                {
+                                    case 535:
+                                        return 86; //earth crystal
+                                    case 536:
+                                        return 84; //frozen tear
+                                    case 749:
+                                        return 82 + random.Next(3) * 2; //fire quartz, frozen tear, earth crystal
+                                    default:
+                                        return 82; //fire quartz
+                                }
                         }
                     }
                     else if (parentSheetIndex == 535) //geode
