@@ -31,15 +31,15 @@ namespace GiantCropRing
         {
             if (Game1.activeClickableMenu is ShopMenu)
             {
-                var shop = (ShopMenu) Game1.activeClickableMenu;
-                if (shop.portraitPerson != null && shop.portraitPerson.name == "Pierre") // && Game1.dayOfMonth % 7 == )
+                ShopMenu shop = (ShopMenu)Game1.activeClickableMenu;
+                if (shop.portraitPerson != null && shop.portraitPerson.Name == "Pierre") // && Game1.dayOfMonth % 7 == )
                 {
                     var items =
                         this.Helper.Reflection.GetField<Dictionary<Item, int[]>>(shop, "itemPriceAndStock").GetValue();
                     var selling = this.Helper.Reflection.GetField<List<Item>>(shop, "forSale").GetValue();
 
                     var ring = new GiantRing();
-                    items.Add(ring, new[] {this.config.cropRingPrice, int.MaxValue});
+                    items.Add(ring, new[] { this.config.cropRingPrice, int.MaxValue });
                     selling.Add(ring);
                 }
             }
@@ -47,7 +47,7 @@ namespace GiantCropRing
 
         private void BeforeSave(object sender, EventArgs e)
         {
-            var chance = 0.0;
+            double chance = 0.0;
             if (Game1.player.leftRing.Value is GiantRing) chance += this.config.cropChancePercentWithRing;
             if (Game1.player.rightRing.Value is GiantRing) chance += this.config.cropChancePercentWithRing;
 
@@ -60,28 +60,28 @@ namespace GiantCropRing
 
         private void MaybeChangeCrops(double chance, GameLocation environment)
         {
-            foreach (var tup in this.GetValidCrops())
+            foreach (Tuple<Vector2, Crop> tup in this.GetValidCrops())
             {
-                var xTile = (int) tup.Item1.X;
-                var yTile = (int) tup.Item1.Y;
+                int xTile = (int)tup.Item1.X;
+                int yTile = (int)tup.Item1.Y;
 
-                var crop = tup.Item2;
+                Crop crop = tup.Item2;
 
 
-                var rand = new Random((int) Game1.uniqueIDForThisGame + (int) Game1.stats.DaysPlayed + xTile * 2000 +
+                double rand = new Random((int)Game1.uniqueIDForThisGame + (int)Game1.stats.DaysPlayed + xTile * 2000 +
                                       yTile).NextDouble();
 
 
-                var okCrop = true;
-                if (crop.currentPhase == crop.phaseDays.Count - 1 &&
-                    (crop.indexOfHarvest == 276 || crop.indexOfHarvest == 190 || crop.indexOfHarvest == 254) &&
+                bool okCrop = true;
+                if (crop.currentPhase.Value == crop.phaseDays.Count - 1 &&
+                    (crop.indexOfHarvest.Value == 276 || crop.indexOfHarvest.Value == 190 || crop.indexOfHarvest.Value == 254) &&
                     rand < chance)
                 {
-                    for (var index1 = xTile - 1; index1 <= xTile + 1; ++index1)
+                    for (int index1 = xTile - 1; index1 <= xTile + 1; ++index1)
                     {
-                        for (var index2 = yTile - 1; index2 <= yTile + 1; ++index2)
+                        for (int index2 = yTile - 1; index2 <= yTile + 1; ++index2)
                         {
-                            var key = new Vector2(index1, index2);
+                            Vector2 key = new Vector2(index1, index2);
                             if (!environment.terrainFeatures.ContainsKey(key) ||
                                 !(environment.terrainFeatures[key] is HoeDirt) ||
                                 (environment.terrainFeatures[key] as HoeDirt).crop == null ||
@@ -101,14 +101,14 @@ namespace GiantCropRing
                     if (!okCrop)
                         continue;
 
-                    for (var index1 = xTile - 1; index1 <= xTile + 1; ++index1)
-                    for (var index2 = yTile - 1; index2 <= yTile + 1; ++index2)
-                    {
-                        var index3 = new Vector2(index1, index2);
-                        (environment.terrainFeatures[index3] as HoeDirt).crop = null;
-                    }
+                    for (int index1 = xTile - 1; index1 <= xTile + 1; ++index1)
+                        for (int index2 = yTile - 1; index2 <= yTile + 1; ++index2)
+                        {
+                            var index3 = new Vector2(index1, index2);
+                            (environment.terrainFeatures[index3] as HoeDirt).crop = null;
+                        }
 
-                    (environment as Farm).resourceClumps.Add(new GiantCrop(crop.indexOfHarvest,
+                    (environment as Farm).resourceClumps.Add(new GiantCrop(crop.indexOfHarvest.Value,
                         new Vector2(xTile - 1, yTile - 1)));
                 }
             }
@@ -119,9 +119,9 @@ namespace GiantCropRing
             return Game1.locations.Where(gl => gl is Farm).SelectMany(gl => (gl as Farm).terrainFeatures.Pairs.Where(
                     tf =>
                         tf.Value is HoeDirt hd && hd.crop != null
-                                               && hd.state == 1).Select(hd =>
+                                               && hd.state.Value == 1).Select(hd =>
                     new Tuple<Vector2, Crop>(hd.Key, (hd.Value as HoeDirt).crop))
-                .Where(c => !(c.Item2.dead || !c.Item2.seasonsToGrowIn.Contains(Game1.currentSeason)))).ToList();
+                .Where(c => !(c.Item2.dead.Value || !c.Item2.seasonsToGrowIn.Contains(Game1.currentSeason)))).ToList();
         }
     }
 }

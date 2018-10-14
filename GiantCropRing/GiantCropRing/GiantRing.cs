@@ -48,7 +48,7 @@ namespace GiantCropRing
 
         private void Build(IReadOnlyDictionary<string, string> additionalSaveData)
         {
-            this.category.Value = -96;
+            this.Category = -96;
             this.Name = "Giant Crop Ring";
             this.description = "Increases the chance of growing giant crops if you wear it before going to sleep.";
             this.uniqueID.Value = int.Parse(additionalSaveData["id"]);
