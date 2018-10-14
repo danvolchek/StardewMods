@@ -20,7 +20,9 @@ namespace NoFenceDecay
         private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
         {
             foreach (Fence fence in this.finder.GetFences())
-                fence.repair();
+            {
+                fence.health.Set((fence.isGate.Value ? 2 : 1) * fence.maxHealth.Value);
+            }
         }
     }
 }
