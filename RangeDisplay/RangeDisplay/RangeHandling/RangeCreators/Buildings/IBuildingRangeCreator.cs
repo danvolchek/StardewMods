@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using StardewValley;
-using System.Collections.Generic;
 
-namespace RangeDisplay.RangeHandling.RangeCreators
+namespace RangeDisplay.RangeHandling.RangeCreators.Buildings
 {
     internal interface IBuildingRangeCreator : IHandlesRangeItem
     {

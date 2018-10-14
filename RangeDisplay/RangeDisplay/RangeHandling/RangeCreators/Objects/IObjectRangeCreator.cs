@@ -1,6 +1,6 @@
 ﻿using SObject = StardewValley.Object;
 
-namespace RangeDisplay.RangeHandling.RangeCreators
+namespace RangeDisplay.RangeHandling.RangeCreators.Objects
 {
     internal interface IObjectRangeCreator : IRangeCreator
     {

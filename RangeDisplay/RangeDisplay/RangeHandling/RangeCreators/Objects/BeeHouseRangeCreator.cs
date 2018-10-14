@@ -1,10 +1,10 @@
-﻿using Microsoft.Xna.Framework;
-using StardewValley;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using StardewValley;
 using SObject = StardewValley.Object;
 
-namespace RangeDisplay.RangeHandling.RangeCreators
+namespace RangeDisplay.RangeHandling.RangeCreators.Objects
 {
     internal class BeeHouseRangeCreator : IObjectRangeCreator
     {

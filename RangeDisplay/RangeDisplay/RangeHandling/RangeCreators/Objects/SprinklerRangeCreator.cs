@@ -1,12 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using RangeDisplay.APIs;
 using StardewModdingAPI;
 using StardewValley;
-using System;
-using System.Collections.Generic;
 using SObject = StardewValley.Object;
 
-namespace RangeDisplay.RangeHandling.RangeCreators
+namespace RangeDisplay.RangeHandling.RangeCreators.Objects
 {
     internal class SprinklerRangeCreator : IObjectRangeCreator
     {

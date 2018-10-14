@@ -1,11 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Locations;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace RangeDisplay.RangeHandling.RangeCreators
+namespace RangeDisplay.RangeHandling.RangeCreators.Buildings
 {
     internal class JunimoHutRangeCreator : IBuildingRangeCreator
     {

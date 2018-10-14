@@ -8,6 +8,8 @@ using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RangeDisplay.RangeHandling.RangeCreators.Buildings;
+using RangeDisplay.RangeHandling.RangeCreators.Objects;
 using SObject = StardewValley.Object;
 
 namespace RangeDisplay

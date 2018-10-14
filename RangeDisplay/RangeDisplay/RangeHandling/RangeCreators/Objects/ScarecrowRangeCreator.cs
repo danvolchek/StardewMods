@@ -1,9 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using StardewValley;
-using System.Collections.Generic;
 using SObject = StardewValley.Object;
 
-namespace RangeDisplay.RangeHandling.RangeCreators
+namespace RangeDisplay.RangeHandling.RangeCreators.Objects
 {
     internal class ScarecrowRangeCreator : IObjectRangeCreator
     {
@@ -11,7 +11,7 @@ namespace RangeDisplay.RangeHandling.RangeCreators
 
         public bool CanHandle(SObject obj)
         {
-            return obj.bigCraftable && obj.name.ToLower().Contains("arecrow");
+            return obj.bigCraftable.Value && obj.name.ToLower().Contains("arecrow");
         }
 
         public IEnumerable<Vector2> GetRange(SObject obj, Vector2 position, GameLocation location)
