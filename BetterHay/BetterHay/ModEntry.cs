@@ -148,7 +148,7 @@ namespace BetterHay
         }
 
         //Converts all hoppers in Objects to ToType that are FromType
-        private void ConvertHopperImpl<TFromType, TToType>(OverlaidDictionary<Vector2, SObject> Objects)
+        private void ConvertHopperImpl<TFromType, TToType>(OverlaidDictionary Objects)
             where TToType : SObject where TFromType : SObject
         {
             if (Objects == null)
