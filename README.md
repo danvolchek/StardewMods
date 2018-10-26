@@ -26,3 +26,4 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Removable Horse Hats](/RemovableHorseHats): Lets you remove the hat from your horse.
 - [Mod Update Menu](/ModUpdateMenu): Adds an in game menu that notifies users about mod updates.
 - [Custom Transparency](/CustomTransparency): Lets you choose how transparent buildings/trees are when you walk behind them.
+- [Casks Everywhere](/CasksEverywhere): Lets you use casks in any location - not just in cellars.

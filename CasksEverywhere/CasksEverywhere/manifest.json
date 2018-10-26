@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Casks Everywhere",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Makes casks work everywhere.",
+  "UniqueID": "cat.caskseverywhere",
+  "EntryDll": "CasksEverywhere.dll",
+  "MinimumApiVersion": "2.8-beta.5",
+  "UpdateKeys": [ "Nexus:2994" ]
+}
