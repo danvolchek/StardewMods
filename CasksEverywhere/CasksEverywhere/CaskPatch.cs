@@ -20,7 +20,7 @@ namespace CasksEverywhere
         }
 
         /// <summary>
-        /// Change the first 0.4 in the method to the specified transparency in the config.
+        /// Change the first Cellar operand to be a GameLocation instead - allowing casks everywhere.
         /// </summary>
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
