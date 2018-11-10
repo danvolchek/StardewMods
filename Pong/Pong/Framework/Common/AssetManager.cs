@@ -7,7 +7,6 @@ namespace Pong.Framework.Common
     {
         public static Texture2D SquareTexture;
         public static Texture2D CircleTexture;
-        public static Texture2D BorderTexture;
 
         public static bool Init(IModHelper helper)
         {
@@ -15,7 +14,6 @@ namespace Pong.Framework.Common
             {
                 SquareTexture = helper.Content.Load<Texture2D>("assets/square.png");
                 CircleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
-                BorderTexture = helper.Content.Load<Texture2D>("assets/border.png");
 
                 return true;
             }

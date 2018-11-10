@@ -21,7 +21,11 @@ namespace Pong
         {
             Instance = this;
 
-            AssetManager.Init(helper);
+            if (!AssetManager.Init(helper))
+            {
+                this.Monitor.Log("Failed to load textures, exiting.", LogLevel.Error);
+                return;
+            }
             this.SwitchToNewMenu(new StartMenu());
 
             GraphicsEvents.OnPostRenderEvent += this.OnPostRender;
