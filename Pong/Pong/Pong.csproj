@@ -42,21 +42,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Framework\Interfaces\IMenu.cs" />
+    <Compile Include="Framework\Menus\IMenu.cs" />
+    <Compile Include="Framework\Menus\Elements\ConditionalElement.cs" />
+    <Compile Include="Framework\Menus\Elements\DynamicTextElement.cs" />
+    <Compile Include="Framework\Menus\Elements\StaticTextElement.cs" />
     <Compile Include="Framework\Menus\Menu.cs" />
-    <Compile Include="Framework\Menus\StartScreen.cs" />
+    <Compile Include="Menus\ServerMenu.cs" />
+    <Compile Include="Menus\StartScreen.cs" />
     <Compile Include="Framework\Menus\SwitchMenuEventArgs.cs" />
     <Compile Include="Game\Ball.cs" />
     <Compile Include="Game\CollideInfo.cs" />
     <Compile Include="Game\Collider.cs" />
     <Compile Include="Game\Controllers\ComputerController.cs" />
     <Compile Include="Game\Controllers\LocalPlayerController.cs" />
-    <Compile Include="Framework\Interfaces\IDrawableCollideable.cs" />
-    <Compile Include="Framework\Interfaces\IDrawable.cs" />
-    <Compile Include="Framework\Interfaces\IReactiveDrawableCollideable.cs" />
-    <Compile Include="Framework\Interfaces\INonReactiveDrawableCollideable.cs" />
-    <Compile Include="Framework\Interfaces\IResetable.cs" />
-    <Compile Include="Framework\Interfaces\IUpdateable.cs" />
+    <Compile Include="Framework\Interfaces\Game\IDrawableCollideable.cs" />
+    <Compile Include="Framework\Common\IDrawable.cs" />
+    <Compile Include="Framework\Interfaces\Game\IReactiveDrawableCollideable.cs" />
+    <Compile Include="Framework\Interfaces\Game\INonReactiveDrawableCollideable.cs" />
+    <Compile Include="Framework\Interfaces\Game\IResetable.cs" />
+    <Compile Include="Framework\Common\IUpdateable.cs" />
     <Compile Include="Framework\Enums\Orientation.cs" />
     <Compile Include="Game\Paddle.cs" />
     <Compile Include="Game\Controllers\PaddleController.cs" />
@@ -64,7 +68,7 @@
     <Compile Include="Framework\Enums\Side.cs" />
     <Compile Include="Game\Wall.cs" />
     <Compile Include="ModEntry.cs" />
-    <Compile Include="Game\PongGame.cs" />
+    <Compile Include="Game\GameMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SoundManager.cs" />
   </ItemGroup>

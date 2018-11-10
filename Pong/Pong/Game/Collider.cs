@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Framework.Interfaces;
+using Pong.Framework.Interfaces.Game;
 
 namespace Pong.Game
 {
@@ -25,7 +25,7 @@ namespace Pong.Game
 
         public virtual void Draw(SpriteBatch b)
         {
-            b.Draw(this.IsSquare ? PongGame.SquareTexture : PongGame.CircleTexture, new Rectangle(this.XPos, this.YPos, this.Width, this.Height), null, Color.White);
+            b.Draw(this.IsSquare ? GameMenu.SquareTexture : GameMenu.CircleTexture, new Rectangle(this.XPos, this.YPos, this.Width, this.Height), null, Color.White);
         }
 
         public virtual void Update()

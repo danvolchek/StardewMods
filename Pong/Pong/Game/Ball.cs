@@ -1,7 +1,9 @@
 ﻿using StardewValley;
 using System;
 using Pong.Framework.Enums;
-using Pong.Framework.Interfaces;
+using Pong.Framework.Interfaces.Game;
+using Pong.Framework.Menus;
+using Pong.Menus;
 
 namespace Pong.Game
 {
@@ -36,8 +38,8 @@ namespace Pong.Game
 
         public void Reset()
         {
-            this.XPos = (PongGame.ScreenWidth- this.Width) / 2;
-            this.YPos = (PongGame.ScreenHeight- this.Height) / 2;
+            this.XPos = (Menu.ScreenWidth- this.Width) / 2;
+            this.YPos = (Menu.ScreenHeight- this.Height) / 2;
             this.xVelocity = (this.rand.NextDouble() < 0.5 ? 1 : -1) * 4;
             this.yVelocity = (this.rand.NextDouble() < 0.5 ? 1 : -1) * 8;
         }

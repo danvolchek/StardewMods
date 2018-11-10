@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Enums;
-using Pong.Framework.Interfaces;
+using Pong.Framework.Interfaces.Game;
 using Pong.Framework.Menus;
+using Pong.Framework.Menus.Elements;
 using Pong.Game.Controllers;
+using Pong.Menus;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewValley;
-using StardewValley.BellsAndWhistles;
+using System.Collections.Generic;
+using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Game
 {
-    internal class PongGame : Menu, IResetable
+    internal class GameMenu : Menu, IResetable
     {
         public static Texture2D SquareTexture;
         public static Texture2D CircleTexture;
@@ -26,7 +26,7 @@ namespace Pong.Game
         private int startTimer;
         private bool paused;
 
-        public PongGame()
+        public GameMenu()
         {
             this.ball = new Ball();
             Paddle computerPaddle = new Paddle(new ComputerController(this.ball), Side.Top);
@@ -55,22 +55,24 @@ namespace Pong.Game
             this.starting = true;
             this.startTimer = 180;
             this.paused = false;
+
+            this.InitDrawables();
         }
 
-        public override void ButtonPressed(EventArgsInput e)
+        public override bool ButtonPressed(EventArgsInput e)
         {
-            e.SuppressButton();
             switch (e.Button)
             {
                 case SButton.P:
                     this.TogglePaused();
-                    break;
+                    return true;
                 case SButton.Escape:
                     this.OnSwitchToNewMenu(new StartScreen());
-                    break;
+                    return true;
             }
-        }
 
+            return false;
+        }
 
         public override void Update()
         {
@@ -128,37 +130,27 @@ namespace Pong.Game
             }
         }
 
-        public override void Draw(SpriteBatch b)
+        protected override IEnumerable<IDrawable> GetDrawables()
         {
-            base.Draw(b);
-
             foreach (INonReactiveDrawableCollideable collideable in this.nonReactiveCollideables)
-                collideable.Draw(b);
+                yield return collideable;
 
-            this.ball.Draw(b);
-            this.scoreDisplay.Draw(b);
+            yield return this.ball;
+            yield return this.scoreDisplay;
 
-            if (this.paused)
-                SpriteText.drawStringHorizontallyCenteredAt(b, "Press P to resume", ScreenWidth / 2,
-                    ScreenHeight / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
-            else if (this.starting)
-                SpriteText.drawStringHorizontallyCenteredAt(b,
-                    $"{this.startTimer / 60 + 1}", ScreenWidth / 2,
-                    (int)(ScreenHeight / 2.0 - Game1.tileSize * 1.5), 999999, -1, 999999, 1f, 0.88f, false,
-                    SpriteText.color_White);
-            else
-                SpriteText.drawString(b, "P to pause", 50, 150, 999999, -1, 999999, 1f, 0.88f, false, -1, "",
-                    SpriteText.color_White);
+            yield return new ConditionalElement(new StaticTextElement("Press P to resume", ScreenWidth / 2, ScreenHeight /2),
+                () => this.paused);
 
-            if (!this.starting)
-                SpriteText.drawString(b, "Esc to exit", 50, 100, 999999, -1, 999999, 1f, 0.88f, false, -1, "",
-                    SpriteText.color_White);
+            yield return new ConditionalElement(new DynamicTextElement(() => $"{this.startTimer / 60 + 1}", ScreenWidth / 2, ScreenHeight / 2), 
+                () => !this.paused && this.starting);
 
+            yield return new ConditionalElement(new StaticTextElement("P to pause", 50, 150),
+                () => !this.paused && !this.starting);
 
-            b.Draw(Game1.mouseCursors,
-                new Rectangle(Game1.oldMouseState.X, Game1.oldMouseState.Y, Game1.tileSize / 2, Game1.tileSize / 2),
-                new Rectangle(146, 384, 9, 9), Color.White);
+            yield return new ConditionalElement(new StaticTextElement("Esc to exit", 50, 100),
+                () => !this.starting);
         }
+        
 
         private void Reset(bool resetScore)
         {

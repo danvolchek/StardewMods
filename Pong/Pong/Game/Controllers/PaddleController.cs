@@ -1,5 +1,5 @@
 ﻿using System;
-using Pong.Framework.Interfaces;
+using Pong.Framework.Common;
 
 namespace Pong.Game.Controllers
 {
@@ -27,7 +27,7 @@ namespace Pong.Game.Controllers
         {
             if (left && xPos < this.movementAmount)
                 return 0;
-            if (!left && xPos > PongGame.ScreenWidth - width - this.movementAmount)
+            if (!left && xPos > GameMenu.ScreenWidth - width - this.movementAmount)
                 return 0;
             return (left ? -1 : 1) * this.movementAmount;
         }

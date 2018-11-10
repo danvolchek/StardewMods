@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using Pong.Framework.Interfaces;
+using Pong.Framework.Common;
+using Pong.Framework.Interfaces.Game;
 using StardewValley.BellsAndWhistles;
 
 namespace Pong.Game

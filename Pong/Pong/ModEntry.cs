@@ -4,8 +4,8 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using System;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Framework.Interfaces;
 using Pong.Framework.Menus;
+using Pong.Menus;
 
 namespace Pong
 {
@@ -15,20 +15,27 @@ namespace Pong
 
         public override void Entry(IModHelper helper)
         {
-            PongGame.SquareTexture = helper.Content.Load<Texture2D>("assets/square.png");
-            PongGame.CircleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
+            GameMenu.SquareTexture = helper.Content.Load<Texture2D>("assets/square.png");
+            GameMenu.CircleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
 
             this.SwitchToNewMenu(new StartScreen());
 
             GraphicsEvents.OnPostRenderEvent += this.OnPostRender;
             GraphicsEvents.Resize += this.Resize;
             InputEvents.ButtonPressed += this.InputEvents_ButtonPressed;
+            ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
+        }
+
+        private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
+        {
+            this.currentMenu?.MouseStateChanged(e);
         }
 
         private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
         {
-            SoundManager.PlayKeyPressSound();
-            this.currentMenu?.ButtonPressed(e);
+            e.SuppressButton();
+            if(this.currentMenu?.ButtonPressed(e) == true)
+                SoundManager.PlayKeyPressSound();
         }
 
         private void SwitchToNewMenuEvent(object sender, SwitchMenuEventArgs e)

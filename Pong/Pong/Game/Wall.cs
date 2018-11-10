@@ -1,5 +1,5 @@
 ﻿using Pong.Framework.Enums;
-using Pong.Framework.Interfaces;
+using Pong.Framework.Interfaces.Game;
 
 namespace Pong.Game
 {
@@ -24,17 +24,17 @@ namespace Pong.Game
                     this.XPos = -10;
                     this.YPos = 0;
                     this.Width = 10;
-                    this.Height = PongGame.ScreenHeight;
+                    this.Height = GameMenu.ScreenHeight;
 
                     orientation = Orientation.Vertical;
                     break;
 
                 case Side.Right:
 
-                    this.XPos = PongGame.ScreenWidth;
+                    this.XPos = GameMenu.ScreenWidth;
                     this.YPos = 0;
                     this.Width = 10;
-                    this.Height = PongGame.ScreenHeight;
+                    this.Height = GameMenu.ScreenHeight;
 
                     orientation = Orientation.Vertical;
                     break;
@@ -42,7 +42,7 @@ namespace Pong.Game
 
                     this.XPos = 0;
                     this.YPos = -10;
-                    this.Width = PongGame.ScreenWidth;
+                    this.Width = GameMenu.ScreenWidth;
                     this.Height = 10;
 
                     orientation = Orientation.Horizontal;
@@ -51,8 +51,8 @@ namespace Pong.Game
                 case Side.Bottom:
 
                     this.XPos = 0;
-                    this.YPos = PongGame.ScreenHeight;
-                    this.Width = PongGame.ScreenWidth;
+                    this.YPos = GameMenu.ScreenHeight;
+                    this.Width = GameMenu.ScreenWidth;
                     this.Height = 10;
 
                     orientation = Orientation.Horizontal;

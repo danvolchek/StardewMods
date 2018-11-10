@@ -2,7 +2,7 @@
 using StardewValley;
 using System;
 using Pong.Framework.Enums;
-using Pong.Framework.Interfaces;
+using Pong.Framework.Interfaces.Game;
 using Pong.Game.Controllers;
 
 namespace Pong.Game
@@ -38,8 +38,8 @@ namespace Pong.Game
 
         private void ResetPos()
         {
-            this.XPos = (PongGame.ScreenWidth - this.Width) / 2;
-            this.YPos = this.side == Side.Bottom ? PongGame.ScreenHeight - this.Height : 0;
+            this.XPos = (GameMenu.ScreenWidth - this.Width) / 2;
+            this.YPos = this.side == Side.Bottom ? GameMenu.ScreenHeight - this.Height : 0;
         }
 
         public void Resize()
