@@ -1,4 +1,6 @@
-﻿namespace Pong.Game.Framework
+﻿using Pong.Game;
+
+namespace Pong.Framework.Interfaces
 {
     internal interface INonReactiveDrawableCollideable : IDrawableCollideable
     {

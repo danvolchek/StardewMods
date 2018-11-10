@@ -1,26 +1,26 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Game.Framework;
-using Pong.Game.Framework.Controllers;
-using Pong.Game.Framework.Enums;
+using Pong.Framework.Enums;
+using Pong.Framework.Interfaces;
+using Pong.Game.Controllers;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
 
 namespace Pong.Game
 {
-    internal class PongGame : Framework.IUpdateable, Framework.IDrawable, IResetable
+    internal class PongGame : Framework.Interfaces.IUpdateable, Framework.Interfaces.IDrawable, IResetable
     {
         public static Texture2D SquareTexture;
         public static Texture2D CircleTexture;
         private readonly List<INonReactiveDrawableCollideable> nonReactiveCollideables;
         private readonly List<IResetable> resetables;
-        private readonly Ball ball;
         private readonly ScoreDisplay scoreDisplay;
-
         private readonly SoundManager soundManager;
 
+
+        private readonly Ball ball;
         private bool ballCollidedLastFrame;
         private bool starting;
         private int startTimer;
@@ -112,8 +112,9 @@ namespace Pong.Game
             }
             else if (this.starting)
             {
+                if (this.startTimer % 60 == 0)
+                    this.soundManager.PlayCountdownSound();
                 this.startTimer--;
-                if (this.startTimer == 60 || this.startTimer == 120 || this.startTimer == 0) this.soundManager.PlayCountdownSound();
                 if (this.startTimer == 0)
                 {
                     this.started = true;
@@ -137,7 +138,7 @@ namespace Pong.Game
                         ScreenHeight / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
                 else if (this.starting)
                     SpriteText.drawStringHorizontallyCenteredAt(b,
-                        $"{(this.startTimer < 60 ? 1 : (this.startTimer < 120 ? 2 : 3))}", ScreenWidth / 2,
+                        $"{this.startTimer / 60 + 1}", ScreenWidth / 2,
                         (int)(ScreenHeight / 2.0 - Game1.tileSize * 1.5), 999999, -1, 999999, 1f, 0.88f, false,
                         SpriteText.color_White);
                 else
@@ -202,7 +203,7 @@ namespace Pong.Game
             if (this.starting || this.started)
                 return;
 
-            this.soundManager.PlayKeyPressSound();
+            //this.soundManager.PlayKeyPressSound();
             this.starting = true;
         }
 

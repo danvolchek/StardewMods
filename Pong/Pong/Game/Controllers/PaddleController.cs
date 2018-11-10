@@ -1,6 +1,7 @@
 ﻿using System;
+using Pong.Framework.Interfaces;
 
-namespace Pong.Game.Framework.Controllers
+namespace Pong.Game.Controllers
 {
     internal abstract class PaddleController : IUpdateable
     {

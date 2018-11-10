@@ -1,6 +1,6 @@
 ﻿using StardewModdingAPI.Events;
 
-namespace Pong.Game.Framework.Controllers
+namespace Pong.Game.Controllers
 {
     internal class LocalPlayerController : PaddleController
     {

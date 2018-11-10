@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Pong.Game.Framework
+namespace Pong.Framework.Interfaces
 {
     internal interface IDrawableCollideable : IUpdateable, IDrawable
     {

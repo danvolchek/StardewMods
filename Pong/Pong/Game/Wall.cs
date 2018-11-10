@@ -1,5 +1,5 @@
-﻿using Pong.Game.Framework;
-using Pong.Game.Framework.Enums;
+﻿using Pong.Framework.Enums;
+using Pong.Framework.Interfaces;
 
 namespace Pong.Game
 {

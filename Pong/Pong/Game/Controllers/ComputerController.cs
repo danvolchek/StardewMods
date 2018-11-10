@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Pong.Game.Framework.Controllers
+namespace Pong.Game.Controllers
 {
     internal class ComputerController : PaddleController
     {

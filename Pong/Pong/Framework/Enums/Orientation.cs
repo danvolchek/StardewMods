@@ -1,4 +1,4 @@
-﻿namespace Pong.Game.Framework.Enums
+﻿namespace Pong.Framework.Enums
 {
     internal enum Orientation
     {

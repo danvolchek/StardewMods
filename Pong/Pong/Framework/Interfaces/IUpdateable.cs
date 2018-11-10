@@ -1,4 +1,4 @@
-﻿namespace Pong.Game.Framework
+﻿namespace Pong.Framework.Interfaces
 {
     internal interface IUpdateable
     {

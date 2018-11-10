@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewValley;
 using System;
-using Pong.Game.Framework;
-using Pong.Game.Framework.Controllers;
-using Pong.Game.Framework.Enums;
+using Pong.Framework.Enums;
+using Pong.Framework.Interfaces;
+using Pong.Game.Controllers;
 
 namespace Pong.Game
 {

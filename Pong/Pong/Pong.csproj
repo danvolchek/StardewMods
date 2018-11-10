@@ -45,19 +45,19 @@
     <Compile Include="Game\Ball.cs" />
     <Compile Include="Game\CollideInfo.cs" />
     <Compile Include="Game\Collider.cs" />
-    <Compile Include="Game\Framework\Controllers\ComputerController.cs" />
-    <Compile Include="Game\Framework\Controllers\LocalPlayerController.cs" />
-    <Compile Include="Game\Framework\IDrawableCollideable.cs" />
-    <Compile Include="Game\Framework\IDrawable.cs" />
-    <Compile Include="Game\Framework\IReactiveDrawableCollideable.cs" />
-    <Compile Include="Game\Framework\INonReactiveDrawableCollideable.cs" />
-    <Compile Include="Game\Framework\IResetable.cs" />
-    <Compile Include="Game\Framework\IUpdateable.cs" />
-    <Compile Include="Game\Framework\Enums\Orientation.cs" />
+    <Compile Include="Game\Controllers\ComputerController.cs" />
+    <Compile Include="Game\Controllers\LocalPlayerController.cs" />
+    <Compile Include="Framework\Interfaces\IDrawableCollideable.cs" />
+    <Compile Include="Framework\Interfaces\IDrawable.cs" />
+    <Compile Include="Framework\Interfaces\IReactiveDrawableCollideable.cs" />
+    <Compile Include="Framework\Interfaces\INonReactiveDrawableCollideable.cs" />
+    <Compile Include="Framework\Interfaces\IResetable.cs" />
+    <Compile Include="Framework\Interfaces\IUpdateable.cs" />
+    <Compile Include="Framework\Enums\Orientation.cs" />
     <Compile Include="Game\Paddle.cs" />
-    <Compile Include="Game\Framework\Controllers\PaddleController.cs" />
+    <Compile Include="Game\Controllers\PaddleController.cs" />
     <Compile Include="Game\ScoreDisplay.cs" />
-    <Compile Include="Game\Framework\Enums\Side.cs" />
+    <Compile Include="Framework\Enums\Side.cs" />
     <Compile Include="Game\Wall.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Game\PongGame.cs" />
@@ -78,6 +78,9 @@
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Pathoschild.Stardew.ModBuildConfig.2.2.0\analyzers\dotnet\cs\StardewModdingAPI.ModBuildConfig.Analyzer.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Framework\Menus\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

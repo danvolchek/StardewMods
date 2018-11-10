@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Game.Framework;
+using Pong.Framework.Interfaces;
 
 namespace Pong.Game
 {
