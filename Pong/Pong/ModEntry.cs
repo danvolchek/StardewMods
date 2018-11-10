@@ -5,18 +5,23 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using System;
+using Pong.Framework.Common;
 
 namespace Pong
 {
     public class ModEntry : Mod
     {
+        //TODO: Highlightable drawables, then multiplayer connection menu (both join and host)
+        //TODO: then player menu, then remoteBall, maybe remoteGame?
         private IMenu currentMenu;
+
+        internal static ModEntry Instance;
 
         public override void Entry(IModHelper helper)
         {
-            GameMenu.SquareTexture = helper.Content.Load<Texture2D>("assets/square.png");
-            GameMenu.CircleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
+            Instance = this;
 
+            AssetManager.Init(helper);
             this.SwitchToNewMenu(new StartMenu());
 
             GraphicsEvents.OnPostRenderEvent += this.OnPostRender;
@@ -32,8 +37,11 @@ namespace Pong
 
         private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
         {
+            if (this.currentMenu == null)
+                return;
+
             e.SuppressButton();
-            if(this.currentMenu?.ButtonPressed(e) == true)
+            if(this.currentMenu.ButtonPressed(e))
                 SoundManager.PlayKeyPressSound();
         }
 

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Pong.Framework.Common;
 using Pong.Framework.Enums;
 using Pong.Framework.Game;
 using Pong.Framework.Menus;
@@ -8,14 +7,13 @@ using Pong.Game;
 using Pong.Game.Controllers;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using System.Collections.Generic;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Menus
 {
     internal class GameMenu : Menu, IResetable
     {
-        public static Texture2D SquareTexture;
-        public static Texture2D CircleTexture;
         private readonly List<INonReactiveDrawableCollideable> nonReactiveCollideables;
         private readonly List<IResetable> resetables;
         private readonly ScoreDisplay scoreDisplay;
@@ -61,6 +59,8 @@ namespace Pong.Menus
 
         public override bool ButtonPressed(EventArgsInput e)
         {
+            bool result = base.ButtonPressed(e);
+
             switch (e.Button)
             {
                 case SButton.P:
@@ -71,7 +71,7 @@ namespace Pong.Menus
                     return true;
             }
 
-            return false;
+            return result;
         }
 
         public override void Update()

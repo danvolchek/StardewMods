@@ -42,6 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Framework\Common\AssetManager.cs" />
+    <Compile Include="Framework\Menus\Elements\IBoundable.cs" />
+    <Compile Include="Framework\Menus\Elements\IClickable.cs" />
+    <Compile Include="Framework\Menus\Elements\IHighlightable.cs" />
     <Compile Include="Framework\Menus\IMenu.cs" />
     <Compile Include="Framework\Menus\Elements\ConditionalElement.cs" />
     <Compile Include="Framework\Menus\Elements\DynamicTextElement.cs" />
@@ -70,13 +74,16 @@
     <Compile Include="ModEntry.cs" />
     <Compile Include="Menus\GameMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Framework\Menus\SoundManager.cs" />
+    <Compile Include="Framework\Common\SoundManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assets\border.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="assets\circle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

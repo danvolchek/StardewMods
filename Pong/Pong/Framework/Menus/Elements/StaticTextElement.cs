@@ -1,25 +1,48 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Common;
+using StardewModdingAPI;
+using StardewValley;
 using StardewValley.BellsAndWhistles;
+using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Framework.Menus.Elements
 {
-    internal class StaticTextElement : IDrawable
+    internal class StaticTextElement : IDrawable, IHighlightable, IClickable
     {
-        protected string Text;
+        private string text;
+        protected string Text
+        {
+            get => this.text;
+            set { this.text = value; this.UpdateBounds(); }
+        }
+
+        public delegate void ClickFunc();
+
         private readonly int xPos;
         private readonly int yPos;
         private readonly bool centered;
         private readonly int color;
+        private readonly bool neverHighlight;
+        private readonly ClickFunc onClick;
 
-        public StaticTextElement(string text, int x, int y, bool centered = true, int color = SpriteText.color_White)
+        public Rectangle Bounds { get; private set; }
+        public void Clicked()
         {
-            this.Text = text;
+            this.onClick?.Invoke();
+        }
+
+        public bool Highlighted { get; set; }
+
+        public StaticTextElement(string text, int x, int y, bool centered = true, bool neverHighlight = false, ClickFunc onClick = null, int color = SpriteText.color_White)
+        {
             this.xPos = x;
             this.yPos = y;
             this.centered = centered;
             this.color = color;
-
+            this.neverHighlight = neverHighlight;
+            this.onClick = onClick;
+            this.Text = text;
         }
 
         public virtual void Draw(SpriteBatch b)
@@ -35,6 +58,26 @@ namespace Pong.Framework.Menus.Elements
                 SpriteText.drawString(b, this.Text, this.xPos, this.yPos, 999999, -1, 999999, 1f,
                     0.88f, false, -1, "", SpriteText.color_White);
             }
+
+            if (!this.neverHighlight && this.Highlighted)
+            {
+                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - 10, this.Bounds.Y - 10, 5, this.Bounds.Height + 10), Color.White);
+                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - 10, this.Bounds.Y - 10, this.Bounds.Width + 10, 5), Color.White);
+                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X + this.Bounds.Width, this.Bounds.Y - 10, 5, this.Bounds.Height + 10), Color.White);
+                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - 10, this.Bounds.Y + this.Bounds.Height, this.Bounds.Width + 15, 5), Color.White);
+            }
+        }
+
+        private void UpdateBounds()
+        {
+            int width = SpriteText.getWidthOfString(this.Text);
+            int height = SpriteText.getHeightOfString(this.Text);
+
+
+            if (this.centered)
+                this.Bounds = new Rectangle(this.xPos - width / 2, this.yPos, width, height);
+            else
+                this.Bounds = new Rectangle(this.xPos, this.yPos, width, height);
         }
     }
 }

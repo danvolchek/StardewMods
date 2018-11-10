@@ -1,6 +1,6 @@
 ﻿using StardewValley;
 
-namespace Pong.Framework.Menus
+namespace Pong.Framework.Common
 {
     internal static class SoundManager
     {

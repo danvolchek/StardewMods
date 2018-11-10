@@ -7,7 +7,7 @@ namespace Pong.Framework.Menus.Elements
     {
         private readonly TextFunc getText;
 
-        public DynamicTextElement(TextFunc getText, int x, int y, bool centered = false, int color = SpriteText.color_White) : base("", x, y, centered, color)
+        public DynamicTextElement(TextFunc getText, int x, int y, bool centered = false, bool neverHighlight = false, ClickFunc onClick = null, int color = SpriteText.color_White) : base("", x, y, centered, neverHighlight, onClick, color)
         {
             this.getText = getText;
         }
