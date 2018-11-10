@@ -1,16 +1,16 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Enums;
 using Pong.Framework.Interfaces.Game;
 using Pong.Framework.Menus;
 using Pong.Framework.Menus.Elements;
+using Pong.Game;
 using Pong.Game.Controllers;
-using Pong.Menus;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using System.Collections.Generic;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
-namespace Pong.Game
+namespace Pong.Menus
 {
     internal class GameMenu : Menu, IResetable
     {

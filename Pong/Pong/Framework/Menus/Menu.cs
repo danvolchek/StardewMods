@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Game;
+using Pong.Menus;
 using StardewModdingAPI.Events;
 using StardewValley;
+using System;
+using System.Collections.Generic;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Framework.Menus
