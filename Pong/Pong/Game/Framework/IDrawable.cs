@@ -1,10 +1,9 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 
-namespace Pong.Game.Interfaces
+namespace Pong.Game.Framework
 {
-    interface IUpdateable
+    internal interface IDrawable
     {
-        void Update();
         void Draw(SpriteBatch b);
     }
 }

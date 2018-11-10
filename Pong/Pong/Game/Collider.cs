@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Game.Interfaces;
+using Pong.Game.Framework;
 
 namespace Pong.Game
 {
-    internal abstract class Collider : ICollideable
+    internal abstract class Collider : IDrawableCollideable
     {
         protected int XPos;
         protected int YPos;

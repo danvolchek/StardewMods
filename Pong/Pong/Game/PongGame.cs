@@ -1,36 +1,21 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Game.Interfaces;
+using Pong.Game.Framework;
+using Pong.Game.Framework.Controllers;
+using Pong.Game.Framework.Enums;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
-using IUpdateable = Pong.Game.Interfaces.IUpdateable;
 
 namespace Pong.Game
 {
-    internal class PongGame : IUpdateable, IResetable
+    internal class PongGame : Framework.IUpdateable, Framework.IDrawable, IResetable
     {
-        public enum Side
-        {
-            Left,
-            Top,
-            Right,
-            Bottom
-        };
-
-        public enum Orientation
-        {
-            Horizontal,
-            Vertical
-        };
-
         public static Texture2D SquareTexture;
         public static Texture2D CircleTexture;
-        private readonly List<INonReactiveCollideable> nonReactiveCollideables;
+        private readonly List<INonReactiveDrawableCollideable> nonReactiveCollideables;
         private readonly List<IResetable> resetables;
-        private readonly Paddle playerPaddle;
-        private readonly Paddle computerPaddle;
         private readonly Ball ball;
         private readonly ScoreDisplay scoreDisplay;
 
@@ -41,24 +26,24 @@ namespace Pong.Game
         private int startTimer;
         private bool started;
         private bool paused;
-        private int lastMouseXPos;
 
         public PongGame(IModHelper helper)
         {
+            
             SquareTexture = helper.Content.Load<Texture2D>("assets/square.png");
             CircleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
 
-            this.computerPaddle = new Paddle(false);
-            this.playerPaddle = new Paddle(true);
             this.ball = new Ball();
+            Paddle computerPaddle = new Paddle(new ComputerController(this.ball), Side.Top);
+            Paddle playerPaddle = new Paddle(new LocalPlayerController(), Side.Bottom);
             this.scoreDisplay = new ScoreDisplay();
 
             this.soundManager = new SoundManager();
 
-            this.nonReactiveCollideables = new List<INonReactiveCollideable>
+            this.nonReactiveCollideables = new List<INonReactiveDrawableCollideable>
             {
-                this.playerPaddle,
-                this.computerPaddle,
+                playerPaddle,
+                computerPaddle,
                 new Wall(Side.Bottom),
                 new Wall(Side.Left),
                 new Wall(Side.Right),
@@ -69,8 +54,8 @@ namespace Pong.Game
             {
                 this.ball,
                 this.scoreDisplay,
-                this.playerPaddle,
-                this.computerPaddle
+                playerPaddle,
+                computerPaddle
             };
 
             this.ballCollidedLastFrame = false;
@@ -78,7 +63,6 @@ namespace Pong.Game
             this.starting = false;
             this.startTimer = 180;
             this.paused = false;
-            this.lastMouseXPos = 0;
         }
 
 
@@ -87,7 +71,7 @@ namespace Pong.Game
             if (this.started && !this.paused)
             {
                 bool collided = false;
-                foreach (INonReactiveCollideable collideable in this.nonReactiveCollideables)
+                foreach (INonReactiveDrawableCollideable collideable in this.nonReactiveCollideables)
                 {
                     if (this.ball.GetBoundingBox().Intersects(collideable.GetBoundingBox()))
                     {
@@ -116,10 +100,6 @@ namespace Pong.Game
                         collided = true;
                     }
 
-                    if (collideable == this.computerPaddle)
-                        this.computerPaddle.ReceiveIntendedPosition(this.ball.GetBoundingBox().X + this.ball.GetBoundingBox().Width / 2);
-                    else if (collideable == this.playerPaddle) this.playerPaddle.ReceiveIntendedPosition(this.lastMouseXPos);
-
                     collideable.Update();
                 }
 
@@ -144,21 +124,21 @@ namespace Pong.Game
 
         public void Draw(SpriteBatch b)
         {
-            b.Draw(SquareTexture, new Rectangle(0, 0, GetScreenWidth(), GetScreenWidth()), null, Color.Black);
+            b.Draw(SquareTexture, new Rectangle(0, 0, ScreenWidth, ScreenWidth), null, Color.Black);
             if (this.started || this.starting)
             {
-                foreach (INonReactiveCollideable collideable in this.nonReactiveCollideables) collideable.Draw(b);
+                foreach (INonReactiveDrawableCollideable collideable in this.nonReactiveCollideables) collideable.Draw(b);
 
                 this.ball.Draw(b);
                 this.scoreDisplay.Draw(b);
 
                 if (this.paused)
-                    SpriteText.drawStringHorizontallyCenteredAt(b, "Press P to resume", GetScreenWidth() / 2,
-                        GetScreenHeight() / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
+                    SpriteText.drawStringHorizontallyCenteredAt(b, "Press P to resume", ScreenWidth / 2,
+                        ScreenHeight / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
                 else if (this.starting)
                     SpriteText.drawStringHorizontallyCenteredAt(b,
-                        $"{(this.startTimer < 60 ? 1 : (this.startTimer < 120 ? 2 : 3))}", GetScreenWidth() / 2,
-                        (int) (GetScreenHeight() / 2 - Game1.tileSize * 1.5), 999999, -1, 999999, 1f, 0.88f, false,
+                        $"{(this.startTimer < 60 ? 1 : (this.startTimer < 120 ? 2 : 3))}", ScreenWidth / 2,
+                        (int)(ScreenHeight / 2.0 - Game1.tileSize * 1.5), 999999, -1, 999999, 1f, 0.88f, false,
                         SpriteText.color_White);
                 else
                     SpriteText.drawString(b, "P to pause", 50, 150, 999999, -1, 999999, 1f, 0.88f, false, -1, "",
@@ -171,17 +151,17 @@ namespace Pong.Game
             else
             {
                 int centerHeight = SpriteText.getHeightOfString("Press Space to start");
-                SpriteText.drawStringHorizontallyCenteredAt(b, "Pong", GetScreenWidth() / 2,
-                    GetScreenHeight() / 2 - centerHeight * 5, 999999, -1, 999999, 1f, 0.88f, false,
+                SpriteText.drawStringHorizontallyCenteredAt(b, "Pong", ScreenWidth / 2,
+                    ScreenHeight / 2 - centerHeight * 5, 999999, -1, 999999, 1f, 0.88f, false,
                     SpriteText.color_White);
-                SpriteText.drawStringHorizontallyCenteredAt(b, "By Cat", GetScreenWidth() / 2,
-                    GetScreenHeight() / 2 - centerHeight * 4, 999999, -1, 999999, 1f, 0.88f, false,
+                SpriteText.drawStringHorizontallyCenteredAt(b, "By Cat", ScreenWidth / 2,
+                    ScreenHeight / 2 - centerHeight * 4, 999999, -1, 999999, 1f, 0.88f, false,
                     SpriteText.color_White);
 
-                SpriteText.drawStringHorizontallyCenteredAt(b, "Press Space to start", GetScreenWidth() / 2,
-                    GetScreenHeight() / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
+                SpriteText.drawStringHorizontallyCenteredAt(b, "Press Space to start", ScreenWidth / 2,
+                    ScreenHeight / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
                 int escHeight = SpriteText.getHeightOfString("Press Esc to exit");
-                SpriteText.drawString(b, "Press Esc to exit", 0, GetScreenHeight() - escHeight, 999999, -1, 999999, 1f,
+                SpriteText.drawString(b, "Press Esc to exit", 0, ScreenHeight - escHeight, 999999, -1, 999999, 1f,
                     0.88f, false, -1, "", SpriteText.color_White);
             }
 
@@ -200,7 +180,7 @@ namespace Pong.Game
             this.starting = false;
             this.startTimer = 180;
             this.paused = false;
-            this.lastMouseXPos = 0;
+
             foreach (IResetable resetable in this.resetables)
                 if (resetable != this.scoreDisplay || resetable == this.scoreDisplay && resetScore)
                     resetable.Reset();
@@ -214,7 +194,7 @@ namespace Pong.Game
 
         public void Resize()
         {
-            foreach (INonReactiveCollideable collideable in this.nonReactiveCollideables) collideable.Resize();
+            foreach (INonReactiveDrawableCollideable collideable in this.nonReactiveCollideables) collideable.Resize();
         }
 
         public void Start()
@@ -240,19 +220,8 @@ namespace Pong.Game
             return this.starting || this.started;
         }
 
-        public void MouseChanged(Point p)
-        {
-            this.lastMouseXPos = p.X;
-        }
+        public static int ScreenWidth => Game1.graphics.GraphicsDevice.Viewport.Width;
 
-        public static int GetScreenWidth()
-        {
-            return Game1.graphics.GraphicsDevice.Viewport.Width;
-        }
-
-        public static int GetScreenHeight()
-        {
-            return Game1.graphics.GraphicsDevice.Viewport.Height;
-        }
+        public static int ScreenHeight => Game1.graphics.GraphicsDevice.Viewport.Height;
     }
 }

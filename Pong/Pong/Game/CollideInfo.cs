@@ -1,4 +1,5 @@
-﻿using static Pong.Game.PongGame;
+﻿using Pong.Game.Framework;
+using Pong.Game.Framework.Enums;
 
 namespace Pong.Game
 {

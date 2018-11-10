@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Game.Interfaces;
+using Pong.Game.Framework;
 using StardewValley.BellsAndWhistles;
 
 namespace Pong.Game
 {
-    internal class ScoreDisplay : IUpdateable, IResetable
+    internal class ScoreDisplay : IUpdateable, IDrawable, IResetable
     {
         public int PlayerScore { get; private set; }
         public int ComputerScore { get; private set; }

@@ -17,7 +17,6 @@ namespace Pong
             InputEvents.ButtonPressed += this.ButtonPressed;
             GraphicsEvents.OnPostRenderEvent += this.OnPostRender;
             GraphicsEvents.Resize += this.Resize;
-            ControlEvents.MouseChanged += this.MouseChanged;
         }
 
         private void ButtonPressed(object sender, EventArgsInput e)
@@ -43,11 +42,6 @@ namespace Pong
             {
                 this.game.TogglePaused();
             }
-        }
-
-        private void MouseChanged(object sender, EventArgsMouseStateChanged e)
-        {
-            this.game.MouseChanged(e.NewPosition);
         }
 
         private void OnPostRender(object sender, EventArgs e)

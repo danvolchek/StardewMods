@@ -1,73 +1,45 @@
 ﻿using Microsoft.Xna.Framework;
-using Pong.Game.Interfaces;
 using StardewValley;
 using System;
+using Pong.Game.Framework;
+using Pong.Game.Framework.Controllers;
+using Pong.Game.Framework.Enums;
 
 namespace Pong.Game
 {
-    internal class Paddle : Collider, INonReactiveCollideable, IResetable
+    internal class Paddle : Collider, INonReactiveDrawableCollideable, IResetable
     {
-        private readonly bool isPlayerControlled;
+        private readonly PaddleController controller;
 
-        private int intendedPosition;
-        private readonly int movementAmount = 9;
+        private readonly Side side;
 
-        private int fuzz = 0;
-        private readonly Random rand;
-
-        public Paddle(bool isPlayerControlled) : base(true)
+        public Paddle(PaddleController controller, Side side) : base(true)
         {
             this.Width = Game1.tileSize * 5;
             this.Height = Game1.tileSize / 2;
-            this.rand = new Random();
+
+            this.controller = controller;
+            this.side = side;
 
             this.ResetPos();
-
-            this.intendedPosition = 0;
-            this.isPlayerControlled = isPlayerControlled;
-            if (!isPlayerControlled) this.movementAmount--;
-
-            this.fuzz = (int)(Game1.random.NextDouble() * this.Width - this.Width / 2);
-        }
-
-        public void Move(bool left)
-        {
-            if (left && this.XPos < this.movementAmount)
-                return;
-            if (!left && this.XPos > PongGame.GetScreenWidth() - this.Width - this.movementAmount)
-                return;
-            this.XPos += (left ? -1 : 1) * this.movementAmount;
-        }
-
-        public void ReceiveIntendedPosition(int pos)
-        {
-            this.intendedPosition = pos + (this.isPlayerControlled ? 0 : this.fuzz);
         }
 
         public override void Update()
         {
-            if (Math.Abs(this.intendedPosition - (this.XPos + this.Width / 2)) > this.movementAmount)
-            {
-                if (this.intendedPosition < this.XPos + this.Width / 2)
-                    this.Move(true);
-                else
-                    this.Move(false);
-            }
-
+            this.controller.Update();
+            this.XPos += this.controller.GetMovement(this.XPos, this.Width);
         }
 
-        public CollideInfo GetCollideInfo(IReactiveCollideable other)
+        public CollideInfo GetCollideInfo(IReactiveDrawableCollideable other)
         {
-            this.fuzz = (int)(this.rand.NextDouble() * this.Width - this.Width / 2);
-
             Rectangle otherPos = other.GetBoundingBox();
-            return new CollideInfo(PongGame.Orientation.Horizontal, Math.Max(0, (otherPos.X + otherPos.Width / 2.0 - this.XPos) / this.Width));
+            return new CollideInfo(Orientation.Horizontal, Math.Max(0, (otherPos.X + otherPos.Width / 2.0 - this.XPos) / this.Width));
         }
 
         private void ResetPos()
         {
-            this.XPos = (PongGame.GetScreenWidth() - this.Width) / 2;
-            this.YPos = this.isPlayerControlled ? PongGame.GetScreenHeight() - this.Height : 0;
+            this.XPos = (PongGame.ScreenWidth - this.Width) / 2;
+            this.YPos = this.side == Side.Bottom ? PongGame.ScreenHeight - this.Height : 0;
         }
 
         public void Resize()
