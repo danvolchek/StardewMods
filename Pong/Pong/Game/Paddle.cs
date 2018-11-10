@@ -5,84 +5,79 @@ using System;
 
 namespace Pong.Game
 {
-    class Paddle : Collider, INonReactiveCollideable, IResetable
+    internal class Paddle : Collider, INonReactiveCollideable, IResetable
     {
-        private bool isPlayerControlled;
+        private readonly bool isPlayerControlled;
 
         private int intendedPosition;
-        private int movementAmount = 9;
+        private readonly int movementAmount = 9;
 
         private int fuzz = 0;
-        private Random rand;
+        private readonly Random rand;
 
         public Paddle(bool isPlayerControlled) : base(true)
         {
-            width = Game1.tileSize * 5;
-            height = Game1.tileSize / 2;
-            rand = new Random();
+            this.Width = Game1.tileSize * 5;
+            this.Height = Game1.tileSize / 2;
+            this.rand = new Random();
 
-            ResetPos();
+            this.ResetPos();
 
-            intendedPosition = 0;
+            this.intendedPosition = 0;
             this.isPlayerControlled = isPlayerControlled;
-            if (!isPlayerControlled)
-               movementAmount--;
+            if (!isPlayerControlled) this.movementAmount--;
 
-            fuzz = (int)(Game1.random.NextDouble() * width - width / 2);
+            this.fuzz = (int)(Game1.random.NextDouble() * this.Width - this.Width / 2);
         }
 
         public void Move(bool left)
         {
-            if (left && xPos < movementAmount)
+            if (left && this.XPos < this.movementAmount)
                 return;
-            if (!left && xPos > PongGame.GetScreenWidth() - width - movementAmount)
+            if (!left && this.XPos > PongGame.GetScreenWidth() - this.Width - this.movementAmount)
                 return;
-            xPos += (left ? -1 : 1) * movementAmount;
+            this.XPos += (left ? -1 : 1) * this.movementAmount;
         }
 
         public void ReceiveIntendedPosition(int pos)
         {
-            intendedPosition = pos + (isPlayerControlled ? 0 : fuzz);
+            this.intendedPosition = pos + (this.isPlayerControlled ? 0 : this.fuzz);
         }
 
         public override void Update()
         {
-            if (Math.Abs(intendedPosition - (xPos + width / 2)) > movementAmount)
+            if (Math.Abs(this.intendedPosition - (this.XPos + this.Width / 2)) > this.movementAmount)
             {
-                if (intendedPosition < (xPos + width / 2))
-                {
-                    Move(true);
-                }
+                if (this.intendedPosition < this.XPos + this.Width / 2)
+                    this.Move(true);
                 else
-                {
-                    Move(false);
-                }
+                    this.Move(false);
             }
 
         }
 
         public CollideInfo GetCollideInfo(IReactiveCollideable other)
         {
-            fuzz = (int)(rand.NextDouble() * width - width / 2);
+            this.fuzz = (int)(this.rand.NextDouble() * this.Width - this.Width / 2);
 
             Rectangle otherPos = other.GetBoundingBox();
-            return new CollideInfo(PongGame.Orientation.HORIZONTAL, Math.Max(0, (otherPos.X + otherPos.Width / 2.0 - xPos) / width));
+            return new CollideInfo(PongGame.Orientation.Horizontal, Math.Max(0, (otherPos.X + otherPos.Width / 2.0 - this.XPos) / this.Width));
         }
 
         private void ResetPos()
         {
-            xPos = (PongGame.GetScreenWidth() - this.width) / 2;
-            yPos = isPlayerControlled ? PongGame.GetScreenHeight() - this.height : 0;
+            this.XPos = (PongGame.GetScreenWidth() - this.Width) / 2;
+            this.YPos = this.isPlayerControlled ? PongGame.GetScreenHeight() - this.Height : 0;
         }
 
         public void Resize()
         {
-            ResetPos();
+            this.ResetPos();
         }
 
         public void Reset()
         {
-            ResetPos();
+            this.ResetPos();
         }
     }
 }

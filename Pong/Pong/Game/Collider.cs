@@ -1,35 +1,35 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Pong.Game.Interfaces;
 
 namespace Pong.Game
 {
-    abstract class Collider : ICollideable
+    internal abstract class Collider : ICollideable
     {
-        protected int xPos;
-        protected int yPos;
-        protected int width;
-        protected int height;
+        protected int XPos;
+        protected int YPos;
+        protected int Width;
+        protected int Height;
 
-        protected bool isSquare;
+        protected bool IsSquare;
 
-        public Collider(bool isSquare)
+        protected Collider(bool isSquare)
         {
-            this.isSquare = isSquare;
+            this.IsSquare = isSquare;
         }
 
         public Rectangle GetBoundingBox()
         {
-            return new Rectangle(xPos, yPos, width, height);
+            return new Rectangle(this.XPos, this.YPos, this.Width, this.Height);
         }
 
         public virtual void Draw(SpriteBatch b)
         {
-            b.Draw(isSquare ? PongGame.squareTexture : PongGame.circleTexture, new Rectangle(xPos, yPos, width, height), null, Color.White);
+            b.Draw(this.IsSquare ? PongGame.SquareTexture : PongGame.CircleTexture, new Rectangle(this.XPos, this.YPos, this.Width, this.Height), null, Color.White);
         }
 
         public virtual void Update()
         {
-
         }
     }
 }

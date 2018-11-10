@@ -1,29 +1,40 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Game;
 using Pong.Game.Interfaces;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
-using System.Collections.Generic;
+using IUpdateable = Pong.Game.Interfaces.IUpdateable;
 
-namespace Pong
+namespace Pong.Game
 {
-    class PongGame : Game.IUpdateable, IResetable
+    internal class PongGame : IUpdateable, IResetable
     {
-        public enum Side { LEFT, TOP, RIGHT, BOTTOM };
-        public enum Orientation { HORIZONTAL, VERTICAL };
+        public enum Side
+        {
+            Left,
+            Top,
+            Right,
+            Bottom
+        };
 
-        public static Texture2D squareTexture;
-        public static Texture2D circleTexture;
-        private List<INonReactiveCollideable> nonReactiveCollideables;
-        private List<IResetable> resetables;
-        private Paddle playerPaddle;
-        private Paddle computerPaddle;
-        private Ball ball;
-        private ScoreDisplay scoreDisplay;
+        public enum Orientation
+        {
+            Horizontal,
+            Vertical
+        };
 
-        private SoundManager soundManager;
+        public static Texture2D SquareTexture;
+        public static Texture2D CircleTexture;
+        private readonly List<INonReactiveCollideable> nonReactiveCollideables;
+        private readonly List<IResetable> resetables;
+        private readonly Paddle playerPaddle;
+        private readonly Paddle computerPaddle;
+        private readonly Ball ball;
+        private readonly ScoreDisplay scoreDisplay;
+
+        private readonly SoundManager soundManager;
 
         private bool ballCollidedLastFrame;
         private bool starting;
@@ -34,207 +45,204 @@ namespace Pong
 
         public PongGame(IModHelper helper)
         {
-            squareTexture = helper.Content.Load<Texture2D>("assets/square.png");
-            circleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
+            SquareTexture = helper.Content.Load<Texture2D>("assets/square.png");
+            CircleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
 
-            computerPaddle = new Paddle(false);
-            playerPaddle = new Paddle(true);
-            ball = new Ball();
-            scoreDisplay = new ScoreDisplay();
+            this.computerPaddle = new Paddle(false);
+            this.playerPaddle = new Paddle(true);
+            this.ball = new Ball();
+            this.scoreDisplay = new ScoreDisplay();
 
-            soundManager = new SoundManager();
+            this.soundManager = new SoundManager();
 
-            nonReactiveCollideables = new List<INonReactiveCollideable>
+            this.nonReactiveCollideables = new List<INonReactiveCollideable>
             {
-                playerPaddle,
-                computerPaddle,
-                new Wall(Side.BOTTOM),
-                new Wall(Side.LEFT),
-                new Wall(Side.RIGHT),
-                new Wall(Side.TOP)
+                this.playerPaddle,
+                this.computerPaddle,
+                new Wall(Side.Bottom),
+                new Wall(Side.Left),
+                new Wall(Side.Right),
+                new Wall(Side.Top)
             };
 
-            resetables = new List<IResetable>
+            this.resetables = new List<IResetable>
             {
-                ball,
-                scoreDisplay,
-                playerPaddle,
-                computerPaddle
+                this.ball,
+                this.scoreDisplay,
+                this.playerPaddle,
+                this.computerPaddle
             };
 
-            ballCollidedLastFrame = false;
-            started = false;
-            starting = false;
-            startTimer = 180;
-            paused = false;
-            lastMouseXPos = 0;
+            this.ballCollidedLastFrame = false;
+            this.started = false;
+            this.starting = false;
+            this.startTimer = 180;
+            this.paused = false;
+            this.lastMouseXPos = 0;
         }
 
 
         public void Update()
         {
-            if (started && !paused)
+            if (this.started && !this.paused)
             {
                 bool collided = false;
-                foreach (INonReactiveCollideable collideable in nonReactiveCollideables)
+                foreach (INonReactiveCollideable collideable in this.nonReactiveCollideables)
                 {
-                    if (ball.GetBoundingBox().Intersects(collideable.GetBoundingBox()))
+                    if (this.ball.GetBoundingBox().Intersects(collideable.GetBoundingBox()))
                     {
-                        ball.CollideWith(collideable);
+                        this.ball.CollideWith(collideable);
 
                         if (collideable is Wall wall)
                         {
-                            if (wall.side == Side.BOTTOM || wall.side == Side.TOP)
+                            if (wall.Side == Side.Bottom || wall.Side == Side.Top)
                             {
-                                soundManager.PlayPointWonSound(wall.side == Side.TOP);
-                                scoreDisplay.UpdateScore(wall.side == Side.TOP);
-                                Reset(false);
-                                Start();
+                                this.soundManager.PlayPointWonSound(wall.Side == Side.Top);
+                                this.scoreDisplay.UpdateScore(wall.Side == Side.Top);
+                                this.Reset(false);
+                                this.Start();
                                 return;
                             }
                             else
                             {
-                                soundManager.PlayBallWallSound();
+                                this.soundManager.PlayBallWallSound();
                             }
                         }
                         else if (collideable is Paddle)
                         {
-                            soundManager.PlayBallPaddleSound();
+                            this.soundManager.PlayBallPaddleSound();
                         }
 
                         collided = true;
                     }
 
-                    if (collideable == computerPaddle)
-                        computerPaddle.ReceiveIntendedPosition(ball.GetBoundingBox().X + ball.GetBoundingBox().Width / 2);
-                    else if (collideable == playerPaddle)
-                        playerPaddle.ReceiveIntendedPosition(lastMouseXPos);
+                    if (collideable == this.computerPaddle)
+                        this.computerPaddle.ReceiveIntendedPosition(this.ball.GetBoundingBox().X + this.ball.GetBoundingBox().Width / 2);
+                    else if (collideable == this.playerPaddle) this.playerPaddle.ReceiveIntendedPosition(this.lastMouseXPos);
 
                     collideable.Update();
                 }
 
-                if (collided && ballCollidedLastFrame)
-                    ball.Reset();
+                if (collided && this.ballCollidedLastFrame) this.ball.Reset();
 
-                ballCollidedLastFrame = collided;
+                this.ballCollidedLastFrame = collided;
 
-                ball.Update();
-                scoreDisplay.Update();
+                this.ball.Update();
+                this.scoreDisplay.Update();
             }
-            else if (starting)
+            else if (this.starting)
             {
-                startTimer--;
-                if (startTimer == 60 || startTimer == 120 || startTimer == 0)
-                    soundManager.PlayCountdownSound();
-                if (startTimer == 0)
+                this.startTimer--;
+                if (this.startTimer == 60 || this.startTimer == 120 || this.startTimer == 0) this.soundManager.PlayCountdownSound();
+                if (this.startTimer == 0)
                 {
-                    started = true;
-                    starting = false;
+                    this.started = true;
+                    this.starting = false;
                 }
             }
         }
 
         public void Draw(SpriteBatch b)
         {
-            b.Draw(squareTexture, new Rectangle(0, 0, GetScreenWidth(), GetScreenWidth()), null, Color.Black);
-            if (started || starting)
+            b.Draw(SquareTexture, new Rectangle(0, 0, GetScreenWidth(), GetScreenWidth()), null, Color.Black);
+            if (this.started || this.starting)
             {
-                foreach (INonReactiveCollideable collideable in nonReactiveCollideables)
-                {
-                    collideable.Draw(b);
-                }
-                ball.Draw(b);
-                scoreDisplay.Draw(b);
+                foreach (INonReactiveCollideable collideable in this.nonReactiveCollideables) collideable.Draw(b);
 
-                if (paused)
-                {
-                    SpriteText.drawStringHorizontallyCenteredAt(b, "Press P to resume", GetScreenWidth() / 2, GetScreenHeight() / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
-                }
-                else if (starting)
-                {
-                    SpriteText.drawStringHorizontallyCenteredAt(b, $"{(startTimer < 60 ? 1 : (startTimer < 120 ? 2 : 3))}", GetScreenWidth() / 2, (int)(GetScreenHeight() / 2 - Game1.tileSize * 1.5), 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
-                }
+                this.ball.Draw(b);
+                this.scoreDisplay.Draw(b);
+
+                if (this.paused)
+                    SpriteText.drawStringHorizontallyCenteredAt(b, "Press P to resume", GetScreenWidth() / 2,
+                        GetScreenHeight() / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
+                else if (this.starting)
+                    SpriteText.drawStringHorizontallyCenteredAt(b,
+                        $"{(this.startTimer < 60 ? 1 : (this.startTimer < 120 ? 2 : 3))}", GetScreenWidth() / 2,
+                        (int) (GetScreenHeight() / 2 - Game1.tileSize * 1.5), 999999, -1, 999999, 1f, 0.88f, false,
+                        SpriteText.color_White);
                 else
-                {
-                    SpriteText.drawString(b, "P to pause", 50, 150, 999999, -1, 999999, 1f, 0.88f, false, -1, "", SpriteText.color_White);
-                }
+                    SpriteText.drawString(b, "P to pause", 50, 150, 999999, -1, 999999, 1f, 0.88f, false, -1, "",
+                        SpriteText.color_White);
 
-                if (!starting)
-                {
-                    SpriteText.drawString(b, "Esc to exit", 50, 100, 999999, -1, 999999, 1f, 0.88f, false, -1, "", SpriteText.color_White);
-                }
+                if (!this.starting)
+                    SpriteText.drawString(b, "Esc to exit", 50, 100, 999999, -1, 999999, 1f, 0.88f, false, -1, "",
+                        SpriteText.color_White);
             }
             else
             {
                 int centerHeight = SpriteText.getHeightOfString("Press Space to start");
-                SpriteText.drawStringHorizontallyCenteredAt(b, "Pong", GetScreenWidth() / 2, GetScreenHeight() / 2 - centerHeight * 5, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
-                SpriteText.drawStringHorizontallyCenteredAt(b, "By Cat", GetScreenWidth() / 2, GetScreenHeight() / 2 - centerHeight * 4, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
+                SpriteText.drawStringHorizontallyCenteredAt(b, "Pong", GetScreenWidth() / 2,
+                    GetScreenHeight() / 2 - centerHeight * 5, 999999, -1, 999999, 1f, 0.88f, false,
+                    SpriteText.color_White);
+                SpriteText.drawStringHorizontallyCenteredAt(b, "By Cat", GetScreenWidth() / 2,
+                    GetScreenHeight() / 2 - centerHeight * 4, 999999, -1, 999999, 1f, 0.88f, false,
+                    SpriteText.color_White);
 
-                SpriteText.drawStringHorizontallyCenteredAt(b, "Press Space to start", GetScreenWidth() / 2, GetScreenHeight() / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
+                SpriteText.drawStringHorizontallyCenteredAt(b, "Press Space to start", GetScreenWidth() / 2,
+                    GetScreenHeight() / 2, 999999, -1, 999999, 1f, 0.88f, false, SpriteText.color_White);
                 int escHeight = SpriteText.getHeightOfString("Press Esc to exit");
-                SpriteText.drawString(b, "Press Esc to exit", 0, GetScreenHeight() - escHeight, 999999, -1, 999999, 1f, 0.88f, false, -1, "", SpriteText.color_White);
+                SpriteText.drawString(b, "Press Esc to exit", 0, GetScreenHeight() - escHeight, 999999, -1, 999999, 1f,
+                    0.88f, false, -1, "", SpriteText.color_White);
             }
-            b.Draw(Game1.mouseCursors, new Rectangle(Game1.oldMouseState.X, Game1.oldMouseState.Y, Game1.tileSize / 2, Game1.tileSize / 2), new Rectangle(146, 384, 9, 9), Color.White);
+
+            b.Draw(Game1.mouseCursors,
+                new Rectangle(Game1.oldMouseState.X, Game1.oldMouseState.Y, Game1.tileSize / 2, Game1.tileSize / 2),
+                new Rectangle(146, 384, 9, 9), Color.White);
         }
 
         private void Reset(bool resetScore)
         {
-            if (!started)
+            if (!this.started)
                 return;
 
-            ballCollidedLastFrame = false;
-            started = false;
-            starting = false;
-            startTimer = 180;
-            paused = false;
-            lastMouseXPos = 0;
-            foreach (IResetable resetable in resetables)
-            {
-                if (resetable != scoreDisplay || (resetable == scoreDisplay && resetScore))
+            this.ballCollidedLastFrame = false;
+            this.started = false;
+            this.starting = false;
+            this.startTimer = 180;
+            this.paused = false;
+            this.lastMouseXPos = 0;
+            foreach (IResetable resetable in this.resetables)
+                if (resetable != this.scoreDisplay || resetable == this.scoreDisplay && resetScore)
                     resetable.Reset();
-            }
         }
 
         public void Reset()
         {
-            Reset(true);
-            soundManager.PlayKeyPressSound();
+            this.Reset(true);
+            this.soundManager.PlayKeyPressSound();
         }
 
         public void Resize()
         {
-            foreach (INonReactiveCollideable collideable in nonReactiveCollideables)
-            {
-                collideable.Resize();
-            }
+            foreach (INonReactiveCollideable collideable in this.nonReactiveCollideables) collideable.Resize();
         }
 
         public void Start()
         {
-            if (starting || started)
+            if (this.starting || this.started)
                 return;
 
-            soundManager.PlayKeyPressSound();
-            starting = true;
+            this.soundManager.PlayKeyPressSound();
+            this.starting = true;
         }
 
         public void TogglePaused()
         {
-            if (!started)
+            if (!this.started)
                 return;
 
-            soundManager.PlayKeyPressSound();
-            paused = !paused;
+            this.soundManager.PlayKeyPressSound();
+            this.paused = !this.paused;
         }
 
         public bool HasStarted()
         {
-            return starting || started;
+            return this.starting || this.started;
         }
 
         public void MouseChanged(Point p)
         {
-            lastMouseXPos = p.X;
+            this.lastMouseXPos = p.X;
         }
 
         public static int GetScreenWidth()

@@ -1,4 +1,4 @@
-﻿namespace Pong.Game
+﻿namespace Pong.Game.Interfaces
 {
     interface INonReactiveCollideable : ICollideable
     {

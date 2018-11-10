@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using StardewModdingAPI.Events;
+﻿using Pong.Game;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
+using System;
 
 namespace Pong
 {
@@ -16,8 +12,7 @@ namespace Pong
 
         public override void Entry(IModHelper helper)
         {
-
-            game = new PongGame(helper);
+            this.game = new PongGame(helper);
 
             InputEvents.ButtonPressed += this.ButtonPressed;
             GraphicsEvents.OnPostRenderEvent += this.OnPostRender;
@@ -29,11 +24,15 @@ namespace Pong
         {
             e.SuppressButton();
             if (e.Button == SButton.Space)
-                game.Start();
+            {
+                this.game.Start();
+            }
             else if (e.Button == SButton.Escape)
             {
-                if (game.HasStarted())
-                    game.Reset();
+                if (this.game.HasStarted())
+                {
+                    this.game.Reset();
+                }
                 else
                 {
                     Game1.quit = true;
@@ -41,23 +40,25 @@ namespace Pong
                 }
             }
             else if (e.Button == SButton.P)
-                game.TogglePaused();
-        }
-
-        private void OnPostRender(object sender, EventArgs e)
-        {
-            game.Update();
-            game.Draw(Game1.spriteBatch);
-        }
-
-        private void Resize(object sender, EventArgs e)
-        {
-            game.Resize();
+            {
+                this.game.TogglePaused();
+            }
         }
 
         private void MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
-            game.MouseChanged(e.NewPosition);
+            this.game.MouseChanged(e.NewPosition);
+        }
+
+        private void OnPostRender(object sender, EventArgs e)
+        {
+            this.game.Update();
+            this.game.Draw(Game1.spriteBatch);
+        }
+
+        private void Resize(object sender, EventArgs e)
+        {
+            this.game.Resize();
         }
     }
 }

@@ -1,16 +1,16 @@
-﻿using static Pong.PongGame;
+﻿using static Pong.Game.PongGame;
 
 namespace Pong.Game
 {
-    class CollideInfo
+    internal class CollideInfo
     {
-        public Orientation orientation;
-        public double collidePercentage;
+        public Orientation Orientation { get; }
+        public double CollidePercentage { get; }
 
         public CollideInfo(Orientation o, double c)
         {
-            orientation = o;
-            collidePercentage = c;
+            this.Orientation = o;
+            this.CollidePercentage = c;
         }
     }
 }

@@ -1,62 +1,61 @@
-﻿using static Pong.PongGame;
+﻿using Pong.Game.Interfaces;
+using static Pong.Game.PongGame;
 
 namespace Pong.Game
 {
-    class Wall : Collider, INonReactiveCollideable
+    internal class Wall : Collider, INonReactiveCollideable
     {
-
-        private CollideInfo collideInfo;
-
-        public Side side;
+        private readonly CollideInfo collideInfo;
+        public Side Side { get; }
 
         public Wall(Side side) : base(true)
         {
-            this.side = side;
+            this.Side = side;
 
-            collideInfo = new CollideInfo(SetPosition(), -1);
+            this.collideInfo = new CollideInfo(this.SetPosition(), -1);
         }
 
         private Orientation SetPosition()
         {
             Orientation orientation;
-            switch (side)
+            switch (this.Side)
             {
-                case Side.LEFT:
-                    xPos = -10;
-                    yPos = 0;
-                    width = 10;
-                    height = PongGame.GetScreenHeight();
+                case Side.Left:
+                    this.XPos = -10;
+                    this.YPos = 0;
+                    this.Width = 10;
+                    this.Height = GetScreenHeight();
 
-                    orientation = Orientation.VERTICAL;
+                    orientation = Orientation.Vertical;
                     break;
 
-                case Side.RIGHT:
+                case Side.Right:
 
-                    xPos = GetScreenWidth();
-                    yPos = 0;
-                    width = 10;
-                    height = PongGame.GetScreenHeight();
+                    this.XPos = GetScreenWidth();
+                    this.YPos = 0;
+                    this.Width = 10;
+                    this.Height = GetScreenHeight();
 
-                    orientation = Orientation.VERTICAL;
+                    orientation = Orientation.Vertical;
                     break;
-                case Side.TOP:
+                case Side.Top:
 
-                    xPos = 0;
-                    yPos = -10;
-                    width = PongGame.GetScreenWidth();
-                    height = 10;
+                    this.XPos = 0;
+                    this.YPos = -10;
+                    this.Width = GetScreenWidth();
+                    this.Height = 10;
 
-                    orientation = Orientation.HORIZONTAL;
+                    orientation = Orientation.Horizontal;
                     break;
                 default:
-                case Side.BOTTOM:
+                case Side.Bottom:
 
-                    xPos = 0;
-                    yPos = PongGame.GetScreenHeight();
-                    width = PongGame.GetScreenWidth();
-                    height = 10;
+                    this.XPos = 0;
+                    this.YPos = GetScreenHeight();
+                    this.Width = GetScreenWidth();
+                    this.Height = 10;
 
-                    orientation = Orientation.HORIZONTAL;
+                    orientation = Orientation.Horizontal;
                     break;
             }
             return orientation;
@@ -64,12 +63,12 @@ namespace Pong.Game
 
         public CollideInfo GetCollideInfo(IReactiveCollideable other)
         {
-            return collideInfo;
+            return this.collideInfo;
         }
 
         public void Resize()
         {
-            SetPosition();
+            this.SetPosition();
         }
     }
 }
