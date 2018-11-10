@@ -2,29 +2,29 @@
 
 namespace Pong
 {
-    class SoundManager
+    internal static class SoundManager
     {
-        public void PlayBallWallSound()
+        public static void PlayBallWallSound()
         {
             Game1.playSound("smallSelect");
         }
 
-        public void PlayBallPaddleSound()
+        public static void PlayBallPaddleSound()
         {
             Game1.playSound("smallSelect");
         }
 
-        public void PlayPointWonSound(bool playerWon)
+        public static void PlayPointWonSound(bool playerWon)
         {
             Game1.playSound(playerWon ? "achievement" : "trashcan");
         }
 
-        public void PlayCountdownSound()
+        public static void PlayCountdownSound()
         {
             Game1.playSound("throwDownITem");
         }
 
-        public void PlayKeyPressSound()
+        public static void PlayKeyPressSound()
         {
             Game1.playSound("bigDeSelect");
         }

@@ -42,6 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Framework\Interfaces\IMenu.cs" />
+    <Compile Include="Framework\Menus\Menu.cs" />
+    <Compile Include="Framework\Menus\StartScreen.cs" />
+    <Compile Include="Framework\Menus\SwitchMenuEventArgs.cs" />
     <Compile Include="Game\Ball.cs" />
     <Compile Include="Game\CollideInfo.cs" />
     <Compile Include="Game\Collider.cs" />
@@ -79,9 +83,7 @@
   <ItemGroup>
     <Analyzer Include="..\packages\Pathoschild.Stardew.ModBuildConfig.2.2.0\analyzers\dotnet\cs\StardewModdingAPI.ModBuildConfig.Analyzer.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Framework\Menus\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <PropertyGroup>

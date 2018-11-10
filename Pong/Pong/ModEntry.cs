@@ -3,56 +3,61 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using System;
+using Microsoft.Xna.Framework.Graphics;
+using Pong.Framework.Interfaces;
+using Pong.Framework.Menus;
 
 namespace Pong
 {
     public class ModEntry : Mod
     {
-        private PongGame game;
+        private IMenu currentMenu;
 
         public override void Entry(IModHelper helper)
         {
-            this.game = new PongGame(helper);
+            PongGame.SquareTexture = helper.Content.Load<Texture2D>("assets/square.png");
+            PongGame.CircleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
 
-            InputEvents.ButtonPressed += this.ButtonPressed;
+            this.SwitchToNewMenu(new StartScreen());
+
             GraphicsEvents.OnPostRenderEvent += this.OnPostRender;
             GraphicsEvents.Resize += this.Resize;
+            InputEvents.ButtonPressed += this.InputEvents_ButtonPressed;
         }
 
-        private void ButtonPressed(object sender, EventArgsInput e)
+        private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
         {
-            e.SuppressButton();
-            if (e.Button == SButton.Space)
+            SoundManager.PlayKeyPressSound();
+            this.currentMenu?.ButtonPressed(e);
+        }
+
+        private void SwitchToNewMenuEvent(object sender, SwitchMenuEventArgs e)
+        {
+            this.SwitchToNewMenu(e.NewMenu);
+        }
+
+        private void SwitchToNewMenu(IMenu newMenu)
+        {
+            if (newMenu == null)
             {
-                this.game.Start();
+                Game1.quit = true;
+                Game1.exitActiveMenu();
+                return;
             }
-            else if (e.Button == SButton.Escape)
-            {
-                if (this.game.HasStarted())
-                {
-                    this.game.Reset();
-                }
-                else
-                {
-                    Game1.quit = true;
-                    Game1.exitActiveMenu();
-                }
-            }
-            else if (e.Button == SButton.P)
-            {
-                this.game.TogglePaused();
-            }
+
+            this.currentMenu = newMenu;
+            this.currentMenu.SwitchToNewMenu += this.SwitchToNewMenuEvent;
         }
 
         private void OnPostRender(object sender, EventArgs e)
         {
-            this.game.Update();
-            this.game.Draw(Game1.spriteBatch);
+            this.currentMenu?.Update();
+            this.currentMenu?.Draw(Game1.spriteBatch);
         }
 
         private void Resize(object sender, EventArgs e)
         {
-            this.game.Resize();
+            this.currentMenu?.Resize();
         }
     }
 }
