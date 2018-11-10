@@ -1,9 +1,8 @@
-﻿using StardewValley;
-using System;
-using Pong.Framework.Enums;
-using Pong.Framework.Interfaces.Game;
+﻿using Pong.Framework.Enums;
+using Pong.Framework.Game;
 using Pong.Framework.Menus;
-using Pong.Menus;
+using StardewValley;
+using System;
 
 namespace Pong.Game
 {

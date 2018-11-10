@@ -1,11 +1,10 @@
-﻿using Pong.Game;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Pong.Framework.Menus;
+using Pong.Menus;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using System;
-using Microsoft.Xna.Framework.Graphics;
-using Pong.Framework.Menus;
-using Pong.Menus;
 
 namespace Pong
 {
@@ -18,7 +17,7 @@ namespace Pong
             GameMenu.SquareTexture = helper.Content.Load<Texture2D>("assets/square.png");
             GameMenu.CircleTexture = helper.Content.Load<Texture2D>("assets/circle.png");
 
-            this.SwitchToNewMenu(new StartScreen());
+            this.SwitchToNewMenu(new StartMenu());
 
             GraphicsEvents.OnPostRenderEvent += this.OnPostRender;
             GraphicsEvents.Resize += this.Resize;

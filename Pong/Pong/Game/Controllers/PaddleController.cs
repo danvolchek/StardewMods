@@ -1,5 +1,6 @@
 ﻿using System;
 using Pong.Framework.Common;
+using Pong.Menus;
 
 namespace Pong.Game.Controllers
 {

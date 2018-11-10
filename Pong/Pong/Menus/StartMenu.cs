@@ -1,17 +1,16 @@
-﻿using System.Collections.Generic;
-using Pong.Framework.Menus;
+﻿using Pong.Framework.Menus;
 using Pong.Framework.Menus.Elements;
-using Pong.Game;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley.BellsAndWhistles;
+using System.Collections.Generic;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Menus
 {
-    internal class StartScreen : Menu
+    internal class StartMenu : Menu
     {
-        public StartScreen()
+        public StartMenu()
         {
             this.InitDrawables();
         }

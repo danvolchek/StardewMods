@@ -45,7 +45,7 @@ namespace Pong.Framework.Menus
             }
 
             b.Draw(Game1.mouseCursors,
-                new Rectangle(Game1.oldMouseState.X - 146 / 2, Game1.oldMouseState.Y - 384 / 2, Game1.tileSize / 2, Game1.tileSize / 2),
+                new Rectangle(Game1.oldMouseState.X - (Game1.tileSize / 4), Game1.oldMouseState.Y - (Game1.tileSize / 4), Game1.tileSize / 2, Game1.tileSize / 2),
                 new Rectangle(146, 384, 9, 9), Color.White);
         }
 

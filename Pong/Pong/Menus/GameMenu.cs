@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Enums;
-using Pong.Framework.Interfaces.Game;
+using Pong.Framework.Game;
 using Pong.Framework.Menus;
 using Pong.Framework.Menus.Elements;
 using Pong.Game;
@@ -67,7 +67,7 @@ namespace Pong.Menus
                     this.TogglePaused();
                     return true;
                 case SButton.Escape:
-                    this.OnSwitchToNewMenu(new StartScreen());
+                    this.OnSwitchToNewMenu(new StartMenu());
                     return true;
             }
 

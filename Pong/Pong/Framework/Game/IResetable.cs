@@ -1,4 +1,4 @@
-﻿namespace Pong.Framework.Interfaces.Game
+﻿namespace Pong.Framework.Game
 {
     internal interface IResetable
     {
