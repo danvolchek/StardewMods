@@ -1,22 +1,18 @@
 ﻿using Pong.Framework.Enums;
 using Pong.Framework.Game;
-using Pong.Framework.Menus;
+using Pong.Framework.Game.States;
 using StardewValley;
-using System;
 
 namespace Pong.Game
 {
-    internal class Ball : Collider, IReactiveDrawableCollideable, IResetable
+    internal sealed class Ball : Collider, IReactiveDrawableCollideable
     {
-        private readonly Random rand;
-        private int xVelocity;
-        private int yVelocity;
+        private readonly VelocityState velocityState;
 
-        public Ball() : base(false)
+        public Ball(PositionState positionState, VelocityState velocityState) : base(positionState, false)
         {
+            this.velocityState = velocityState;
             this.Width = this.Height = Game1.tileSize;
-            this.rand = new Random();
-            this.Reset();
         }
 
         public void CollideWith(INonReactiveDrawableCollideable other)
@@ -25,28 +21,26 @@ namespace Pong.Game
 
             if (info.Orientation == Orientation.Horizontal)
             {
-                this.yVelocity *= -1;
+                this.velocityState.YVelocity *= -1;
 
-                if (info.CollidePercentage >= 0) this.xVelocity = (int)(30 * info.CollidePercentage - 15);
+                if (info.CollidePercentage >= 0) this.velocityState.XVelocity = (int)(30 * info.CollidePercentage - 15);
             }
             else
             {
-                this.xVelocity *= -1;
+                this.velocityState.XVelocity *= -1;
             }
         }
 
         public void Reset()
         {
-            this.XPos = (Menu.ScreenWidth- this.Width) / 2;
-            this.YPos = (Menu.ScreenHeight- this.Height) / 2;
-            this.xVelocity = (this.rand.NextDouble() < 0.5 ? 1 : -1) * 4;
-            this.yVelocity = (this.rand.NextDouble() < 0.5 ? 1 : -1) * 8;
+            this.velocityState.Reset();
+            this.PositionState.Reset();
         }
 
         public override void Update()
         {
-            this.XPos += this.xVelocity;
-            this.YPos += this.yVelocity;
+            this.XPos += this.velocityState.XVelocity;
+            this.YPos += this.velocityState.YVelocity;
         }
     }
 }

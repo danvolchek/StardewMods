@@ -11,14 +11,17 @@ namespace Pong
 {
     public class ModEntry : Mod
     {
-        //TODO: Highlightable drawables, then multiplayer connection menu (both join and host)
+        //TODO: then multiplayer connection menu (both join and host)
         //TODO: then player menu, then remoteBall, maybe remoteGame?
         private IMenu currentMenu;
+
+        internal string PongId { get; private set; }
 
         internal static ModEntry Instance;
 
         public override void Entry(IModHelper helper)
         {
+            this.PongId = this.ModManifest.UniqueID;
             Instance = this;
 
             if (!AssetManager.Init(helper))
@@ -44,7 +47,7 @@ namespace Pong
             if (this.currentMenu == null)
                 return;
 
-            e.SuppressButton();
+            //e.SuppressButton();
             if(this.currentMenu.ButtonPressed(e))
                 SoundManager.PlayKeyPressSound();
         }

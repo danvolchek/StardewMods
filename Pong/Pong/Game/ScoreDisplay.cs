@@ -1,36 +1,35 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Common;
-using Pong.Framework.Game;
+using Pong.Framework.Game.States;
 using StardewValley.BellsAndWhistles;
 
 namespace Pong.Game
 {
-    internal class ScoreDisplay : IUpdateable, IDrawable, IResetable
+    internal class ScoreDisplay : IUpdateable, IDrawable
     {
-        public int PlayerScore { get; private set; }
-        public int ComputerScore { get; private set; }
+        private readonly ScoreState state;
 
-        public ScoreDisplay()
+        public ScoreDisplay(ScoreState state)
         {
-            this.Reset();
+            this.state = state;
         }
 
         public void UpdateScore(bool playerWon)
         {
             if (playerWon)
-                this.PlayerScore++;
+                this.state.PlayerOneScore++;
             else
-                this.ComputerScore++;
+                this.state.PlayerTwoScore++;
         }
 
         public void Draw(SpriteBatch b)
         {
-            SpriteText.drawString(b, $"{this.PlayerScore} - {this.ComputerScore}", 50, 50, 999999, -1, 999999, 1f, 0.88f, false, -1, "", SpriteText.color_White);
+            SpriteText.drawString(b, $"{this.state.PlayerOneScore} - {this.state.PlayerTwoScore}", 50, 50, 999999, -1, 999999, 1f, 0.88f, false, -1, "", SpriteText.color_White);
         }
 
         public void Reset()
         {
-            this.PlayerScore = this.ComputerScore = 0;
+            this.state.Reset();
         }
 
         public void Update()

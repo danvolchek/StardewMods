@@ -47,15 +47,34 @@ namespace Pong.Framework.Menus
 
         public virtual void MouseStateChanged(EventArgsMouseStateChanged e)
         {
-            foreach (IHighlightable highlightable in this.drawables.OfType<IHighlightable>())
+            foreach (IDrawable drawable in this.drawables)
             {
-                highlightable.Highlighted = highlightable.Bounds.Contains(e.NewPosition);
+                switch (drawable)
+                {
+                    case IHighlightable highlightable:
+                        highlightable.Highlighted = highlightable.Bounds.Contains(e.NewPosition);
+                        break;
+                    case ConditionalElement conditional:
+                        if (conditional.GetElementForHighlight() is IHighlightable condHighlightable)
+                            condHighlightable.Highlighted = condHighlightable.Bounds.Contains(e.NewPosition);
+                        break;
+                    case ElementContainer container:
+                        foreach (IHighlightable element in container.Elements.OfType<IHighlightable>())
+                            element.Highlighted = element.Bounds.Contains(e.NewPosition);
+                        break;
+                }
             }
         }
 
+        public virtual void BeforeMenuSwitch()
+        {
+
+        }
+
+
         public void Draw(SpriteBatch b)
         {
-            b.Draw(AssetManager.SquareTexture, new Rectangle(0, 0, ScreenWidth, ScreenWidth), null, Color.Black);
+            //b.Draw(AssetManager.SquareTexture, new Rectangle(0, 0, ScreenWidth, ScreenWidth), null, Color.Black);
 
             foreach (IDrawable drawable in this.drawables)
             {
@@ -77,6 +96,7 @@ namespace Pong.Framework.Menus
 
         protected void OnSwitchToNewMenu(IMenu newMenu)
         {
+            this.BeforeMenuSwitch();
             this.SwitchToNewMenu?.Invoke(this, new SwitchMenuEventArgs(newMenu));
         }
     }

@@ -8,6 +8,7 @@ using Pong.Game.Controllers;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using System.Collections.Generic;
+using Pong.Framework.Game.States;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Menus
@@ -19,17 +20,14 @@ namespace Pong.Menus
         private readonly ScoreDisplay scoreDisplay;
 
         private readonly Ball ball;
-        private bool ballCollidedLastFrame;
-        private bool starting;
-        private int startTimer;
-        private bool paused;
+        private readonly GameState state = new GameState();
 
-        public GameMenu()
+        public GameMenu(long? enemyPlayer = null)
         {
-            this.ball = new Ball();
+            this.ball = new Ball(this.state.PositionState, this.state.VelocityState);
             Paddle computerPaddle = new Paddle(new ComputerController(this.ball), Side.Top);
             Paddle playerPaddle = new Paddle(new LocalPlayerController(), Side.Bottom);
-            this.scoreDisplay = new ScoreDisplay();
+            this.scoreDisplay = new ScoreDisplay(this.state.ScoreState);
 
             this.nonReactiveCollideables = new List<INonReactiveDrawableCollideable>
             {
@@ -43,16 +41,9 @@ namespace Pong.Menus
 
             this.resetables = new List<IResetable>
             {
-                this.ball,
-                this.scoreDisplay,
                 playerPaddle,
                 computerPaddle
             };
-
-            this.ballCollidedLastFrame = false;
-            this.starting = true;
-            this.startTimer = 180;
-            this.paused = false;
 
             this.InitDrawables();
         }
@@ -76,12 +67,12 @@ namespace Pong.Menus
 
         public override void Update()
         {
-            if (!this.starting && !this.paused)
+            if (!this.state.Starting && !this.state.Paused)
             {
                 bool collided = false;
                 foreach (INonReactiveDrawableCollideable collideable in this.nonReactiveCollideables)
                 {
-                    if (this.ball.GetBoundingBox().Intersects(collideable.GetBoundingBox()))
+                    if (this.ball.Bounds.Intersects(collideable.Bounds))
                     {
                         this.ball.CollideWith(collideable);
 
@@ -111,22 +102,19 @@ namespace Pong.Menus
                     collideable.Update();
                 }
 
-                if (collided && this.ballCollidedLastFrame) this.ball.Reset();
+                if (collided && this.state.BallCollidedLastFrame) this.ball.Reset();
 
-                this.ballCollidedLastFrame = collided;
+                this.state.BallCollidedLastFrame = collided;
 
                 this.ball.Update();
                 this.scoreDisplay.Update();
             }
-            else if (this.starting)
+            else if (this.state.Starting)
             {
-                if (this.startTimer % 60 == 0)
+                if (this.state.StartTimer % 60 == 0)
                     SoundManager.PlayCountdownSound();
-                this.startTimer--;
-                if (this.startTimer == 0)
-                {
-                    this.starting = false;
-                }
+                this.state.StartTimer--;
+                if (this.state.StartTimer == 0) this.state.Starting = false;
             }
         }
 
@@ -138,33 +126,41 @@ namespace Pong.Menus
             yield return this.ball;
             yield return this.scoreDisplay;
 
-            yield return new ConditionalElement(new StaticTextElement("Press P to resume", ScreenWidth / 2, ScreenHeight /2),
-                () => this.paused);
+            yield return new ConditionalElement(
+                new StaticTextElement("Press P to resume", ScreenWidth / 2, ScreenHeight / 2, true, true),
+                () => this.state.Paused);
 
-            yield return new ConditionalElement(new DynamicTextElement(() => $"{this.startTimer / 60 + 1}", ScreenWidth / 2, ScreenHeight / 2), 
-                () => !this.paused && this.starting);
+            yield return new ConditionalElement(
+                new DynamicTextElement(() => $"{this.state.StartTimer / 60 + 1}", ScreenWidth / 2, ScreenHeight / 2, true, true),
+                () => !this.state.Paused && this.state.Starting);
 
-            yield return new ConditionalElement(new StaticTextElement("P to pause", 50, 150),
-                () => !this.paused && !this.starting);
+            yield return new ConditionalElement(new StaticTextElement("P to pause", 50, 150, true, true),
+                () => !this.state.Paused && !this.state.Starting);
 
-            yield return new ConditionalElement(new StaticTextElement("Esc to exit", 50, 100),
-                () => !this.starting);
+            yield return new ConditionalElement(new StaticTextElement("Esc to exit", 50, 100, true, true),
+                () => !this.state.Starting);
         }
-        
+
 
         private void Reset(bool resetScore)
         {
-            if (this.starting)
+            if (this.state.Starting)
                 return;
+   
+            int one = this.state.ScoreState.PlayerOneScore;
+            int two = this.state.ScoreState.PlayerTwoScore;
 
-            this.ballCollidedLastFrame = false;
-            this.starting = true;
-            this.startTimer = 180;
-            this.paused = false;
+            this.state.Reset();
+
+            // This is bad
+            if(!resetScore)
+            {
+                this.state.ScoreState.PlayerTwoScore = one;
+                this.state.ScoreState.PlayerOneScore = two;
+            }
 
             foreach (IResetable resetable in this.resetables)
-                if (resetable != this.scoreDisplay || resetable == this.scoreDisplay && resetScore)
-                    resetable.Reset();
+                resetable.Reset();
         }
 
         public void Reset()
@@ -181,20 +177,19 @@ namespace Pong.Menus
 
         private void Start()
         {
-            if (this.starting)
+            if (this.state.Starting)
                 return;
 
-            this.starting = true;
+            this.state.Starting = true;
         }
 
         private void TogglePaused()
         {
-            if (this.starting)
+            if (this.state.Starting)
                 return;
 
             SoundManager.PlayKeyPressSound();
-            this.paused = !this.paused;
+            this.state.Paused = !this.state.Paused;
         }
-
     }
 }

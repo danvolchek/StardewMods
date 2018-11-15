@@ -11,5 +11,7 @@ namespace Pong.Framework.Menus
 
         bool ButtonPressed(EventArgsInput e);
         void MouseStateChanged(EventArgsMouseStateChanged e);
+
+        void BeforeMenuSwitch();
     }
 }

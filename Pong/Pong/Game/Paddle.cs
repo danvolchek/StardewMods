@@ -33,7 +33,7 @@ namespace Pong.Game
 
         public CollideInfo GetCollideInfo(IReactiveDrawableCollideable other)
         {
-            Rectangle otherPos = other.GetBoundingBox();
+            Rectangle otherPos = other.Bounds;
             return new CollideInfo(Orientation.Horizontal, Math.Max(0, (otherPos.X + otherPos.Width / 2.0 - this.XPos) / this.Width));
         }
 

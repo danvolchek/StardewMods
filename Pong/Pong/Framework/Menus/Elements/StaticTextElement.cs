@@ -32,6 +32,7 @@ namespace Pong.Framework.Menus.Elements
             this.onClick?.Invoke();
         }
 
+        public static int HighlightWidth { get; } = 10;
         public bool Highlighted { get; set; }
 
         public StaticTextElement(string text, int x, int y, bool centered = true, bool neverHighlight = false, ClickFunc onClick = null, int color = SpriteText.color_White)
@@ -61,10 +62,10 @@ namespace Pong.Framework.Menus.Elements
 
             if (!this.neverHighlight && this.Highlighted)
             {
-                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - 10, this.Bounds.Y - 10, 5, this.Bounds.Height + 10), Color.White);
-                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - 10, this.Bounds.Y - 10, this.Bounds.Width + 10, 5), Color.White);
-                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X + this.Bounds.Width, this.Bounds.Y - 10, 5, this.Bounds.Height + 10), Color.White);
-                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - 10, this.Bounds.Y + this.Bounds.Height, this.Bounds.Width + 15, 5), Color.White);
+                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - HighlightWidth, this.Bounds.Y - HighlightWidth, HighlightWidth / 2, this.Bounds.Height + HighlightWidth), Color.White);
+                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - HighlightWidth, this.Bounds.Y - HighlightWidth, this.Bounds.Width + HighlightWidth, HighlightWidth / 2), Color.White);
+                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X + this.Bounds.Width, this.Bounds.Y - HighlightWidth, HighlightWidth / 2, this.Bounds.Height + HighlightWidth), Color.White);
+                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - HighlightWidth, this.Bounds.Y + this.Bounds.Height, this.Bounds.Width + (int)(HighlightWidth * 1.5), HighlightWidth / 2), Color.White);
             }
         }
 

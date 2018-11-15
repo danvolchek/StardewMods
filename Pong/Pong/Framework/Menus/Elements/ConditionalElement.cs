@@ -13,6 +13,13 @@ namespace Pong.Framework.Menus.Elements
             this.element = element;
             this.condition = condition;
         }
+
+        public IDrawable GetElementForHighlight()
+        {
+            return this.condition() ? this.element : null;
+        }
+
+
         public void Draw(SpriteBatch b)
         {
             if(this.condition())

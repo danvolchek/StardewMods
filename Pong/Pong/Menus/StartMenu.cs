@@ -36,7 +36,7 @@ namespace Pong.Menus
             yield return new StaticTextElement("Pong", ScreenWidth / 2, ScreenHeight / 2 - centerHeight * 5, true, true);
             yield return new StaticTextElement("By Cat", ScreenWidth / 2, ScreenHeight / 2 - centerHeight * 4, true, true);
             yield return new StaticTextElement("Single Player", ScreenWidth / 2 - ScreenWidth / 4, ScreenHeight / 2, true, false, () => this.OnSwitchToNewMenu(new GameMenu()));
-            yield return new StaticTextElement("Multi Player", ScreenWidth / 2 + ScreenWidth / 4, ScreenHeight / 2);
+            yield return new StaticTextElement("Multi Player", ScreenWidth / 2 + ScreenWidth / 4, ScreenHeight / 2, true, false, () => this.OnSwitchToNewMenu(new ServerMenu()));
 
             int escHeight = SpriteText.getHeightOfString("Press Esc to exit");
             yield return new StaticTextElement("Press Esc to exit", 15, ScreenHeight - escHeight - 15, false, false, () => this.OnSwitchToNewMenu(null));

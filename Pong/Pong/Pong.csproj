@@ -43,14 +43,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Framework\Common\AssetManager.cs" />
+    <Compile Include="Framework\Enums\MultiplayerConnectionState.cs" />
+    <Compile Include="Framework\Game\IState.cs" />
+    <Compile Include="Framework\Game\MultiplayerConnectionStateMachine.cs" />
+    <Compile Include="Framework\Game\States\PositionState.cs" />
     <Compile Include="Framework\Menus\Elements\IBoundable.cs" />
     <Compile Include="Framework\Menus\Elements\IClickable.cs" />
     <Compile Include="Framework\Menus\Elements\IHighlightable.cs" />
+    <Compile Include="Framework\Menus\Elements\ElementContainer.cs" />
     <Compile Include="Framework\Menus\IMenu.cs" />
     <Compile Include="Framework\Menus\Elements\ConditionalElement.cs" />
     <Compile Include="Framework\Menus\Elements\DynamicTextElement.cs" />
     <Compile Include="Framework\Menus\Elements\StaticTextElement.cs" />
     <Compile Include="Framework\Menus\Menu.cs" />
+    <Compile Include="Framework\Messages\ChallengeRequestMessage.cs" />
+    <Compile Include="Framework\Messages\ChallengeRequestResponseMessage.cs" />
+    <Compile Include="Framework\Messages\GameStateMessage.cs" />
+    <Compile Include="Framework\Messages\MailBox.cs" />
+    <Compile Include="Framework\Messages\MessageEnvelope.cs" />
+    <Compile Include="Framework\Messages\QuitGameMessage.cs" />
+    <Compile Include="Framework\Game\States\VelocityState.cs" />
+    <Compile Include="Framework\Game\States\GameState.cs" />
+    <Compile Include="Framework\Game\States\ScoreState.cs" />
+    <Compile Include="Menus\PlayerMenu.cs" />
     <Compile Include="Menus\ServerMenu.cs" />
     <Compile Include="Menus\StartMenu.cs" />
     <Compile Include="Framework\Menus\SwitchMenuEventArgs.cs" />

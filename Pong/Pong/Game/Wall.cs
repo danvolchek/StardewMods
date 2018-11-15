@@ -22,39 +22,36 @@ namespace Pong.Game
             switch (this.Side)
             {
                 case Side.Left:
-                    this.XPos = -10;
-                    this.YPos = 0;
                     this.Width = 10;
                     this.Height = Menu.ScreenHeight;
+                    this.XPos = -10;
+                    this.YPos = 0;
 
                     orientation = Orientation.Vertical;
                     break;
 
                 case Side.Right:
-
-                    this.XPos = Menu.ScreenWidth;
-                    this.YPos = 0;
                     this.Width = 10;
                     this.Height = Menu.ScreenHeight;
+                    this.XPos = Menu.ScreenWidth;
+                    this.YPos = 0;
 
                     orientation = Orientation.Vertical;
                     break;
                 case Side.Top:
-
-                    this.XPos = 0;
-                    this.YPos = -10;
                     this.Width = Menu.ScreenWidth;
                     this.Height = 10;
+                    this.XPos = 0;
+                    this.YPos = -10;
 
                     orientation = Orientation.Horizontal;
                     break;
                 default:
                 case Side.Bottom:
-
-                    this.XPos = 0;
-                    this.YPos = Menu.ScreenHeight;
                     this.Width = Menu.ScreenWidth;
                     this.Height = 10;
+                    this.XPos = 0;
+                    this.YPos = Menu.ScreenHeight;
 
                     orientation = Orientation.Horizontal;
                     break;
