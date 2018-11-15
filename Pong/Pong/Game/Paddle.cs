@@ -10,11 +10,11 @@ namespace Pong.Game
 {
     internal class Paddle : Collider, INonReactiveDrawableCollideable, IResetable
     {
-        private readonly PaddleController controller;
+        private readonly IPaddleController controller;
 
         private readonly Side side;
 
-        public Paddle(PaddleController controller, Side side) : base(true)
+        public Paddle(IPaddleController controller, Side side) : base(true)
         {
             this.Width = Game1.tileSize * 5;
             this.Height = Game1.tileSize / 2;

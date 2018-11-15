@@ -8,7 +8,10 @@ using Pong.Game.Controllers;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using System.Collections.Generic;
+using System.Threading;
 using Pong.Framework.Game.States;
+using Pong.Framework.Messages;
+using StardewValley;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Menus
@@ -21,18 +24,25 @@ namespace Pong.Menus
 
         private readonly Ball ball;
         private readonly GameState state = new GameState();
+        private readonly long enemyPlayerId;
+
+        private Thread sendGameStateThread = null;
+        private bool shouldSyncGameState = true;
+        private readonly bool isMultiplayerGame;
 
         public GameMenu(long? enemyPlayer = null)
         {
-            this.ball = new Ball(this.state.PositionState, this.state.VelocityState);
-            Paddle computerPaddle = new Paddle(new ComputerController(this.ball), Side.Top);
-            Paddle playerPaddle = new Paddle(new LocalPlayerController(), Side.Bottom);
+            this.isMultiplayerGame = enemyPlayer.HasValue;
+
+            this.ball = new Ball(this.state.BallPositionState, this.state.BallVelocityState);
+            Paddle playerTwoPaddle = !enemyPlayer.HasValue ? new Paddle(new ComputerController(this.ball), Side.Top) : new Paddle(new RemotePaddleController(this.state.OtherPaddlePositionState), Side.Top);
+            Paddle playerOnePaddle = new Paddle(new LocalPlayerController(), Side.Bottom);
             this.scoreDisplay = new ScoreDisplay(this.state.ScoreState);
 
             this.nonReactiveCollideables = new List<INonReactiveDrawableCollideable>
             {
-                playerPaddle,
-                computerPaddle,
+                playerOnePaddle,
+                playerTwoPaddle,
                 new Wall(Side.Bottom),
                 new Wall(Side.Left),
                 new Wall(Side.Right),
@@ -41,11 +51,66 @@ namespace Pong.Menus
 
             this.resetables = new List<IResetable>
             {
-                playerPaddle,
-                computerPaddle
+                playerOnePaddle
             };
 
             this.InitDrawables();
+
+            if (this.isMultiplayerGame)
+            {
+                this.enemyPlayerId = enemyPlayer.Value;
+                this.InitSync();
+            }
+            else
+                this.resetables.Add(playerTwoPaddle);
+        }
+
+        private void InitSync()
+        {
+            if(Game1.player.UniqueMultiplayerID < this.enemyPlayerId)
+                this.StartSendingData();
+            else
+                this.StartReceivingData();
+        }
+
+        private void StartSendingData()
+        {
+            this.sendGameStateThread = new Thread(this.SyncGameState);
+            this.sendGameStateThread.Start();
+        }
+
+        private void SyncGameState()
+        {
+            while (this.shouldSyncGameState)
+            {
+                MailBox.Send(new MessageEnvelope(this.state, this.enemyPlayerId));
+                Thread.Sleep(500);
+            }
+        }
+
+        private void StartReceivingData()
+        {
+            ModEntry.Instance.Helper.Events.Multiplayer.ModMessageReceived += this.Multiplayer_ModMessageReceived;
+        }
+
+        private void Multiplayer_ModMessageReceived(object sender, ModMessageReceivedEventArgs e)
+        {
+            if (e.FromModID != ModEntry.Instance.PongId)
+                return;
+            if (e.Type != typeof(GameState).Name)
+                return;
+
+            GameState newState = e.ReadAs<GameState>();
+
+            this.state.SetState(newState);
+        }
+
+        public override void BeforeMenuSwitch()
+        {
+            if (this.enemyPlayerId != default(long))
+                ModEntry.Instance.Helper.Events.Multiplayer.ModMessageReceived -= this.Multiplayer_ModMessageReceived;
+            if (this.sendGameStateThread != null)
+                this.shouldSyncGameState = false;
         }
 
         public override bool ButtonPressed(EventArgsInput e)
@@ -146,14 +211,14 @@ namespace Pong.Menus
         {
             if (this.state.Starting)
                 return;
-   
+
             int one = this.state.ScoreState.PlayerOneScore;
             int two = this.state.ScoreState.PlayerTwoScore;
 
             this.state.Reset();
 
             // This is bad
-            if(!resetScore)
+            if (!resetScore)
             {
                 this.state.ScoreState.PlayerTwoScore = one;
                 this.state.ScoreState.PlayerOneScore = two;

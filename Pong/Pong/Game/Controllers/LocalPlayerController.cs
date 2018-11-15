@@ -2,7 +2,7 @@
 
 namespace Pong.Game.Controllers
 {
-    internal class LocalPlayerController : PaddleController
+    internal class LocalPlayerController : IntentionalPaddleController
     {
         private int lastXMousePos;
 

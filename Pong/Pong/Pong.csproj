@@ -65,6 +65,8 @@
     <Compile Include="Framework\Game\States\VelocityState.cs" />
     <Compile Include="Framework\Game\States\GameState.cs" />
     <Compile Include="Framework\Game\States\ScoreState.cs" />
+    <Compile Include="Game\Controllers\IPaddleController.cs" />
+    <Compile Include="Game\Controllers\RemotePaddleController.cs" />
     <Compile Include="Menus\PlayerMenu.cs" />
     <Compile Include="Menus\ServerMenu.cs" />
     <Compile Include="Menus\StartMenu.cs" />
@@ -82,7 +84,7 @@
     <Compile Include="Framework\Common\IUpdateable.cs" />
     <Compile Include="Framework\Enums\Orientation.cs" />
     <Compile Include="Game\Paddle.cs" />
-    <Compile Include="Game\Controllers\PaddleController.cs" />
+    <Compile Include="Game\Controllers\IntentionalPaddleController.cs" />
     <Compile Include="Game\ScoreDisplay.cs" />
     <Compile Include="Framework\Enums\Side.cs" />
     <Compile Include="Game\Wall.cs" />

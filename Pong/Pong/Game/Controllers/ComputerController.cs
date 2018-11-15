@@ -2,7 +2,7 @@
 
 namespace Pong.Game.Controllers
 {
-    internal class ComputerController : PaddleController
+    internal class ComputerController : IntentionalPaddleController
     {
         private readonly Ball ball;
 

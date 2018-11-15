@@ -1,10 +1,9 @@
 ﻿using System;
-using Pong.Framework.Common;
-using Pong.Menus;
+using static Pong.Framework.Menus.Menu;
 
 namespace Pong.Game.Controllers
 {
-    internal abstract class PaddleController : IUpdateable
+    internal abstract class IntentionalPaddleController : IPaddleController
     {
         private readonly int movementAmount = 9;
         protected int IntendedPosition = 0;
@@ -28,7 +27,7 @@ namespace Pong.Game.Controllers
         {
             if (left && xPos < this.movementAmount)
                 return 0;
-            if (!left && xPos > GameMenu.ScreenWidth - width - this.movementAmount)
+            if (!left && xPos > ScreenWidth - width - this.movementAmount)
                 return 0;
             return (left ? -1 : 1) * this.movementAmount;
         }

@@ -9,9 +9,10 @@ namespace Pong.Framework.Game.States
         public int StartTimer { get; set; } = 180;
         public bool Paused { get; set; }
 
-        public VelocityState VelocityState { get; set; } = new VelocityState();
         public ScoreState ScoreState { get; set; } = new ScoreState();
-        public PositionState PositionState { get; set; } = new PositionState();
+        public VelocityState BallVelocityState { get; set; } = new VelocityState();
+        public PositionState BallPositionState { get; set; } = new PositionState();
+        public PositionState OtherPaddlePositionState { get; set; } = new PositionState();
 
         public GameState()
         {
@@ -25,9 +26,9 @@ namespace Pong.Framework.Game.States
             this.StartTimer = state.StartTimer;
             this.Paused = state.Paused;
 
-            this.VelocityState.SetState(state.VelocityState);
+            this.BallVelocityState.SetState(state.BallVelocityState);
             this.ScoreState.SetState(state.ScoreState);
-            this.PositionState.SetState(state.PositionState);
+            this.BallPositionState.SetState(state.BallPositionState);
         }
 
         public void Reset()
@@ -38,8 +39,8 @@ namespace Pong.Framework.Game.States
             this.Paused = false;
 
             this.ScoreState.Reset();
-            this.VelocityState.Reset();
-            this.PositionState.Reset();
+            this.BallVelocityState.Reset();
+            this.BallPositionState.Reset();
         }
     }
 }
