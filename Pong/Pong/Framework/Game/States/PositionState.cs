@@ -41,6 +41,22 @@ namespace Pong.Framework.Game.States
             this.YPosition = Menu.ScreenHeight / 2;
         }
 
+        public void Invert()
+        {
+            int newXPosition = this.XPosition;
+            newXPosition -= Menu.ScreenWidth / 2;
+            newXPosition *= -1;
+            newXPosition += Menu.ScreenWidth / 2;
+
+            int newYPosition = this.YPosition;
+            newYPosition -= Menu.ScreenHeight / 2;
+            newYPosition *= -1;
+            newYPosition += Menu.ScreenHeight / 2;
+
+            this.XPosition = newXPosition;
+            this.YPosition = newYPosition;
+        }
+
         public event EventHandler StateChanged;
 
         private void OnStateChanged()

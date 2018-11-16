@@ -2,11 +2,11 @@
 
 namespace Pong.Game.Controllers
 {
-    internal class RemotePaddleController : IntentionalPaddleController
+    internal class StatePaddleController : IntentionalPaddleController
     {
-        private readonly PositionState intendedState;
+        protected readonly PositionState intendedState;
 
-        public RemotePaddleController(PositionState intendedState)
+        public StatePaddleController(PositionState intendedState)
         {
             this.intendedState = intendedState;
         }

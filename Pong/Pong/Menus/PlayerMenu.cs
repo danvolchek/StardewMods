@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Pong.Framework.Common;
+﻿using Pong.Framework.Common;
 using Pong.Framework.Enums;
 using Pong.Framework.Game;
 using Pong.Framework.Menus;
@@ -13,6 +8,8 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Pong.Menus
 {
@@ -35,6 +32,23 @@ namespace Pong.Menus
 
 
             this.InitDrawables();
+        }
+
+        public override bool ButtonPressed(EventArgsInput e)
+        {
+            bool result = base.ButtonPressed(e);
+
+            if (this.CurrentModal != null)
+                return result;
+
+            switch (e.Button)
+            {
+                case SButton.Escape:
+                    this.OnSwitchToNewMenu(new StartMenu());
+                    return true;
+            }
+
+            return result;
         }
 
         private void Multiplayer_ModMessageReceived(object sender, ModMessageReceivedEventArgs e)
@@ -60,6 +74,8 @@ namespace Pong.Menus
                 else if (this.multiplayerConnectionState.State == MultiplayerConnectionState.InPlayerLobby)
                 {
                     this.multiplayerConnectionState.TransitionTo(MultiplayerConnectionState.ReceivedChallengeRequest);
+                    this.currentChallengeRequestRecipient = e.FromPlayerID; // rename to current challenge request sender?
+
                     //Show a modal to the player asking them if they want to accept.
                 }
                 else if (this.multiplayerConnectionState.State == MultiplayerConnectionState.InGame)
@@ -74,7 +90,7 @@ namespace Pong.Menus
                 {
                     bool accepted = e.ReadAs<ChallengeRequestResponseMessage>().Accepted;
 
-                    if(!accepted)
+                    if (!accepted)
                         this.multiplayerConnectionState.TransitionTo(MultiplayerConnectionState.InPlayerLobby);
                     else
                         this.MoveToGame(e.FromPlayerID);
@@ -102,10 +118,18 @@ namespace Pong.Menus
         {
             if (this.multiplayerConnectionState.CouldTransitionTo(MultiplayerConnectionState.AwaitingChallengeRequestReponse))
             {
+                ModEntry.Instance.Monitor.Log("SENT CHALLENGE", LogLevel.Error);
                 this.currentChallengeRequestRecipient = player;
                 MailBox.Send(new MessageEnvelope(new ChallengeRequestMessage(), player));
                 this.multiplayerConnectionState.TransitionTo(MultiplayerConnectionState.AwaitingChallengeRequestReponse);
             }
+            else if (this.multiplayerConnectionState.State == MultiplayerConnectionState.ReceivedChallengeRequest &&
+                     player == this.currentChallengeRequestRecipient)
+            {
+                this.SendChallengeResponse(player, true);
+                this.MoveToGame(player);
+            }
+            //TODO: remove else if block after modals
         }
 
         private void MoveToGame(long enemyPlayer)
@@ -136,6 +160,10 @@ namespace Pong.Menus
         protected override IEnumerable<IDrawable> GetDrawables()
         {
             yield return new StaticTextElement("Player Menu!", ScreenWidth / 2, 50, true, true);
+
+            int escHeight = SpriteText.getHeightOfString("Press Esc to go back");
+            yield return new StaticTextElement("Press Esc to go back", 15, ScreenHeight - escHeight - 15, false, false, () => this.OnSwitchToNewMenu(new StartMenu()));
+
             yield return this.opponentList;
         }
 

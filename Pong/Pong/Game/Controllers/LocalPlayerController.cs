@@ -1,24 +1,18 @@
-﻿using StardewModdingAPI.Events;
+﻿using Pong.Framework.Game.States;
+using StardewModdingAPI.Events;
 
 namespace Pong.Game.Controllers
 {
-    internal class LocalPlayerController : IntentionalPaddleController
+    internal class LocalPlayerController : StatePaddleController
     {
-        private int lastXMousePos;
-
-        public LocalPlayerController()
+        public LocalPlayerController(PositionState intendedState) : base(intendedState)
         {
             ControlEvents.MouseChanged += this.MouseChanged;
         }
 
-        public override void Update()
-        {
-            this.IntendedPosition = this.lastXMousePos;
-        }
-
         private void MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
-            this.lastXMousePos = e.NewPosition.X;
+            this.intendedState.XPosition = e.NewPosition.X;
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Pong.Framework.Game.States
+﻿namespace Pong.Framework.Game.States
 {
     internal class VelocityState : IState<VelocityState>
     {
@@ -22,6 +20,12 @@ namespace Pong.Framework.Game.States
         {
             this.XVelocity = state.XVelocity;
             this.YVelocity = state.YVelocity;
+        }
+
+        public void Invert()
+        {
+            this.XVelocity *= -1;
+            this.YVelocity *= -1;
         }
     }
 }

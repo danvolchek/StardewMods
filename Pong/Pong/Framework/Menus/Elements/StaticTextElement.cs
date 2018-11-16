@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Common;
+using Pong.Framework.Extensions;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
@@ -62,10 +63,7 @@ namespace Pong.Framework.Menus.Elements
 
             if (!this.neverHighlight && this.Highlighted)
             {
-                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - HighlightWidth, this.Bounds.Y - HighlightWidth, HighlightWidth / 2, this.Bounds.Height + HighlightWidth), Color.White);
-                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - HighlightWidth, this.Bounds.Y - HighlightWidth, this.Bounds.Width + HighlightWidth, HighlightWidth / 2), Color.White);
-                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X + this.Bounds.Width, this.Bounds.Y - HighlightWidth, HighlightWidth / 2, this.Bounds.Height + HighlightWidth), Color.White);
-                b.Draw(AssetManager.SquareTexture, new Rectangle(this.Bounds.X - HighlightWidth, this.Bounds.Y + this.Bounds.Height, this.Bounds.Width + (int)(HighlightWidth * 1.5), HighlightWidth / 2), Color.White);
+                this.DrawBorder(b);
             }
         }
 

@@ -1,17 +1,17 @@
 ﻿using Pong.Framework.Common;
 using Pong.Framework.Enums;
 using Pong.Framework.Game;
+using Pong.Framework.Game.States;
 using Pong.Framework.Menus;
 using Pong.Framework.Menus.Elements;
+using Pong.Framework.Messages;
 using Pong.Game;
 using Pong.Game.Controllers;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewValley;
 using System.Collections.Generic;
 using System.Threading;
-using Pong.Framework.Game.States;
-using Pong.Framework.Messages;
-using StardewValley;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Menus
@@ -26,18 +26,49 @@ namespace Pong.Menus
         private readonly GameState state = new GameState();
         private readonly long enemyPlayerId;
 
-        private Thread sendGameStateThread = null;
-        private bool shouldSyncGameState = true;
+        private Thread syncDataThread;
+        private bool shouldSyncData = true;
         private readonly bool isMultiplayerGame;
+        private readonly bool isLeader;
+
+        private readonly PositionState followerPaddlePosition = new PositionState();
+
+        private bool paused;
+
+        private const int MessageSendFrequency = 10;
 
         public GameMenu(long? enemyPlayer = null)
         {
+
             this.isMultiplayerGame = enemyPlayer.HasValue;
+            if (this.isMultiplayerGame)
+                this.enemyPlayerId = enemyPlayer.Value;
+            this.isLeader = this.isMultiplayerGame && Game1.player.UniqueMultiplayerID < this.enemyPlayerId;
 
             this.ball = new Ball(this.state.BallPositionState, this.state.BallVelocityState);
-            Paddle playerTwoPaddle = !enemyPlayer.HasValue ? new Paddle(new ComputerController(this.ball), Side.Top) : new Paddle(new RemotePaddleController(this.state.OtherPaddlePositionState), Side.Top);
-            Paddle playerOnePaddle = new Paddle(new LocalPlayerController(), Side.Bottom);
             this.scoreDisplay = new ScoreDisplay(this.state.ScoreState);
+
+            Paddle playerOnePaddle;
+            Paddle playerTwoPaddle;
+
+            if (!this.isMultiplayerGame)
+            {
+                playerTwoPaddle = new Paddle(new ComputerController(this.ball), Side.Top);
+                playerOnePaddle = new Paddle(new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
+            }
+            else
+            {
+                if (this.isLeader)
+                {
+                    playerTwoPaddle = new Paddle(new StatePaddleController(this.followerPaddlePosition), Side.Top);
+                    playerOnePaddle = new Paddle(new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
+                }
+                else
+                {
+                    playerTwoPaddle = new Paddle(new StatePaddleController(this.state.PaddlePositionState), Side.Top);
+                    playerOnePaddle = new Paddle(new LocalPlayerController(this.followerPaddlePosition), Side.Bottom);
+                }
+            }
 
             this.nonReactiveCollideables = new List<INonReactiveDrawableCollideable>
             {
@@ -58,7 +89,6 @@ namespace Pong.Menus
 
             if (this.isMultiplayerGame)
             {
-                this.enemyPlayerId = enemyPlayer.Value;
                 this.InitSync();
             }
             else
@@ -67,61 +97,78 @@ namespace Pong.Menus
 
         private void InitSync()
         {
-            if(Game1.player.UniqueMultiplayerID < this.enemyPlayerId)
-                this.StartSendingData();
+            if (this.isLeader)
+                this.syncDataThread = new Thread(this.SyncGameState);
             else
-                this.StartReceivingData();
-        }
+            {
+                this.state.BallVelocityState.Invert();
+                this.syncDataThread = new Thread(this.SendMyPaddlePosition);
+            }
 
-        private void StartSendingData()
-        {
-            this.sendGameStateThread = new Thread(this.SyncGameState);
-            this.sendGameStateThread.Start();
+            ModEntry.Instance.Helper.Events.Multiplayer.ModMessageReceived += this.Multiplayer_ModMessageReceived;
+
+            this.syncDataThread.Start();
         }
 
         private void SyncGameState()
         {
-            while (this.shouldSyncGameState)
+            while (this.shouldSyncData)
             {
                 MailBox.Send(new MessageEnvelope(this.state, this.enemyPlayerId));
-                Thread.Sleep(500);
+                Thread.Sleep(MessageSendFrequency);
             }
         }
 
-        private void StartReceivingData()
+        private void SendMyPaddlePosition()
         {
-            ModEntry.Instance.Helper.Events.Multiplayer.ModMessageReceived += this.Multiplayer_ModMessageReceived;
+            while (this.shouldSyncData)
+            {
+                MailBox.Send(new MessageEnvelope(this.followerPaddlePosition, this.enemyPlayerId));
+                Thread.Sleep(MessageSendFrequency);
+            }
         }
 
         private void Multiplayer_ModMessageReceived(object sender, ModMessageReceivedEventArgs e)
         {
             if (e.FromModID != ModEntry.Instance.PongId)
                 return;
-            if (e.Type != typeof(GameState).Name)
-                return;
+            if (e.Type == typeof(GameState).Name && !this.isLeader)
+            {
+                GameState newState = e.ReadAs<GameState>();
+                newState.BallVelocityState.Invert();
+                newState.BallPositionState.Invert();
+                newState.PaddlePositionState.Invert();
 
-            GameState newState = e.ReadAs<GameState>();
+                this.state.SetState(newState);
+            }
+            else if (e.Type == typeof(PositionState).Name && this.isLeader)
+            {
+                PositionState newState = e.ReadAs<PositionState>();
+                newState.Invert();
+                this.followerPaddlePosition.SetState(newState);
+            }
 
-            this.state.SetState(newState);
         }
 
         public override void BeforeMenuSwitch()
         {
             if (this.enemyPlayerId != default(long))
                 ModEntry.Instance.Helper.Events.Multiplayer.ModMessageReceived -= this.Multiplayer_ModMessageReceived;
-            if (this.sendGameStateThread != null)
-                this.shouldSyncGameState = false;
+            if (this.syncDataThread != null)
+                this.shouldSyncData = false;
         }
 
         public override bool ButtonPressed(EventArgsInput e)
         {
             bool result = base.ButtonPressed(e);
 
+            if (this.CurrentModal != null)
+                return result;
+
             switch (e.Button)
             {
                 case SButton.P:
-                    this.TogglePaused();
-                    return true;
+                    return this.TogglePaused();
                 case SButton.Escape:
                     this.OnSwitchToNewMenu(new StartMenu());
                     return true;
@@ -132,7 +179,7 @@ namespace Pong.Menus
 
         public override void Update()
         {
-            if (!this.state.Starting && !this.state.Paused)
+            if (!this.state.Starting && !this.paused)
             {
                 bool collided = false;
                 foreach (INonReactiveDrawableCollideable collideable in this.nonReactiveCollideables)
@@ -191,16 +238,18 @@ namespace Pong.Menus
             yield return this.ball;
             yield return this.scoreDisplay;
 
-            yield return new ConditionalElement(
-                new StaticTextElement("Press P to resume", ScreenWidth / 2, ScreenHeight / 2, true, true),
-                () => this.state.Paused);
+            if (!this.isMultiplayerGame)
+                yield return new ConditionalElement(
+                    new StaticTextElement("Press P to resume", ScreenWidth / 2, ScreenHeight / 2, true, true),
+                    () => this.paused);
 
             yield return new ConditionalElement(
                 new DynamicTextElement(() => $"{this.state.StartTimer / 60 + 1}", ScreenWidth / 2, ScreenHeight / 2, true, true),
-                () => !this.state.Paused && this.state.Starting);
+                () => !this.paused && this.state.Starting);
 
-            yield return new ConditionalElement(new StaticTextElement("P to pause", 50, 150, true, true),
-                () => !this.state.Paused && !this.state.Starting);
+            if (!this.isMultiplayerGame)
+                yield return new ConditionalElement(new StaticTextElement("P to pause", 50, 150, true, true),
+                () => !this.paused && !this.state.Starting);
 
             yield return new ConditionalElement(new StaticTextElement("Esc to exit", 50, 100, true, true),
                 () => !this.state.Starting);
@@ -216,6 +265,8 @@ namespace Pong.Menus
             int two = this.state.ScoreState.PlayerTwoScore;
 
             this.state.Reset();
+            this.followerPaddlePosition.Reset();
+            this.paused = false;
 
             // This is bad
             if (!resetScore)
@@ -248,13 +299,15 @@ namespace Pong.Menus
             this.state.Starting = true;
         }
 
-        private void TogglePaused()
+        private bool TogglePaused()
         {
-            if (this.state.Starting)
-                return;
+            if (this.state.Starting || this.isMultiplayerGame)
+                return false;
 
             SoundManager.PlayKeyPressSound();
-            this.state.Paused = !this.state.Paused;
+            this.paused = !this.paused;
+
+            return true;
         }
     }
 }

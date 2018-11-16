@@ -14,6 +14,7 @@ namespace Pong.Framework.Menus
     internal abstract class Menu : IMenu
     {
         private readonly List<IDrawable> drawables = new List<IDrawable>();
+        protected Modal CurrentModal;
 
         protected void InitDrawables()
         {
@@ -29,6 +30,9 @@ namespace Pong.Framework.Menus
 
         public virtual bool ButtonPressed(EventArgsInput e)
         {
+            if (this.CurrentModal != null)
+                return this.CurrentModal.ButtonPressed(e);
+
             bool clicked = false;
             if (e.IsUseToolButton)
             {
@@ -40,6 +44,36 @@ namespace Pong.Framework.Menus
                         clicked = true;
                     }
                 }
+
+                foreach (IDrawable drawable in this.drawables)
+                {
+                    switch (drawable)
+                    {
+                        case IClickable clickable:
+                            if (clickable.Bounds.Contains((int)e.Cursor.ScreenPixels.X, (int)e.Cursor.ScreenPixels.Y))
+                            {
+                                clickable.Clicked();
+                                clicked = true;
+                            }
+                            break;
+                        case ConditionalElement conditional:
+                            if (conditional.GetElementForHighlight() is IClickable condClickable)
+                                if (condClickable.Bounds.Contains((int)e.Cursor.ScreenPixels.X, (int)e.Cursor.ScreenPixels.Y))
+                                {
+                                    condClickable.Clicked();
+                                    clicked = true;
+                                }
+                            break;
+                        case ElementContainer container:
+                            foreach (IClickable clickable in container.Elements.OfType<IClickable>())
+                                if (clickable.Bounds.Contains((int)e.Cursor.ScreenPixels.X, (int)e.Cursor.ScreenPixels.Y))
+                                {
+                                    clickable.Clicked();
+                                    clicked = true;
+                                }
+                            break;
+                    }
+                }
             }
 
             return clicked;
@@ -47,6 +81,12 @@ namespace Pong.Framework.Menus
 
         public virtual void MouseStateChanged(EventArgsMouseStateChanged e)
         {
+            if (this.CurrentModal != null)
+            {
+                this.CurrentModal.MouseStateChanged(e);
+                return;
+            }
+
             foreach (IDrawable drawable in this.drawables)
             {
                 switch (drawable)
@@ -68,7 +108,7 @@ namespace Pong.Framework.Menus
 
         public virtual void BeforeMenuSwitch()
         {
-
+            
         }
 
 

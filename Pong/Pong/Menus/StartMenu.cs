@@ -19,6 +19,9 @@ namespace Pong.Menus
         {
             bool result = base.ButtonPressed(e);
 
+            if (this.CurrentModal != null)
+                return result;
+
             switch (e.Button)
             {
                 case SButton.Escape:
