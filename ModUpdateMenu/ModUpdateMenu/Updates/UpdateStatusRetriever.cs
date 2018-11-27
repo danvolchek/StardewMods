@@ -1,9 +1,11 @@
 ﻿using System;
 using StardewModdingAPI;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using StardewModdingAPI.Toolkit.Framework.Clients.WebApi;
+using StardewModdingAPI.Toolkit.Framework.ModData;
 
 namespace ModUpdateMenu.Updates
 {
@@ -24,103 +26,76 @@ namespace ModUpdateMenu.Updates
             object registry = this.helper.ModRegistry.GetType()
                 .GetField("Registry", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(this.helper.ModRegistry);
 
-            foreach (object modMetaData in (IEnumerable<object>)registry.GetType()
-                .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Instance)
-                .Invoke(registry, new object[] { true, true }))
+            bool addedNonSkippedStatus = false;
+
+            foreach (object modMetaData in (IEnumerable<object>)registry.GetType().GetField("Mods", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(registry))
             {
-                ModEntryModel updateCheckModel = GetInstanceProperty<ModEntryModel>(modMetaData, "UpdateCheckData");
+                ModEntryModel result = GetInstanceProperty<ModEntryModel>(modMetaData, "UpdateCheckData");
+                IManifest manifest = GetInstanceProperty<IManifest>(modMetaData, "Manifest");
 
-                if (updateCheckModel == null)
-                    return false;
-
-                IManifest modManifest = GetInstanceProperty<IManifest>(modMetaData, "Manifest");
-
-                ModEntryVersionModel latestModEntryVersionModel = updateCheckModel.Main;
-                ModEntryVersionModel optionalModEntryVersionModel = updateCheckModel.Optional;
-                ModEntryVersionModel unofficialModEntryVersionModel = updateCheckModel.Unofficial;
-
-                // get versions
-                ISemanticVersion localVersion = modManifest.Version;
-                ISemanticVersion latestVersion = latestModEntryVersionModel?.Version;
-                ISemanticVersion optionalVersion = optionalModEntryVersionModel?.Version;
-                ISemanticVersion unofficialVersion = unofficialModEntryVersionModel?.Version;
-
-                UpdateStatus status = UpdateStatus.OutOfDate;
-                ModEntryVersionModel whichModel = null;
-                ISemanticVersion updateVersion;
-                string error = null;
-
-                // get update alerts
-                if (IsValidUpdate(localVersion, latestVersion, useBetaChannel: true))
+                if (manifest.UpdateKeys == null || !manifest.UpdateKeys.Any())
                 {
-                    whichModel = latestModEntryVersionModel;
-                    updateVersion = latestVersion;
+                    statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, "", null, "Mod has no update keys"));
+                    continue;
                 }
-                else if (IsValidUpdate(localVersion, optionalVersion, useBetaChannel: localVersion.IsPrerelease()))
+                else if (result == null)
                 {
-                    whichModel = optionalModEntryVersionModel;
-                    updateVersion = optionalVersion;
+                    statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, "", null, "SMAPI didn't check for an update"));
+                    continue;
                 }
-                else if (IsValidUpdate(localVersion, unofficialVersion, useBetaChannel: true))
-                //Different from SMAPI: useBetaChannel is always true
-                {
-                    whichModel = unofficialModEntryVersionModel;
-                    unofficialModEntryVersionModel.Url = $"https://stardewvalleywiki.com/Modding:SMAPI_compatibility#{GenerateAnchor(modManifest.Name)}";
-                    updateVersion = unofficialVersion;
-                }
+
+                ModDataRecordVersionedFields dataRecord =
+                    GetInstanceProperty<ModDataRecordVersionedFields>(modMetaData, "DataRecord");
+
+                bool useBetaInfo = result.HasBetaInfo && Constants.ApiVersion.IsPrerelease();
+                ISemanticVersion localVersion = dataRecord?.GetLocalVersionForUpdateChecks(manifest.Version) ?? manifest.Version;
+                ISemanticVersion latestVersion = dataRecord?.GetRemoteVersionForUpdateChecks(result.Main?.Version) ?? result.Main?.Version;
+                ISemanticVersion optionalVersion = dataRecord?.GetRemoteVersionForUpdateChecks(result.Optional?.Version) ?? result.Optional?.Version;
+                ISemanticVersion unofficialVersion = useBetaInfo ? result.UnofficialForBeta?.Version : result.Unofficial?.Version;
+
+                if (this.IsValidUpdate(localVersion, latestVersion, useBetaChannel: true))
+                    statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, result.Main?.Url, latestVersion.ToString()));
+                else if (this.IsValidUpdate(localVersion, optionalVersion, useBetaChannel: localVersion.IsPrerelease()))
+                    statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, result.Optional?.Url, optionalVersion.ToString()));
+                else if (this.IsValidUpdate(localVersion, unofficialVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
+                    statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url, unofficialVersion.ToString()));
+                else if (result.Errors != null && result.Errors.Any())
+                    statuses.Add(new ModStatus(UpdateStatus.Error, manifest, "", "", result.Errors[0]));
                 else
                 {
-                    if (updateCheckModel.Errors.Length > 0)
-                    {
-                        status = UpdateStatus.Error;
-                        error = updateCheckModel.Errors[0];
-                        updateVersion = modManifest.Version;
-                    }
+                    string updateURL = "";
+                    UpdateStatus updateStatus = UpdateStatus.UpToDate;
+                    if (localVersion.Equals(latestVersion))
+                        updateURL = result.Main?.Url;
+                    else if (localVersion.Equals(optionalVersion))
+                        updateURL = result.Optional?.Url;
+                    else if (localVersion.Equals(unofficialVersion))
+                        updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
                     else
                     {
-                        updateVersion = modManifest.Version;
-                        status = UpdateStatus.UpToDate;
-
-                        if (latestVersion != null && (latestVersion.Equals(localVersion) || IsValidUpdate(latestVersion, localVersion, true)))
-                            whichModel = latestModEntryVersionModel;
-                        else if (optionalVersion != null && (optionalVersion.Equals(localVersion) || IsValidUpdate(optionalVersion, localVersion, true)))
-                            whichModel = optionalModEntryVersionModel;
-                        else if (unofficialVersion != null && (unofficialVersion.Equals(localVersion) || IsValidUpdate(unofficialVersion, localVersion, true)))
-                            whichModel = unofficialModEntryVersionModel;
-                        else
-                            status = UpdateStatus.Skipped;
+                        if (this.IsValidUpdate(latestVersion, localVersion, useBetaChannel: true))
+                        {
+                            updateURL = result.Main?.Url;
+                            updateStatus = UpdateStatus.VeryNew;
+                        }
+                        else if (this.IsValidUpdate(optionalVersion, localVersion, useBetaChannel: localVersion.IsPrerelease()))
+                        {
+                            updateURL = result.Optional?.Url;
+                            updateStatus = UpdateStatus.VeryNew;
+                        }
+                        else if (this.IsValidUpdate(unofficialVersion, localVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
+                        {
+                            updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
+                            updateStatus = UpdateStatus.VeryNew;
+                        }
                     }
+                    statuses.Add(new ModStatus(updateStatus, manifest, updateURL));
                 }
 
-                statuses.Add(new ModStatus(status, modManifest.UniqueID, modManifest.Name, modManifest.Author,
-                    whichModel?.Url ?? "",
-                    modManifest.Version.ToString(), updateVersion?.ToString() ?? "", error));
+                addedNonSkippedStatus = true;
             }
 
-            return true;
-        }
-
-        private static string GenerateAnchor(string name)
-        {
-            name = name.Replace(' ', '_');
-            StringBuilder builder = new StringBuilder();
-            foreach (char c in name)
-            {
-                if (c != '_' && !IsLetterOrDigit(c, out int code))
-                    builder.Append($".{code}");
-                else
-                    builder.Append(c);
-            }
-
-            return builder.ToString();
-        }
-
-        private static bool IsLetterOrDigit(char c, out int code)
-        {
-            code = Convert.ToInt32(c);
-            if (code == -1)
-                code = c;
-            return (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+            return addedNonSkippedStatus;
         }
 
         private static T GetInstanceProperty<T>(object obj, string name, bool isNonPublic = false)
@@ -129,13 +104,21 @@ namespace ModUpdateMenu.Updates
                 (isNonPublic ? BindingFlags.NonPublic : BindingFlags.Public) | BindingFlags.Instance).GetValue(obj));
         }
 
+        private static string GetEnumName(object obj, string name, bool isNonPublic = false)
+        {
+            object foundEnum = GetInstanceProperty<object>(obj, name, isNonPublic);
+            if (foundEnum == null)
+                return null;
+            return Enum.GetName(foundEnum.GetType(), foundEnum);
+        }
+
 
         ////Taken from https://github.com/Pathoschild/SMAPI/blob/develop/src/SMAPI/Program.cs#L709-L719
         /// <summary>Get whether a given version should be offered to the user as an update.</summary>
         /// <param name="currentVersion">The current semantic version.</param>
         /// <param name="newVersion">The target semantic version.</param>
         /// <param name="useBetaChannel">Whether the user enabled the beta channel and should be offered pre-release updates.</param>
-        private static bool IsValidUpdate(ISemanticVersion currentVersion, ISemanticVersion newVersion, bool useBetaChannel)
+        private bool IsValidUpdate(ISemanticVersion currentVersion, ISemanticVersion newVersion, bool useBetaChannel)
         {
             return
                 newVersion != null

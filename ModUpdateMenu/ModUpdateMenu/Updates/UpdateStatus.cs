@@ -2,9 +2,10 @@
 {
     public enum UpdateStatus
     {
+        Skipped,
         UpToDate,
+        VeryNew,
         OutOfDate,
-        Error,
-        Skipped
+        Error
     }
 }

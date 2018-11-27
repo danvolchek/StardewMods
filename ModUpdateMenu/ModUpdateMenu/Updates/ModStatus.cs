@@ -1,4 +1,6 @@
-﻿namespace ModUpdateMenu.Updates
+﻿using StardewModdingAPI;
+
+namespace ModUpdateMenu.Updates
 {
     public class ModStatus
     {
@@ -27,15 +29,21 @@
                 this.UpdateURLType = "Forums";
             else if (updateURL.ToLower().Contains("stardewvalleywiki"))
                 this.UpdateURLType = "Unofficial";
+            else if (updateURL.ToLower().Contains("spacechase0"))
+                this.UpdateURLType = "Spacechase";
             else this.UpdateURLType = "???";
         }
 
-        public ModStatus(UpdateStatus updateStatus, string Id, string name, string author, string updateURL, string currentVersion, string newVersion = null, string errorReason = null) : this(updateStatus, Id, name, author, updateURL)
+        private ModStatus(UpdateStatus updateStatus, string Id, string name, string author, string updateURL, string currentVersion, string newVersion = null, string errorReason = null) : this(updateStatus, Id, name, author, updateURL)
         {
             this.NewVersion = newVersion;
             this.CurrentVersion = currentVersion;
             this.NewVersion = newVersion;
             this.ErrorReason = errorReason;
+        }
+
+        public ModStatus(UpdateStatus updateStatus, IManifest manifest, string updateURL, string newVersion = null, string errorReason = null) : this(updateStatus, manifest.UniqueID, manifest.Name, manifest.Author, updateURL, manifest.Version.ToString(), newVersion, errorReason)
+        {
         }
     }
 }

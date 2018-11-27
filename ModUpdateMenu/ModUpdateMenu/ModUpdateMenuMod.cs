@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using ModUpdateMenu.Menus;
+﻿using ModUpdateMenu.Menus;
 using ModUpdateMenu.Updates;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace ModUpdateMenu
 {
@@ -31,7 +30,7 @@ namespace ModUpdateMenu
             new Thread(() =>
             {
                 IUpdateStatusRetriever statusRetriever = new UpdateStatusRetriever(this.Helper);
-                int attempts = 20;
+                int attempts = 50;
                 while (true)
                 {
                     Thread.Sleep(2000);

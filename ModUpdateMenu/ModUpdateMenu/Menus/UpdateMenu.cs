@@ -229,6 +229,9 @@ namespace ModUpdateMenu.Menus
                     case 1:
                         switch (which.UpdateStatus)
                         {
+                            case UpdateStatus.VeryNew:
+                                this.hoverText = "Your version is newer than the remote one.";
+                                break;
                             case UpdateStatus.UpToDate:
                                 this.hoverText = $"You have: {which.CurrentVersion}.";
                                 break;
@@ -239,15 +242,12 @@ namespace ModUpdateMenu.Menus
                                 this.hoverText = $"Failed to check updates: ^{which.ErrorReason}";
                                 break;
                             case UpdateStatus.Skipped:
-                                this.hoverText = $"Mod not loaded: ^{which.ErrorReason}";
+                                this.hoverText = $"Updates not checked: ^{which.ErrorReason}";
                                 break;
                         }
                         break;
                     case 2:
-                        if (which.UpdateURLType != "???")
-                            this.hoverText = $"Click to go to: ^{which.UpdateURL}";
-                        else
-                            this.hoverText = "Unknown update link.";
+                        this.hoverText = which.UpdateURLType != "???" ? $"Click to go to: ^{which.UpdateURL}" : "Unknown update link.";
                         break;
                 }
 
@@ -508,6 +508,8 @@ namespace ModUpdateMenu.Menus
                     return SpriteText.color_Green;
                 case UpdateStatus.Skipped:
                     return SpriteText.color_Purple;
+                case UpdateStatus.VeryNew:
+                    return SpriteText.color_Cyan;
             }
 
             return SpriteText.color_White;
