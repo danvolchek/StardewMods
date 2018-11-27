@@ -47,6 +47,7 @@ namespace ModUpdateMenu.Updates
                 ModDataRecordVersionedFields dataRecord =
                     GetInstanceProperty<ModDataRecordVersionedFields>(modMetaData, "DataRecord");
 
+                //This section largely taken from https://github.com/Pathoschild/SMAPI/blob/924c3a5d3fe6bfad483834112883156bdf202b57/src/SMAPI/Framework/SCore.cs#L618-L630
                 bool useBetaInfo = result.HasBetaInfo && Constants.ApiVersion.IsPrerelease();
                 ISemanticVersion localVersion = dataRecord?.GetLocalVersionForUpdateChecks(manifest.Version) ?? manifest.Version;
                 ISemanticVersion latestVersion = dataRecord?.GetRemoteVersionForUpdateChecks(result.Main?.Version) ?? result.Main?.Version;
@@ -73,17 +74,17 @@ namespace ModUpdateMenu.Updates
                         updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
                     else
                     {
-                        if (this.IsValidUpdate(latestVersion, localVersion, useBetaChannel: true))
+                        if (latestVersion != null && this.IsValidUpdate(latestVersion, localVersion, useBetaChannel: true))
                         {
                             updateURL = result.Main?.Url;
                             updateStatus = UpdateStatus.VeryNew;
                         }
-                        else if (this.IsValidUpdate(optionalVersion, localVersion, useBetaChannel: localVersion.IsPrerelease()))
+                        else if (optionalVersion!= null && this.IsValidUpdate(optionalVersion, localVersion, useBetaChannel: localVersion.IsPrerelease()))
                         {
                             updateURL = result.Optional?.Url;
                             updateStatus = UpdateStatus.VeryNew;
                         }
-                        else if (this.IsValidUpdate(unofficialVersion, localVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
+                        else if (unofficialVersion != null && this.IsValidUpdate(unofficialVersion, localVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
                         {
                             updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
                             updateStatus = UpdateStatus.VeryNew;
@@ -113,7 +114,7 @@ namespace ModUpdateMenu.Updates
         }
 
 
-        ////Taken from https://github.com/Pathoschild/SMAPI/blob/develop/src/SMAPI/Program.cs#L709-L719
+        ////Taken from https://github.com/Pathoschild/SMAPI/blob/924c3a5d3fe6bfad483834112883156bdf202b57/src/SMAPI/Framework/SCore.cs#L669
         /// <summary>Get whether a given version should be offered to the user as an update.</summary>
         /// <param name="currentVersion">The current semantic version.</param>
         /// <param name="newVersion">The target semantic version.</param>
