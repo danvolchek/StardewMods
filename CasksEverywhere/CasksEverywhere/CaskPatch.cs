@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Harmony;
+﻿using Harmony;
 using StardewValley;
 using StardewValley.Locations;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
+using StardewValley.Objects;
 
 namespace CasksEverywhere
 {
@@ -16,7 +14,7 @@ namespace CasksEverywhere
     {
         private static MethodBase TargetMethod()
         {
-            return CasksEverywhereMod.GetSDVType("Objects.Cask").GetMethod("performObjectDropInAction");
+            return typeof(Cask).GetMethod("performObjectDropInAction");
         }
 
         /// <summary>
