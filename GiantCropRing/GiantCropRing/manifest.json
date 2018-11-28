@@ -5,12 +5,12 @@
   "Description": "Adds a ring which increases the chance of getting giant crops.",
   "UniqueID": "cat.giantcropring",
   "EntryDll": "GiantCropRing.dll",
-  "MinimumApiVersion": "2.8-beta.4",
+  "MinimumApiVersion": "2.8.2",
   "UpdateKeys": [ "Nexus:1182" ],
   "Dependencies": [
     {
       "UniqueID": "Platonymous.Toolkit",
-      "MinimumVersion": "1.0.0"
+      "MinimumVersion": "1.4.19"
     }
   ]
 }

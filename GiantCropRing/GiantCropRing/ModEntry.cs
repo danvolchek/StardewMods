@@ -16,15 +16,39 @@ namespace GiantCropRing
         private ModConfig config;
         private Texture2D giantRingTexture;
 
+        private int numberOfTimeTicksWearingOneRing;
+        private int numberOfTimeTicksWearingTwoRings;
+
+        private int totalNumberOfSeenTimeTicks;
+
         public override void Entry(IModHelper helper)
         {
-            SaveEvents.BeforeSave += this.BeforeSave;
+            this.Helper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
+            TimeEvents.TimeOfDayChanged += this.TimeEvents_TimeOfDayChanged;
             MenuEvents.MenuChanged += this.MenuChanged;
             this.config = helper.ReadConfig<ModConfig>();
             this.giantRingTexture = this.Helper.Content.Load<Texture2D>("assets/ring.png");
 
             GiantRing.texture = this.giantRingTexture;
             GiantRing.price = this.config.cropRingPrice / 2;
+        }
+
+
+        private void TimeEvents_TimeOfDayChanged(object sender, EventArgsIntChanged e)
+        {
+            bool left = Game1.player.leftRing.Value is GiantRing;
+            bool right = Game1.player.rightRing.Value is GiantRing;
+
+            if (left && right)
+            {
+                this.numberOfTimeTicksWearingOneRing++;
+                this.numberOfTimeTicksWearingTwoRings++;
+            }
+            else if (left || right)
+                this.numberOfTimeTicksWearingOneRing++;
+
+            this.totalNumberOfSeenTimeTicks++;
+
         }
 
         private void MenuChanged(object sender, EventArgsClickableMenuChanged e)
@@ -45,17 +69,25 @@ namespace GiantCropRing
             }
         }
 
-        private void BeforeSave(object sender, EventArgs e)
+        private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
             double chance = 0.0;
-            if (Game1.player.leftRing.Value is GiantRing) chance += this.config.cropChancePercentWithRing;
-            if (Game1.player.rightRing.Value is GiantRing) chance += this.config.cropChancePercentWithRing;
 
-            if (!this.config.shouldWearingBothRingsDoublePercentage && chance > this.config.cropChancePercentWithRing)
+            this.totalNumberOfSeenTimeTicks = Math.Max(1, this.totalNumberOfSeenTimeTicks);
+            this.numberOfTimeTicksWearingOneRing = Math.Max(1, this.numberOfTimeTicksWearingOneRing);
+            this.numberOfTimeTicksWearingTwoRings = Math.Max(1, this.numberOfTimeTicksWearingTwoRings);
+
+            if (this.numberOfTimeTicksWearingOneRing / (this.totalNumberOfSeenTimeTicks * 1.0) >= this.config.percentOfDayNeededToWearRingToTriggerEffect)
                 chance = this.config.cropChancePercentWithRing;
 
+            if (this.config.shouldWearingBothRingsDoublePercentage && this.numberOfTimeTicksWearingTwoRings / (this.totalNumberOfSeenTimeTicks * 1.0) >= this.config.percentOfDayNeededToWearRingToTriggerEffect)
+                chance = 2 * this.config.cropChancePercentWithRing;
 
             if (chance > 0) this.MaybeChangeCrops(chance, Game1.getFarm());
+
+            this.numberOfTimeTicksWearingOneRing = 0;
+            this.numberOfTimeTicksWearingTwoRings = 0;
+            this.totalNumberOfSeenTimeTicks = 0;
         }
 
         private void MaybeChangeCrops(double chance, GameLocation environment)
@@ -66,7 +98,6 @@ namespace GiantCropRing
                 int yTile = (int)tup.Item1.Y;
 
                 Crop crop = tup.Item2;
-
 
                 double rand = new Random((int)Game1.uniqueIDForThisGame + (int)Game1.stats.DaysPlayed + xTile * 2000 +
                                       yTile).NextDouble();

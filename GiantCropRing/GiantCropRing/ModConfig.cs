@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GiantCropRing
 {
@@ -10,6 +6,7 @@ namespace GiantCropRing
     {
         public double cropChancePercentWithRing { get; set; } = 0.05;
         public Boolean shouldWearingBothRingsDoublePercentage { get; set; } = true;
+        public double percentOfDayNeededToWearRingToTriggerEffect { get; set; } = 0.5;
 
         public int cropRingPrice { get; set; } = 5000;
     }
