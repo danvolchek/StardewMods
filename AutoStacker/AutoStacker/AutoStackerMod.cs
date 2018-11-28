@@ -19,24 +19,24 @@ namespace AutoStacker
 
         private void KeyPressed(object sender, EventArgsKeyPressed e)
         {
-            String key = e.KeyPressed.ToString().ToLower();
+            string key = e.KeyPressed.ToString().ToLower();
 
             if (key == this.config.ActivationKey.ToLower())
             {
-                StackOwnInventory();
+                this.StackOwnInventory();
             }
         }
 
         private void StackOwnInventory()
         {
-            IEnumerable<Item> items = Game1.player.Items.Where(it => it != null && it.maximumStackSize() != -1);
+            IList<Item> items = Game1.player.Items.Where(it => it != null && it.maximumStackSize() != -1).ToList();
             items.Reverse();
             foreach (Item item in items)
             {
                 if (item.Stack == item.maximumStackSize() || item.Stack == 0)
                     continue;
 
-                foreach (Item stackOnMe in Game1.player.Items.Where(it => it != null && it != item && it.canStackWith(item) && it.getRemainingStackSpace() > 0))
+                foreach (Item stackOnMe in Game1.player.Items.Where(it => it != null && it != item && it.canStackWith(item) && it.getRemainingStackSpace() > 0 && it.Stack != 0))
                 {
                     int remain = stackOnMe.getRemainingStackSpace();
                     int add = Math.Min(remain, item.Stack);
@@ -54,7 +54,7 @@ namespace AutoStacker
                 Item it = Game1.player.Items[i];
                 if (it != null && it.Stack == 0 && it.maximumStackSize() != -1)
                 {
-                    SwapStack(FindFirstNonEmptyStack(it, i + 1), it);
+                    this.SwapStack(this.FindFirstNonEmptyStack(it, i + 1), it);
                 }
             }
 
