@@ -9,6 +9,7 @@ using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using StardewValley.TerrainFeatures;
+using ChangeType = StardewModdingAPI.Events.ChangeType;
 
 namespace WinterGrass
 {
