@@ -1,26 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Harmony;
 using Microsoft.Xna.Framework;
 using SafeLightning.API;
 using SafeLightning.CommandParsing;
-using SafeLightning.LightningProtection;
-using SafeLightning.LightningProtection.ResultDetectors;
-using SafeLightning.LightningProtection.ResultResolvers;
-using SafeLightning.LightningProtection.ResultResolvers.SavedFeatureData;
 using StardewModdingAPI;
-using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.TerrainFeatures;
+using System.Reflection;
+using StardewValley.Locations;
+using SObject = StardewValley.Object;
 
 namespace SafeLightning
 {
     /// <summary>
     ///     A mod which prevents negative affects from lightning hitting anything but lightning rods.
     /// </summary>
-    /// <remarks>
-    ///     How this mod actually works is by detecting when something is hit by lightning,
-    ///     restoring it to its original state, and removing any side effects of the restoration.
-    /// </remarks>
     public class SafeLightningMod : Mod
     {
         /// <summary>
@@ -30,47 +26,8 @@ namespace SafeLightning
         /// <param name="effects">Whether to display visual/sound effects or not</param>
         public delegate void StrikeLightningDelegate(Vector2 position, bool effects);
 
-        /// <summary>
-        ///     <see cref="TerrainFeature" />s, or copies of them if needed, befor they were hit by lightning.
-        /// </summary>
-        private readonly IDictionary<Vector2, BaseFeatureSaveData> featuresBeforeTheyWereHit =
-            new Dictionary<Vector2, BaseFeatureSaveData>();
 
-        /// <summary>
-        ///     Margin used to decide when to start saving <see cref="TerrainFeature" />s.
-        /// </summary>
-        /// <remarks>See <see cref="SafeLightningMod.UpdateTick(object, EventArgs)" /> for why this is needed.</remarks>
-        private readonly int margin = 100;
-
-        /// <summary>
-        ///     Is listening to events.
-        /// </summary>
-        private bool isSubscribed;
-
-        /// <summary>
-        ///     Detectors that detect negative lightning strike results.
-        /// </summary>
-        private List<IResultDetector> lightningDetectors;
-
-        /// <summary>
-        ///     Resolvers that fix negative lightning strike results.
-        /// </summary>
-        private IDictionary<LightningStrikeResult, IResultResolver> lightningResolvers;
-
-        /// <summary>
-        ///     Whether a mod caused a lightning strike that we need to recover from instantly.
-        /// </summary>
-        private bool modForcedRestore;
-
-        /// <summary>
-        ///     Used to simulate overnight strikes correctly.
-        /// </summary>
-        private LightningStrikeRNGInfo previousDayRNGInfo;
-
-        /// <summary>
-        ///     Last <see cref="Game1.timeOfDay" /> <see cref="TerrainFeature" />s were saved at.
-        /// </summary>
-        private int savedFeaturesAt = -1;
+        public static SafeLightningMod Instance;
 
         /// <summary>
         ///     Safe Lightning initialization. Sets up console commands, lightning detectors and resolvers, and subscribes to
@@ -79,235 +36,14 @@ namespace SafeLightning
         /// <param name="helper">The mod helper</param>
         public override void Entry(IModHelper helper)
         {
+            Instance = this;
             new CommandParser(this);
 
-            //Add detectors
-            this.lightningDetectors = new List<IResultDetector>
-            {
-                new CropKilledDetector(),
-                new FruitTreeCoalDetector(),
-                new RemovedFeatureDetector(),
-                new TreeFallingDetector(helper.Reflection)
-            };
+            HarmonyInstance instance = HarmonyInstance.Create("cat.safelightning");
 
-            this.Monitor.Log($"Loaded {this.lightningDetectors.Count} detectors.", LogLevel.Trace);
-
-            //Add resolvers
-            IResultResolver crop = new CropKilledResolver(this.Monitor);
-            IResultResolver fruit = new FruitTreeCoalResolver(this.Monitor);
-            IResultResolver removed = new RemovedFeatureResolver(this.Monitor);
-            IResultResolver falling = new TreeFallingResolver(helper.Reflection, this.Monitor);
-            this.lightningResolvers = new Dictionary<LightningStrikeResult, IResultResolver>
-            {
-                {crop.Result, crop},
-                {fruit.Result, fruit},
-                {removed.Result, removed},
-                {falling.Result, falling}
-            };
-
-            this.Monitor.Log($"Loaded {this.lightningDetectors.Count} resolvers.", LogLevel.Trace);
-
-            SaveEvents.AfterLoad += this.AfterLoad;
-            SaveEvents.AfterReturnToTitle += (sender, args) => this.Unsubscribe();
+            instance.PatchAll(Assembly.GetExecutingAssembly());
         }
 
-        private void AfterLoad(object sender, EventArgs e)
-        {
-            if (!Context.IsMainPlayer)
-                this.Unsubscribe();
-            else
-                this.Subscribe();
-        }
-
-        private void Subscribe()
-        {
-            if (this.isSubscribed)
-                return;
-
-            GameEvents.UpdateTick += this.UpdateTick;
-            SaveEvents.BeforeSave += this.BeforeSave;
-
-            this.Monitor.Log("Subscribed to events.", LogLevel.Trace);
-            this.isSubscribed = true;
-        }
-
-        private void Unsubscribe()
-        {
-            if (!this.isSubscribed)
-                return;
-
-            GameEvents.UpdateTick -= this.UpdateTick;
-            SaveEvents.BeforeSave -= this.BeforeSave;
-
-            this.savedFeaturesAt = -1;
-
-            this.Monitor.Log("Unsubscribed from events.", LogLevel.Trace);
-            this.isSubscribed = false;
-        }
-
-        /// <summary>
-        ///     Restores a location to what it was before a lightning strike given which features were affected.
-        /// </summary>
-        /// <param name="location">The <see cref="GameLocation" /> to restore</param>
-        /// <param name="affectedFeatures">Features affected by lightning strikes last tick</param>
-        /// <returns>Whether all affected features were restored</returns>
-        private bool RestoreLocation(GameLocation location, IDictionary<Vector2, BaseFeatureSaveData> affectedFeatures)
-        {
-            if (affectedFeatures.Count == 0)
-                return true;
-
-            this.Monitor.Log($"Restore - {affectedFeatures.Count} features to resolve.", LogLevel.Trace);
-
-            IList<Vector2> toRemove = new List<Vector2>();
-
-            //If a detector detects an affected feature, send the feature to the corresponding resolver to fix it.
-            foreach (IResultDetector detector in this.lightningDetectors)
-            {
-                foreach (Vector2 featurePosition in detector.Detect(location, affectedFeatures.Keys))
-                {
-                    this.lightningResolvers[detector.Result].Resolve(location, affectedFeatures[featurePosition]);
-                    toRemove.Add(featurePosition);
-                }
-
-                foreach (Vector2 item in toRemove)
-                    affectedFeatures.Remove(item);
-                toRemove.Clear();
-            }
-
-            return affectedFeatures.Count == 0;
-        }
-
-        /// <summary>
-        ///     Calls <see cref="SafeLightningMod.RestoreLocation(GameLocation, IDictionary{Vector2, BaseFeatureSaveData})" /> but
-        ///     ignores unresolved <see cref="TerrainFeature" />s.
-        ///     This shouldn't happen, but we account for it anyway.
-        /// </summary>
-        /// <param name="location">The <see cref="GameLocation" /> to restore</param>
-        /// <param name="affectedFeatures">The affected <see cref="TerrainFeature" />s</param>
-        private void RestoreLocationAndIgnoreErrors(GameLocation location,
-            IDictionary<Vector2, BaseFeatureSaveData> affectedFeatures)
-        {
-            if (!this.RestoreLocation(Game1.getFarm(), affectedFeatures))
-            {
-                this.Monitor.Log($"Failed to restore {affectedFeatures.Count} features.", LogLevel.Trace);
-                foreach(KeyValuePair<Vector2, BaseFeatureSaveData> unresolvedFeature in affectedFeatures)
-                {
-                    this.Monitor.Log($"{unresolvedFeature.Key} - {unresolvedFeature.Value.GetType()} ({unresolvedFeature.Value.Feature.GetType()})", LogLevel.Trace);
-                }
-                this.featuresBeforeTheyWereHit.Clear();
-            }
-        }
-
-        /// <summary>
-        ///     Handles the next update tick. Restores any affected <see cref="TerrainFeature" />s and saves
-        ///     <see cref="TerrainFeature" />s to be hit in the next ten minutes.
-        /// </summary>
-        private void UpdateTick(object sender, EventArgs e)
-        {
-            if (!Context.IsWorldReady)
-                return;
-
-            if (this.savedFeaturesAt != -1 && this.savedFeaturesAt != Game1.timeOfDay || this.modForcedRestore)
-            {
-                this.RestoreLocationAndIgnoreErrors(Game1.getFarm(), this.featuresBeforeTheyWereHit);
-
-                if (this.modForcedRestore) this.modForcedRestore = false;
-                this.savedFeaturesAt = -1;
-            }
-
-            //Lightning protection works by saving features right before lightning hits them, i.e. right before the game's ten minute update.
-            //Unfortunately, there is no reliable way to determine when the current tick is the last tick before the ten minute update.
-            //We use a margin based on the game's original code to save features. The margin is large enough to be compatible with mods that speed up
-            //time up to ten in game minutes == 1 real life second, but save more than necessary for the default ten minute length.
-            if (Game1.gameTimeInterval >=
-                7000 + Game1.currentLocation.getExtraMillisecondsPerInGameMinuteForThisLocation() - this.margin)
-            {
-                if (SDVLightningMimic.GetSDVLightningStrikePositionAt(new LightningStrikeRNGInfo(true),
-                    out KeyValuePair<Vector2, TerrainFeature> item))
-                    this.SaveFeature(item.Key, item.Value);
-
-                this.savedFeaturesAt = Game1.timeOfDay;
-            }
-
-            if (Game1.newDay) this.PrepareForOvernightLightning();
-        }
-
-        /// <summary>
-        ///     Save the given <see cref="TerrainFeature" /> state so it can be restored later.
-        /// </summary>
-        /// <remarks>
-        ///     <see cref="IResultResolver" />s may require information about the <see cref="TerrainFeature" /> before it was
-        ///     modified, so save that if necessary.
-        /// </remarks>
-        /// <param name="pos">Where the <see cref="TerrainFeature" /> is</param>
-        /// <param name="value">The <see cref="TerrainFeature" /> itself</param>
-        private void SaveFeature(Vector2 pos, TerrainFeature value)
-        {
-            this.featuresBeforeTheyWereHit[pos] =
-                FeatureSaveDataFactory.CreateFeatureSaveData(pos, value, this.Helper.Reflection);
-        }
-
-        /// <summary>
-        ///     Gets the in game time 10 minutes after when.
-        /// </summary>
-        /// <param name="when">The time</param>
-        /// <returns>10 minutes after the given time</returns>
-        internal static int GetNextTime(int when)
-        {
-            when += 10;
-            if (when % 100 >= 60)
-                when = when - when % 100 + 100;
-            return when;
-        }
-
-        /*********
-         * Overnight Handling
-         *********/
-
-        /// <summary>
-        ///     If there will be lightning tonight, prevent it and save the conditions that decide which
-        ///     <see cref="TerrainFeature" />s get hit.
-        /// </summary>
-        private void PrepareForOvernightLightning()
-        {
-            if (Game1.isLightning)
-            {
-                this.previousDayRNGInfo = new LightningStrikeRNGInfo();
-                Game1.isLightning = false;
-                this.Monitor.Log($"Turned off lightning. Player went to bed at {Game1.timeOfDay}.", LogLevel.Trace);
-            }
-        }
-
-        /// <summary>
-        ///     Before a save, simulate any lightning the previous night should have had safely.
-        /// </summary>
-        private void BeforeSave(object sender, EventArgs e)
-        {
-            if (this.previousDayRNGInfo == null)
-                return;
-
-            //Fix Game1.wasRainingYesterday
-            Game1.wasRainingYesterday = Game1.wasRainingYesterday || this.previousDayRNGInfo.isLightning;
-
-            int num = (2400 - this.previousDayRNGInfo.time) / 100;
-
-            this.Monitor.Log($"Running overnight lightning {num} times.", LogLevel.Trace);
-
-            for (int i = 0; i < num; i++)
-            {
-                if (SDVLightningMimic.GetSDVLightningStrikePositionAt(this.previousDayRNGInfo,
-                    out KeyValuePair<Vector2, TerrainFeature> item))
-                {
-                    this.SaveFeature(item.Key, item.Value);
-                    this.Monitor.Log($"{item.Value.GetType().Name} at {item.Key} will be hit next.", LogLevel.Trace);
-                }
-
-                SDVLightningMimic.CauseVanillaStrike(this.previousDayRNGInfo);
-                this.RestoreLocationAndIgnoreErrors(Game1.getFarm(), this.featuresBeforeTheyWereHit);
-            }
-
-            this.previousDayRNGInfo = null;
-        }
 
         /*********
          * Mod API
@@ -333,13 +69,97 @@ namespace SafeLightning
             if (!Context.IsWorldReady)
                 return;
 
-            if (Game1.getFarm().terrainFeatures.TryGetValue(position, out TerrainFeature feature))
+            StrikeLightningSafelyAt(position, effects);
+        }
+
+        internal static void StrikeLightningSafely()
+        {
+            Random random = new Random((int)Game1.uniqueIDForThisGame + (int)Game1.stats.DaysPlayed + Game1.timeOfDay);
+
+            if (random.NextDouble() < 0.125 + Game1.dailyLuck + Game1.player.luckLevel.Value / 100.0)
             {
-                this.SaveFeature(position, feature);
-                this.modForcedRestore = true;
+                if (Game1.currentLocation.IsOutdoors && !(Game1.currentLocation is Desert) && !Game1.newDay)
+                {
+
+                    Game1.flashAlpha = (float)(0.5 + random.NextDouble());
+                    Game1.playSound("thunder");
+                }
+
+                GameLocation locationFromName = Game1.getLocationFromName("Farm");
+                List<Vector2> source = new List<Vector2>();
+                foreach (KeyValuePair<Vector2, SObject> pair in locationFromName.objects.Pairs)
+                {
+                    if (pair.Value.bigCraftable.Value && pair.Value.ParentSheetIndex == 9)
+                        source.Add(pair.Key);
+                }
+
+                if (source.Count > 0)
+                {
+                    for (int index1 = 0; index1 < 2; ++index1)
+                    {
+                        Vector2 index2 = source.ElementAt<Vector2>(random.Next(source.Count));
+                        if (locationFromName.objects[index2].heldObject.Value == null)
+                        {
+                            locationFromName.objects[index2].heldObject.Value = new SObject(787, 1, false, -1, 0);
+                            locationFromName.objects[index2].MinutesUntilReady = 3000 - Game1.timeOfDay;
+                            locationFromName.objects[index2].shakeTimer = 1000;
+                            if (!(Game1.currentLocation is Farm))
+                                return;
+
+                            Utility.drawLightningBolt(index2 * 64f + new Vector2(32f, 0.0f), locationFromName);
+                            return;
+                        }
+                    }
+                }
+
+                if (random.NextDouble() >= 0.25 - Game1.dailyLuck - Game1.player.luckLevel.Value / 100.0)
+                    return;
+
+                Vector2 pos = locationFromName.terrainFeatures.Pairs.ElementAt(random.Next(locationFromName.terrainFeatures.Count())).Key;
+                Utility.drawLightningBolt(pos * 64f + new Vector2(32f, (float)sbyte.MinValue), locationFromName);
+
+            }
+            else
+            {
+                if (random.NextDouble() >= 0.1 || !Game1.currentLocation.IsOutdoors || (Game1.currentLocation is Desert || Game1.newDay))
+                    return;
+
+                Game1.flashAlpha = (float)(0.5 + random.NextDouble());
+                if (random.NextDouble() < 0.5)
+                    DelayedAction.screenFlashAfterDelay((float)(0.3 + random.NextDouble()), random.Next(500, 1000), "");
+                DelayedAction.playSoundAfterDelay("thunder_small", random.Next(500, 1500), (GameLocation)null);
+            }
+        }
+
+        /// <summary>
+        ///     Safely strikes lightning.
+        /// </summary>
+        /// <param name="position">The position to strike lightning</param>
+        /// <param name="effects">Whether visual/sound effects should be created</param>
+        internal static void StrikeLightningSafelyAt(Vector2 position, bool effects)
+        {
+            GameLocation farm = Game1.getFarm();
+
+            if (effects && Game1.currentLocation.IsOutdoors && !(Game1.currentLocation is Desert) && !Game1.newDay)
+            {
+                Game1.flashAlpha = (float)(0.5 + new Random().NextDouble());
+                Game1.playSound("thunder");
             }
 
-            SDVLightningMimic.StrikeLightningSafelyAt(this.Monitor, position, effects);
+            if (farm.objects.TryGetValue(position, out SObject obj) && obj.bigCraftable.Value && obj.ParentSheetIndex == 9 &&
+                obj.heldObject.Value == null)
+            {
+                obj.heldObject.Value = new SObject(787, 1, false, -1, 0);
+                obj.MinutesUntilReady = 3000 - Game1.timeOfDay;
+                obj.shakeTimer = 1000;
+                if (effects && Game1.currentLocation is Farm)
+                    Utility.drawLightningBolt(position * Game1.tileSize + new Vector2(Game1.tileSize / 2, 0.0f), farm);
+            }
+            else
+            {
+                if (effects)
+                    Utility.drawLightningBolt(position * Game1.tileSize + new Vector2(Game1.tileSize / 2, -Game1.tileSize * 2), farm);
+            }
         }
     }
 }

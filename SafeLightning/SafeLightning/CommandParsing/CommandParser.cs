@@ -21,7 +21,6 @@ namespace SafeLightning.CommandParsing
             //Get available commands
             this.commands = new List<ICommand>
             {
-                new GetLightningCommand(),
                 new PrintLocationCommand(),
                 new SetLightningCommand(),
                 new GrowTreesCommand(),

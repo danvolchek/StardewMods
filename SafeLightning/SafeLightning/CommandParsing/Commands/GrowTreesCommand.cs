@@ -17,8 +17,8 @@ namespace SafeLightning.CommandParsing.Commands
 
         public override string Parse(string[] args)
         {
-            foreach (KeyValuePair<Vector2, NetRef<TerrainFeature>> item in Game1.getFarm().terrainFeatures.FieldPairs)
-                switch (item.Value.Value)
+            foreach (KeyValuePair<Vector2, TerrainFeature> item in Game1.getFarm().terrainFeatures.Pairs)
+                switch (item.Value)
                 {
                     case Tree t:
                         t.growthStage.Value++;
