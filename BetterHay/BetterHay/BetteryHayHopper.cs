@@ -46,6 +46,9 @@ namespace BetterHay
                                 Game1.getFarm().piecesOfHay.Value -= Math.Max(1, num2);
                                 who.addItemToInventoryBool((Item)new SObject(178, num2, false, -1, 0), false);
                                 Game1.playSound("shwip");
+                                if (Game1.getFarm().piecesOfHay.Value <= 0)
+                                    this.showNextIndex.Value = false;
+                                return true;
                             }
                         }
                         else if (Game1.player.couldInventoryAcceptThisObject(178, 1, 0))
