@@ -8,7 +8,7 @@ namespace NoFenceDecay
     /// <summary>Stops fences from decaying.</summary>
     internal class NoFenceDecayMod : Mod
     {
-        /// <summary>Used to find fences.</summary>B
+        /// <summary>Used to find fences.</summary>
         private readonly FenceFinder finder = new FenceFinder();
 
         public override void Entry(IModHelper helper)
