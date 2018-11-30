@@ -1,7 +1,7 @@
 {
   "Name": "No Fence Decay",
   "Author": "Cat",
-  "Version": "1.3.0",
+  "Version": "1.4.0",
   "Description": "Makes all fences and gates last forever.",
   "UniqueID": "cat.nofencedecay",
   "EntryDll": "NoFenceDecay.dll",
