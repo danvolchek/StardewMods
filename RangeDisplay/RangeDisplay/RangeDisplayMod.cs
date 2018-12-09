@@ -30,6 +30,7 @@ namespace RangeDisplay
         private RangeDisplayConfig config;
 
         private SprinklerRangeCreator sprinklerRangeCreator;
+        private ScarecrowRangeCreator scarecrowRangeCreator;
 
         //Need to fix rendering and item change (walking)
         public override void Entry(IModHelper helper)
@@ -44,10 +45,11 @@ namespace RangeDisplay
             });
 
             this.sprinklerRangeCreator = new SprinklerRangeCreator();
+            this.scarecrowRangeCreator = new ScarecrowRangeCreator();
             this.objectRangeCreators = new List<IObjectRangeCreator>()
             {
                 this.sprinklerRangeCreator,
-                new ScarecrowRangeCreator(),
+                this.scarecrowRangeCreator,
                 new BeeHouseRangeCreator()
             };
 
@@ -82,6 +84,7 @@ namespace RangeDisplay
         private void FirstUpdateTick(object sender, EventArgs e)
         {
             this.sprinklerRangeCreator.ModRegistryReady(this.Helper.ModRegistry);
+            this.scarecrowRangeCreator.ModRegistryReady(this.Helper.ModRegistry);
         }
 
         private void RefreshRangeItems(GameLocation location)
@@ -101,7 +104,6 @@ namespace RangeDisplay
                     if (creator.CanHandle(item.Value))
                     {
                         this.displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetRange(item.Value, item.Key, location), mouseTile.Equals(item.Key) && this.isModifierKeyDown);
-                        break;
                     }
                 }
             }
@@ -122,7 +124,6 @@ namespace RangeDisplay
                     if (creator.CanHandle(this.activeObject))
                     {
                         this.displayManager.AddTilesToDisplay(creator.HandledRangeItem, creator.GetRange(this.activeObject, mouseTile, Game1.currentLocation), true);
-                        break;
                     }
                 }
             }

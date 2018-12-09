@@ -8,12 +8,13 @@ using SObject = StardewValley.Object;
 
 namespace RangeDisplay.RangeHandling.RangeCreators.Objects
 {
-    internal class SprinklerRangeCreator : IObjectRangeCreator
+    internal class SprinklerRangeCreator : IObjectRangeCreator, IModRegistryListener
     {
         public RangeItem HandledRangeItem => RangeItem.Sprinkler;
 
         private ISimpleSprinklersAPI simpleSprinklersAPI = null;
         private IBetterSprinklersAPI betterSprinklersAPI = null;
+        private IPrismaticToolsAPI prismaticToolsAPI = null;
 
         public void ModRegistryReady(IModRegistry registry)
         {
@@ -26,6 +27,11 @@ namespace RangeDisplay.RangeHandling.RangeCreators.Objects
             {
                 this.betterSprinklersAPI = registry.GetApi<IBetterSprinklersAPI>("Speeder.BetterSprinklers");
             }
+
+            if (registry.IsLoaded("stokastic.PrismaticTools"))
+            {
+                this.prismaticToolsAPI = registry.GetApi<IPrismaticToolsAPI>("stokastic.PrismaticTools");
+            }
         }
 
         public bool CanHandle(SObject obj)
@@ -35,17 +41,26 @@ namespace RangeDisplay.RangeHandling.RangeCreators.Objects
 
         public IEnumerable<Vector2> GetRange(SObject obj, Vector2 position, GameLocation location)
         {
-            if (this.betterSprinklersAPI == null)
-            {
-                foreach (Vector2 pos in this.GetDefaultRange(obj, position))
+            if (this.prismaticToolsAPI != null && obj.ParentSheetIndex == this.prismaticToolsAPI.SprinklerIndex)
+                foreach (Vector2 pos in this.prismaticToolsAPI.GetSprinklerCoverage(position))
                     yield return pos;
-            } else if (this.betterSprinklersAPI.GetSprinklerCoverage().TryGetValue(obj.ParentSheetIndex, out Vector2[] bExtra))
-                foreach (Vector2 extraPos in bExtra)
-                    yield return extraPos + position;
+            else
+            {
+                if (this.betterSprinklersAPI == null)
+                {
+                    foreach (Vector2 pos in this.GetDefaultRange(obj, position))
+                        yield return pos;
+                }
+                else if (this.betterSprinklersAPI.GetSprinklerCoverage()
+                    .TryGetValue(obj.ParentSheetIndex, out Vector2[] bExtra))
+                    foreach (Vector2 extraPos in bExtra)
+                        yield return extraPos + position;
 
-            if (this.simpleSprinklersAPI != null && this.simpleSprinklersAPI.GetNewSprinklerCoverage().TryGetValue(obj.ParentSheetIndex, out Vector2[] sExtra))
-                foreach(Vector2 extraPos in sExtra)
-                    yield return extraPos + position;
+                if (this.simpleSprinklersAPI != null && this.simpleSprinklersAPI.GetNewSprinklerCoverage()
+                        .TryGetValue(obj.ParentSheetIndex, out Vector2[] sExtra))
+                    foreach (Vector2 extraPos in sExtra)
+                        yield return extraPos + position;
+            }
         }
 
         public IEnumerable<Vector2> GetDefaultRange(SObject obj, Vector2 position)
