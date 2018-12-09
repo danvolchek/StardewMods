@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="APIs\IBetterSprinklersAPI.cs" />
+    <Compile Include="APIs\IPrismaticToolsAPI.cs" />
     <Compile Include="APIs\ISimpleSprinklersAPI.cs" />
     <Compile Include="BetterGardenPotsMod.cs" />
     <Compile Include="BetterGardenPotsModConfig.cs" />

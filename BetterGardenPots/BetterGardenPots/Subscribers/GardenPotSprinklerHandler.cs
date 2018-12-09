@@ -16,6 +16,7 @@ namespace BetterGardenPots.Subscribers
     {
         private ISimpleSprinklersAPI simpleSprinklersAPI;
         private IBetterSprinklersAPI betterSprinklersAPI;
+        private IPrismaticToolsAPI prismaticToolsAPI;
 
         private readonly IModHelper helper;
 
@@ -58,6 +59,11 @@ namespace BetterGardenPots.Subscribers
             {
                 this.betterSprinklersAPI = this.helper.ModRegistry.GetApi<IBetterSprinklersAPI>("Speeder.BetterSprinklers");
             }
+
+            if (this.helper.ModRegistry.IsLoaded("stokastic.PrismaticTools"))
+            {
+                this.prismaticToolsAPI = this.helper.ModRegistry.GetApi<IPrismaticToolsAPI>("stokastic.PrismaticTools");
+            }
         }
 
         private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
@@ -98,18 +104,24 @@ namespace BetterGardenPots.Subscribers
 
         public IEnumerable<Vector2> GetRange(SObject obj, Vector2 position)
         {
-            if (this.betterSprinklersAPI == null)
-            {
-                foreach (Vector2 pos in this.GetDefaultRange(obj, position))
+            if(this.prismaticToolsAPI != null && obj.ParentSheetIndex == this.prismaticToolsAPI.SprinklerIndex)
+                foreach (Vector2 pos in this.prismaticToolsAPI.GetSprinklerCoverage(position))
                     yield return pos;
-            }
-            else if (this.betterSprinklersAPI.GetSprinklerCoverage().TryGetValue(obj.ParentSheetIndex, out Vector2[] bExtra))
-                foreach (Vector2 extraPos in bExtra)
-                    yield return extraPos + position;
+            else
+            {
+                if (this.betterSprinklersAPI == null)
+                {
+                    foreach (Vector2 pos in this.GetDefaultRange(obj, position))
+                        yield return pos;
+                }
+                else if (this.betterSprinklersAPI.GetSprinklerCoverage().TryGetValue(obj.ParentSheetIndex, out Vector2[] bExtra))
+                    foreach (Vector2 extraPos in bExtra)
+                        yield return extraPos + position;
 
-            if (this.simpleSprinklersAPI != null && this.simpleSprinklersAPI.GetNewSprinklerCoverage().TryGetValue(obj.ParentSheetIndex, out Vector2[] sExtra))
-                foreach (Vector2 extraPos in sExtra)
-                    yield return extraPos + position;
+                if (this.simpleSprinklersAPI != null && this.simpleSprinklersAPI.GetNewSprinklerCoverage().TryGetValue(obj.ParentSheetIndex, out Vector2[] sExtra))
+                    foreach (Vector2 extraPos in sExtra)
+                        yield return extraPos + position;
+            }       
         }
 
         public IEnumerable<Vector2> GetDefaultRange(SObject obj, Vector2 position)
