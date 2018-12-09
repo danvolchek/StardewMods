@@ -51,15 +51,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\ListExtensions.cs" />
-    <Compile Include="IInitializable.cs" />
     <Compile Include="BetterFruitTreesConfig.cs" />
     <Compile Include="BetterFruitTreesMod.cs" />
     <Compile Include="Patches\JunimoHarvester\FoundCropEndFunctionPatch.cs" />
     <Compile Include="Patches\JunimoHarvester\TryToHarvestHerePatch.cs" />
     <Compile Include="Patches\JunimoHarvester\UpdatePatch.cs" />
     <Compile Include="Patches\JunimoHut\AreThereMatureCropsWithinRadiusPatch.cs" />
+    <Compile Include="Patches\PlacementPatch.cs" />
     <Compile Include="Patches\Utils.cs" />
-    <Compile Include="PlacementHelper.cs" />
+    <Compile Include="GrowHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

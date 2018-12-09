@@ -9,12 +9,18 @@ using Harmony;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Characters;
 using static BetterFruitTrees.Extensions.ListExtensions;
+using SObject = StardewValley.Object;
 
 namespace BetterFruitTrees
 {
     public class BetterFruitTreesMod : Mod
     {
+        internal static BetterFruitTreesMod Instance;
+
+        internal BetterFruitTreesConfig Config;
+
         public override void Entry(IModHelper helper)
         {
             Utils.Reflection = helper.Reflection;
@@ -32,24 +38,26 @@ namespace BetterFruitTrees
                 return;
             }
 
-            BetterFruitTreesConfig config = helper.ReadConfig<BetterFruitTreesConfig>();
+            Instance = this;
 
-            IInitializable pHelper = new PlacementHelper(config);
-            pHelper.Init();
+            this.Config = helper.ReadConfig<BetterFruitTreesConfig>();
 
-            if (config.Disable_Fruit_Tree_Junimo_Harvesting)
-                return;
-
-            Utils.HarvestThreeAtOnce =
-                config.Wait_To_Harvest_Fruit_Trees_Until_They_Have_Three_Fruits__Then_Harvest_All_Three_At_Once;
+            GrowHelper growHelper = new GrowHelper();
 
             HarmonyInstance harmony = HarmonyInstance.Create("cat.betterfruittrees");
 
-            Type junimoHarvesterType = Utils.GetSDVType("Characters.JunimoHarvester");
+            Utils.HarvestThreeAtOnce =
+                this.Config.Wait_To_Harvest_Fruit_Trees_Until_They_Have_Three_Fruits__Then_Harvest_All_Three_At_Once;
+
 
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>
             {
-                {"foundCropEndFunction", junimoHarvesterType, typeof(FoundCropEndFunctionPatch)},
+                {"placementAction", typeof(SObject), typeof(PlacementPatch)}
+            };
+
+            Type junimoHarvesterType = typeof(JunimoHarvester);
+            IList<Tuple<string, Type, Type>> junimoReplacements = new List<Tuple<string, Type, Type>>
+            {
                 {"tryToHarvestHere", junimoHarvesterType, typeof(TryToHarvestHerePatch)},
                 {"update", junimoHarvesterType, typeof(UpdatePatch)},
                 {
@@ -57,6 +65,12 @@ namespace BetterFruitTrees
                     typeof(AreThereMatureCropsWithinRadiusPatch)
                 }
             };
+
+
+            if (!this.Config.Disable_Fruit_Tree_Junimo_Harvesting)
+                foreach (Tuple<string, Type, Type> item in junimoReplacements)
+                    replacements.Add(item);
+
 
             foreach (Tuple<string, Type, Type> replacement in replacements)
             {
@@ -69,6 +83,7 @@ namespace BetterFruitTrees
                 MethodInfo postfix = replacement.Item3.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     .FirstOrDefault(item => item.Name == "Postfix");
 
+                this.Monitor.Log($"{original} {prefix} {postfix}");
                 harmony.Patch(original, prefix == null ? null : new HarmonyMethod(prefix),
                     postfix == null ? null : new HarmonyMethod(postfix));
             }
