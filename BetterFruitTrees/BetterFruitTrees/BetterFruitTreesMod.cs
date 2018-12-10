@@ -83,7 +83,6 @@ namespace BetterFruitTrees
                 MethodInfo postfix = replacement.Item3.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     .FirstOrDefault(item => item.Name == "Postfix");
 
-                this.Monitor.Log($"{original} {prefix} {postfix}");
                 harmony.Patch(original, prefix == null ? null : new HarmonyMethod(prefix),
                     postfix == null ? null : new HarmonyMethod(postfix));
             }
