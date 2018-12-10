@@ -1,6 +1,7 @@
 ﻿using System;
 using StardewModdingAPI;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -18,6 +19,22 @@ namespace ModUpdateMenu.Updates
             this.helper = helper;
         }
 
+        public ISemanticVersion GetSMAPIUpdateVersion()
+        {
+            string updateMarker = (string) typeof(Constants)
+                .GetProperty("UpdateMarker", BindingFlags.Static | BindingFlags.NonPublic).GetValue(typeof(Constants));
+
+            //If there's no update marker, SMAPI is up to date
+            //(Or there was an error, but we'd need to intercept console output to determine that)
+            if (!File.Exists(updateMarker))
+                return Constants.ApiVersion;
+
+            //If there is an update marker, there is a SMAPI update
+            string rawUpdate = File.ReadAllText(updateMarker);
+        
+            return StardewModdingAPI.Toolkit.SemanticVersion.TryParse(rawUpdate, out ISemanticVersion updateFound) ? updateFound : null;
+        }
+
         public bool GetUpdateStatuses(out IList<ModStatus> statuses)
         {
             statuses = new List<ModStatus>();
@@ -33,14 +50,15 @@ namespace ModUpdateMenu.Updates
                 ModEntryModel result = GetInstanceProperty<ModEntryModel>(modMetaData, "UpdateCheckData");
                 IManifest manifest = GetInstanceProperty<IManifest>(modMetaData, "Manifest");
 
-                if (manifest.UpdateKeys == null || !manifest.UpdateKeys.Any())
-                {
-                    statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, "", null, "Mod has no update keys"));
-                    continue;
-                }
-                else if (result == null)
+                if (result == null)
                 {
                     statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, "", null, "SMAPI didn't check for an update"));
+                    continue;
+                }
+
+                if (!(bool)modMetaData.GetType().GetMethod("HasValidUpdateKeys").Invoke(modMetaData, null))
+                {
+                    statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, "", null, "Mod has no update keys"));
                     continue;
                 }
 
@@ -60,11 +78,9 @@ namespace ModUpdateMenu.Updates
                     statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, result.Optional?.Url, optionalVersion.ToString()));
                 else if (this.IsValidUpdate(localVersion, unofficialVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
                     statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url, unofficialVersion.ToString()));
-                else if (result.Errors != null && result.Errors.Any())
-                    statuses.Add(new ModStatus(UpdateStatus.Error, manifest, "", "", result.Errors[0]));
                 else
                 {
-                    string updateURL = "";
+                    string updateURL = null;
                     UpdateStatus updateStatus = UpdateStatus.UpToDate;
                     if (localVersion.Equals(latestVersion))
                         updateURL = result.Main?.Url;
@@ -72,25 +88,28 @@ namespace ModUpdateMenu.Updates
                         updateURL = result.Optional?.Url;
                     else if (localVersion.Equals(unofficialVersion))
                         updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
-                    else
+                    else if (latestVersion != null && this.IsValidUpdate(latestVersion, localVersion, useBetaChannel: true))
                     {
-                        if (latestVersion != null && this.IsValidUpdate(latestVersion, localVersion, useBetaChannel: true))
-                        {
-                            updateURL = result.Main?.Url;
-                            updateStatus = UpdateStatus.VeryNew;
-                        }
-                        else if (optionalVersion!= null && this.IsValidUpdate(optionalVersion, localVersion, useBetaChannel: localVersion.IsPrerelease()))
-                        {
-                            updateURL = result.Optional?.Url;
-                            updateStatus = UpdateStatus.VeryNew;
-                        }
-                        else if (unofficialVersion != null && this.IsValidUpdate(unofficialVersion, localVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
-                        {
-                            updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
-                            updateStatus = UpdateStatus.VeryNew;
-                        }
+                        updateURL = result.Main?.Url;
+                        updateStatus = UpdateStatus.VeryNew;
                     }
-                    statuses.Add(new ModStatus(updateStatus, manifest, updateURL));
+                    else if (optionalVersion != null && this.IsValidUpdate(optionalVersion, localVersion, useBetaChannel: localVersion.IsPrerelease()))
+                    {
+                        updateURL = result.Optional?.Url;
+                        updateStatus = UpdateStatus.VeryNew;
+                    }
+                    else if (unofficialVersion != null && this.IsValidUpdate(unofficialVersion, localVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
+                    {
+                        updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
+                        updateStatus = UpdateStatus.VeryNew;
+                    }
+
+                    if(updateURL != null)
+                        statuses.Add(new ModStatus(updateStatus, manifest, updateURL));
+                    else if (result.Errors != null && result.Errors.Any())
+                        statuses.Add(new ModStatus(UpdateStatus.Error, manifest, "", "", result.Errors[0]));
+                    else
+                        statuses.Add(new ModStatus(UpdateStatus.Error, manifest, "", "", "Unknown Error"));
                 }
 
                 addedNonSkippedStatus = true;

@@ -16,15 +16,10 @@ namespace ModUpdateMenu.Menus
         private readonly Texture2D statusTexture;
         private readonly ClickableTextureComponent updateButton;
         private bool wasUpdateButtonHovered;
-        private Random random = new Random();
-
-        private int updatePulseTimer;
 
         internal bool ShowUpdateButton { get; set; }
         internal ButtonStatus ButtonStatus { get; set; } = ButtonStatus.Unknown;
-
-        private const int UpdatePulseWait = 60 * 3;
-        private const int UpdatePulseShake = 90;
+        internal ButtonStatus SMAPIButtonStatus { get; set; } = ButtonStatus.Unknown;
 
         private Point mousePosition;
 
@@ -55,13 +50,6 @@ namespace ModUpdateMenu.Menus
             if (this.mousePosition != null)
                 this.updateButton.tryHover(this.mousePosition.X, this.mousePosition.Y, 0.25f);
 
-            if (this.ButtonStatus == ButtonStatus.Updates)
-            {
-                if (this.updatePulseTimer > -1 * UpdatePulseWait)
-                    this.updatePulseTimer--;
-                else
-                    this.updatePulseTimer = UpdatePulseShake;
-            }
 
         }
 
@@ -95,23 +83,13 @@ namespace ModUpdateMenu.Menus
                 return;
             this.updateButton.draw(Game1.spriteBatch);
 
+            Vector2 position = new Vector2(this.updateButton.bounds.X + this.updateButton.bounds.Width * 2 / 3, this.updateButton.bounds.Y - this.updateButton.bounds.Height * 1 / 3);
 
-            int xOffset = 0;
-            int yOffset = 0;
-            float scaleMultiplier = 0;
+            b.Draw(this.statusTexture, position, new Rectangle(this.StatusToOffset(this.ButtonStatus), 0, 16, 16), Color.White, 0.0f, Vector2.Zero, 3 * Vector2.One, SpriteEffects.None, 0.99f);
 
-            if (this.updatePulseTimer > 0)
-            {
-                scaleMultiplier = 1.5f * ((UpdatePulseShake / 2f -
-                                        Math.Abs(this.updatePulseTimer - UpdatePulseShake / 2f)) /
-                                       (UpdatePulseShake / 2f));
-                xOffset = this.random.Next(-1, 2);
-                yOffset = this.random.Next(-1, 2);
-            }
+            Vector2 SMAPIPosition = new Vector2(this.updateButton.bounds.X - 16, this.updateButton.bounds.Y - this.updateButton.bounds.Height * 1 / 3);
 
-            Vector2 position = new Vector2(this.updateButton.bounds.X + this.updateButton.bounds.Width * 2 / 3 + xOffset, this.updateButton.bounds.Y - this.updateButton.bounds.Height * 1 / 3 + yOffset);
-
-            b.Draw(this.statusTexture, position, new Rectangle(this.StatusToOffset(this.ButtonStatus), 0, 16, 16), Color.White, 0.0f, Vector2.Zero, (3 + scaleMultiplier) * Vector2.One, SpriteEffects.None, 0.99f);
+            b.Draw(this.statusTexture, SMAPIPosition, new Rectangle(this.StatusToOffset(this.SMAPIButtonStatus), 0, 16, 16), Color.White, 0.0f, Vector2.Zero, 3 * Vector2.One, SpriteEffects.None, 0.99f);
 
             if (Game1.activeClickableMenu is TitleMenu titleMenu)
                 titleMenu.drawMouse(b);
@@ -143,6 +121,16 @@ namespace ModUpdateMenu.Menus
             }
             else
                 this.ButtonStatus = ButtonStatus.Unknown;
+        }
+
+        public void NotifySMAPI(ISemanticVersion version)
+        {
+            if (version == null)
+                this.SMAPIButtonStatus = ButtonStatus.Error;
+            else if (version == Constants.ApiVersion)
+                this.SMAPIButtonStatus = ButtonStatus.NoUpdates;
+            else
+                this.SMAPIButtonStatus = ButtonStatus.Updates;
         }
     }
 }

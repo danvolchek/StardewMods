@@ -17,6 +17,8 @@ namespace ModUpdateMenu
         private UpdateMenu menu;
         private ModUpdateMenuConfig config;
 
+        private IList<ModStatus> currentStatuses = null;
+
         public override void Entry(IModHelper helper)
         {
             this.config = this.Helper.ReadConfig<ModUpdateMenuConfig>();
@@ -33,24 +35,42 @@ namespace ModUpdateMenu
                 int attempts = 50;
                 while (true)
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                     try
                     {
                         if (statusRetriever.GetUpdateStatuses(out IList<ModStatus> statuses))
                         {
-                            this.Notify(statuses);
-                            break;
+                            if (this.currentStatuses != null && this.currentStatuses.Count == statuses.Count)
+                            {
+                                this.Notify(statuses);
+
+                                try
+                                {
+                                    this.NotifySMAPI(statusRetriever.GetSMAPIUpdateVersion());
+                                }
+                                catch
+                                {
+                                    this.NotifySMAPI(null);
+                                }
+
+
+                                break;
+                            }
+                            else
+                                this.currentStatuses = statuses;
+
                         }
 
                         attempts--;
-                        if(attempts == 0)
+                        if (attempts == 0)
                             throw new Exception("All update attempts failed.");
                     }
                     catch (Exception e)
                     {
-                        this.Monitor.Log("Failed retreiving update info from SMAPI: ", LogLevel.Debug);
+                        this.Monitor.Log("Failed retrieving update info from SMAPI: ", LogLevel.Debug);
                         this.Monitor.Log(e.ToString(), LogLevel.Debug);
                         this.Notify(null);
+                        this.NotifySMAPI(null);
                         break;
                     }
                 }
@@ -78,12 +98,27 @@ namespace ModUpdateMenu
 
         private void GraphicsEvents_OnPostRenderHudEvent(object sender, EventArgs e)
         {
-            if (Game1.activeClickableMenu is TitleMenu titleMenu && this.ShouldDrawUpdateButton())
+            if (Game1.activeClickableMenu is TitleMenu && this.ShouldDrawUpdateButton())
                 this.button.Draw(Game1.spriteBatch);
+        }
+
+        public void NotifySMAPI(ISemanticVersion version)
+        {
+            //Debug Info
+            //this.Monitor.Log($"SMAPI: {version}");
+            this.menu.NotifySMAPI(version);
+            this.button.NotifySMAPI(version);
         }
 
         public void Notify(IList<ModStatus> statuses)
         {
+            //Debug Info
+            /*if(statuses != null)
+                foreach(ModStatus status in statuses.OrderByDescending(item => item.UpdateStatus))
+                    this.Monitor.Log($"{status.UpdateStatus} {status.CurrentVersion} {status.NewVersion} {status.UpdateURL} {status.ErrorReason} {status.ModName}");
+            else
+                this.Monitor.Log("Statuses are null");*/
+
             if (this.config.HideSkippedMods)
                 statuses = statuses?.Where(status => status.UpdateStatus != UpdateStatus.Skipped).ToList();
 
@@ -97,13 +132,12 @@ namespace ModUpdateMenu
                 return false;
 
             return TitleMenu.subMenu == null && !this.GetPrivateBool(titleMenu, "isTransitioningButtons") &&
-                   (this.GetPrivateBool(titleMenu,"titleInPosition") && !this.GetPrivateBool(titleMenu, "transitioningCharacterCreationMenu"));
+                   (this.GetPrivateBool(titleMenu, "titleInPosition") && !this.GetPrivateBool(titleMenu, "transitioningCharacterCreationMenu"));
         }
 
         private bool GetPrivateBool(object obj, string name)
         {
             return this.Helper.Reflection.GetField<bool>(obj, name).GetValue();
         }
-
     }
 }

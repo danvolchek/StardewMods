@@ -1,13 +1,11 @@
-﻿using System;
+﻿using StardewModdingAPI;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ModUpdateMenu.Updates
 {
-    interface INotifiable
+    internal interface INotifiable
     {
         void Notify(IList<ModStatus> statuses);
+        void NotifySMAPI(ISemanticVersion version);
     }
 }

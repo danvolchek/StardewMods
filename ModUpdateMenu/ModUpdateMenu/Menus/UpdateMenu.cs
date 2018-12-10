@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ModUpdateMenu.Updates;
+using StardewModdingAPI;
+using StardewValley;
+using StardewValley.BellsAndWhistles;
+using StardewValley.Menus;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ModUpdateMenu.Updates;
-using StardewValley;
-using StardewValley.BellsAndWhistles;
-using StardewValley.Menus;
 
 namespace ModUpdateMenu.Menus
 {
@@ -41,6 +42,22 @@ namespace ModUpdateMenu.Menus
         private int numDisplayableMods;
         private int displayIndex;
 
+        private string _SMAPIText;
+
+        private string SMAPIText
+        {
+            get => this._SMAPIText;
+            set
+            {
+                this._SMAPIText = value;
+                this.SMAPIHeight = SpriteText.getHeightOfString(value);
+                this.SMAPIWidth = SpriteText.getWidthOfString(value);
+            }
+        }
+        private int SMAPIHeight;
+        private int SMAPIWidth;
+        private ClickableComponent SMAPIComponent;
+
         public UpdateMenu()
         {
             this.SizeMaybeChanged();
@@ -57,6 +74,12 @@ namespace ModUpdateMenu.Menus
             Vector2 centeringOnScreen = Utility.getTopLeftPositionForCenteringOnScreen(this.width, ((IClickableMenu)this).height - 100, 0, 0);
             b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.75f);
             IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(473, 36, 24, 24), (int)centeringOnScreen.X, (int)centeringOnScreen.Y, this.width, ((IClickableMenu)this).height - 150, Color.White, 4f, true);
+
+            if (this.SMAPIText != null)
+            {
+                IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(473, 36, 24, 24), 20, ((IClickableMenu)this).height - 25 - this.SMAPIHeight / 2, (int)(this.SMAPIWidth * 1.09), (int)(this.SMAPIHeight*1.5) + 5, Color.White, 4f, true);
+                SpriteText.drawString(b, this.SMAPIText, 50, ((IClickableMenu)this).height - 30, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+            }
 
             int startX = (int)centeringOnScreen.X + 32;
             int startY = (int)centeringOnScreen.Y + 32;
@@ -163,16 +186,33 @@ namespace ModUpdateMenu.Menus
 
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
-            this.CheckPosition(x, y, this.ComponentClicked);
+            if (this.SMAPIText != null && this.SMAPIComponent.containsPoint(x, y))
+            {
+                try
+                {
+                    Process.Start("https://smapi.io");
+                }
+                catch
+                {
+                }
+            }else
+                this.CheckPosition(x, y, this.ComponentClicked);
         }
 
         public override void performHoverAction(int x, int y)
         {
-            this.CheckPosition(x, y, this.ComponentHovered, () => this.hoverText = null);
+            if (this.SMAPIText != null && this.SMAPIComponent.containsPoint(x, y))
+            {
+                this.hoverText = "Click to go to: https://smapi.io";
+                this.SplitHoverText();
+                this.hoverTextDimensions = UpdateMenu.GetDimensions(this.hoverText);
+            } else
+                this.CheckPosition(x, y, this.ComponentHovered, () => this.hoverText = null);
         }
 
         private void CheckPosition(int x, int y, ComponentAction action, Action onNoMatch = null)
         {
+
             if (this.components.Count == 0)
                 return;
 
@@ -363,6 +403,18 @@ namespace ModUpdateMenu.Menus
             this.UpdateComponents();
         }
 
+        public void NotifySMAPI(ISemanticVersion version)
+        {
+            if (version == null)
+                this.SMAPIText = "Error checking for SMAPI update";
+            else if (version == Constants.ApiVersion)
+                this.SMAPIText = "SMAPI is up to date";
+            else
+                this.SMAPIText = $"New SMAPI available: {version}";
+
+            this.SMAPIComponent = new ClickableComponent(new Rectangle(20, ((IClickableMenu)this).height - 25 - this.SMAPIHeight / 2, (int)(this.SMAPIWidth * 1.09), (int)(this.SMAPIHeight * 1.5) + 5), "");
+        }
+
         public void Activated()
         {
             this.SizeMaybeChanged();
@@ -389,6 +441,8 @@ namespace ModUpdateMenu.Menus
                 if (this.currentSortDirection == 1)
                     temp = temp.Reverse();
             }
+
+            this.SMAPIComponent = new ClickableComponent(new Rectangle(20, ((IClickableMenu)this).height - 25 - this.SMAPIHeight / 2, (int)(this.SMAPIWidth * 1.09), (int)(this.SMAPIHeight * 1.5) + 5), "");
 
             this.UpdateComponentsImpl(temp?.Skip(this.displayIndex).ToList());
         }
