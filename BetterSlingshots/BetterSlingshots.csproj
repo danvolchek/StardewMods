@@ -72,8 +72,5 @@
   <ItemGroup>
     <None Include="manifest.json" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Projectiles\" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
