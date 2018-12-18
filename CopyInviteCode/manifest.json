@@ -5,6 +5,6 @@
   "Description": "Adds a button to copy invite codes to the clipboard in the menu.",
   "UniqueID": "cat.copyinvitecode",
   "EntryDll": "CopyInviteCode.dll",
-  "MinimumApiVersion": "2.6-beta",
+  "MinimumApiVersion": "2.9.0",
   "UpdateKeys": [ "Nexus:2171" ]
 }

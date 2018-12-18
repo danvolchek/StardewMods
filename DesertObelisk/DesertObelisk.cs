@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using StardewModdingAPI.Events;
+﻿using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Buildings;
 
@@ -9,6 +7,9 @@ namespace DesertObelisk
     internal class DesertObelisk : Building
     {
         private readonly int desertWarpX;
+
+        /// <summary>Whether the player is currently being warped.</summary>
+        private bool IsWarping;
 
         //Parameterless constructor for when its synced to other players
         public DesertObelisk()
@@ -31,10 +32,10 @@ namespace DesertObelisk
                     who.currentLocation.temporarySprites.Add(new TemporaryAnimatedSprite(354, Game1.random.Next(25, 75),
                         6, 1,
                         new Vector2(
-                            Game1.random.Next((int) who.position.X - Game1.tileSize * 4,
-                                (int) who.position.X + Game1.tileSize * 3),
-                            Game1.random.Next((int) who.position.Y - Game1.tileSize * 4,
-                                (int) who.position.Y + Game1.tileSize * 3)), false, Game1.random.NextDouble() < 0.5));
+                            Game1.random.Next((int)who.position.X - Game1.tileSize * 4,
+                                (int)who.position.X + Game1.tileSize * 3),
+                            Game1.random.Next((int)who.position.Y - Game1.tileSize * 4,
+                                (int)who.position.Y + Game1.tileSize * 3)), false, Game1.random.NextDouble() < 0.5));
                 who.currentLocation.playSound("wand");
                 Game1.displayFarmer = false;
                 Game1.player.freezePause = 1000;
@@ -59,6 +60,18 @@ namespace DesertObelisk
             return false;
         }
 
+        public override void Update(GameTime time)
+        {
+            // check for completed warp
+            if (this.IsWarping && !Game1.eventUp && Game1.currentLocation.Name == "Desert")
+            {
+                Game1.player.position.X += 0.5f * Game1.tileSize;
+                this.IsWarping = false;
+            }
+
+            base.Update(time);
+        }
+
         private void WarpToDesert()
         {
             Game1.warpFarmer("Desert", this.desertWarpX, 43, 2);
@@ -67,17 +80,7 @@ namespace DesertObelisk
             Game1.player.temporarilyInvincible = false;
             Game1.player.temporaryInvincibilityTimer = 0;
             Game1.displayFarmer = true;
-
-            GameEvents.UpdateTick += this.CheckForWarpOver;
-        }
-
-        private void CheckForWarpOver(object sender, EventArgs e)
-        {
-            if (!Game1.eventUp && Game1.currentLocation.Name == "Desert")
-            {
-                Game1.player.position.X += 0.5f * Game1.tileSize;
-                GameEvents.UpdateTick -= this.CheckForWarpOver;
-            }
+            this.IsWarping = true;
         }
     }
 }

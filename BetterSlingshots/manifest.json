@@ -5,6 +5,6 @@
   "Description": "Makes slingshots way better! Adds full auto fire, auto reload, better aiming, fixes bugs, and more!",
   "UniqueID": "cat.betterslingshots",
   "EntryDll": "BetterSlingshots.dll",
-  "MinimumApiVersion": "2.0",
+  "MinimumApiVersion": "2.9.0",
   "UpdateKeys": [ "Nexus:2067" ]
 }

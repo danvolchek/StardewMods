@@ -1,4 +1,6 @@
-﻿using Pong.Framework.Common;
+﻿using System.Collections.Generic;
+using System.Threading;
+using Pong.Framework.Common;
 using Pong.Framework.Enums;
 using Pong.Framework.Game;
 using Pong.Framework.Game.States;
@@ -10,8 +12,6 @@ using Pong.Game.Controllers;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using System.Collections.Generic;
-using System.Threading;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Menus
@@ -21,6 +21,7 @@ namespace Pong.Menus
         private readonly List<INonReactiveDrawableCollideable> nonReactiveCollideables;
         private readonly List<IResetable> resetables;
         private readonly ScoreDisplay scoreDisplay;
+        private readonly LocalPlayerController localPlayerController;
 
         private readonly Ball ball;
         private readonly GameState state = new GameState();
@@ -54,20 +55,17 @@ namespace Pong.Menus
             if (!this.isMultiplayerGame)
             {
                 playerTwoPaddle = new Paddle(new ComputerController(this.ball), Side.Top);
-                playerOnePaddle = new Paddle(new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
+                playerOnePaddle = new Paddle(localPlayerController = new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
+            }
+            else if (this.isLeader)
+            {
+                playerTwoPaddle = new Paddle(new StatePaddleController(this.followerPaddlePosition), Side.Top);
+                playerOnePaddle = new Paddle(localPlayerController = new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
             }
             else
             {
-                if (this.isLeader)
-                {
-                    playerTwoPaddle = new Paddle(new StatePaddleController(this.followerPaddlePosition), Side.Top);
-                    playerOnePaddle = new Paddle(new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
-                }
-                else
-                {
-                    playerTwoPaddle = new Paddle(new StatePaddleController(this.state.PaddlePositionState), Side.Top);
-                    playerOnePaddle = new Paddle(new LocalPlayerController(this.followerPaddlePosition), Side.Bottom);
-                }
+                playerTwoPaddle = new Paddle(new StatePaddleController(this.state.PaddlePositionState), Side.Top);
+                playerOnePaddle = new Paddle(localPlayerController = new LocalPlayerController(this.followerPaddlePosition), Side.Bottom);
             }
 
             this.nonReactiveCollideables = new List<INonReactiveDrawableCollideable>
@@ -158,9 +156,11 @@ namespace Pong.Menus
                 this.shouldSyncData = false;
         }
 
-        public override bool ButtonPressed(EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="e">The event arguments.</param>
+        public override bool OnButtonPressed(ButtonPressedEventArgs e)
         {
-            bool result = base.ButtonPressed(e);
+            bool result = base.OnButtonPressed(e);
 
             if (this.CurrentModal != null)
                 return result;
@@ -175,6 +175,14 @@ namespace Pong.Menus
             }
 
             return result;
+        }
+
+        /// <summary>Raised after the player moves the in-game cursor.</summary>
+        /// <param name="e">The event arguments.</param>
+        public override void OnCursorMoved(CursorMovedEventArgs e)
+        {
+            base.OnCursorMoved(e);
+            localPlayerController.OnCursorMoved(e);
         }
 
         public override void Update()

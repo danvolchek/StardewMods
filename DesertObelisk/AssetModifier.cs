@@ -22,7 +22,7 @@ namespace DesertObelisk
             this.desertWarpX = desertWarpX;
             IManifest loadedManifest = null;
 
-            foreach (var contentPack in helper.GetContentPacks())
+            foreach (var contentPack in helper.ContentPacks.GetOwned())
             {
                 if (loadedManifest != null)
                 {
@@ -99,12 +99,15 @@ namespace DesertObelisk
 
         public void ModifyMap()
         {
-            GameEvents.OneSecondTick += this.OneSecondTick;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
-        private void OneSecondTick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (!Context.IsWorldReady)
+            if (!Context.IsWorldReady || e.IsOneSecond)
                 return;
             GameLocation desert = Game1.getLocationFromName("Desert");
             TileSheet markerTileSheet = new TileSheet("zDesertObeliskTileSheet", desert.map,
@@ -124,7 +127,7 @@ namespace DesertObelisk
             buildingsLayer.Tiles[this.desertWarpX + 1, 42] =
                 new StaticTile(buildingsLayer, markerTileSheet, BlendMode.Alpha, 5);
 
-            GameEvents.OneSecondTick -= this.OneSecondTick;
+            helper.Events.GameLoop.UpdateTicked -= this.OnUpdateTicked;
         }
     }
 }

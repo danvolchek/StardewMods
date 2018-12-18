@@ -11,6 +11,8 @@ namespace Pong.Framework.Menus
 {
     class Modal : IDrawable, IBoundable, IInputable
     {
+        public Rectangle Bounds { get; }
+
         public Modal(string text, ModalButtonType buttonType)
         {
             this.Bounds = new Rectangle(50, 50, 400, 400);
@@ -22,13 +24,16 @@ namespace Pong.Framework.Menus
             this.DrawBorder(b);
         }
 
-        public Rectangle Bounds { get; }
-        public bool ButtonPressed(EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="e">The event arguments.</param>
+        public bool OnButtonPressed(ButtonPressedEventArgs e)
         {
             throw new System.NotImplementedException();
         }
 
-        public void MouseStateChanged(EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player moves the in-game cursor.</summary>
+        /// <param name="e">The event arguments.</param>
+        public void OnCursorMoved(CursorMovedEventArgs e)
         {
             throw new System.NotImplementedException();
         }

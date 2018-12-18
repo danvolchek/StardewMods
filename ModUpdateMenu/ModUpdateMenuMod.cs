@@ -1,13 +1,13 @@
-﻿using ModUpdateMenu.Menus;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using ModUpdateMenu.Menus;
 using ModUpdateMenu.Updates;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace ModUpdateMenu
 {
@@ -19,15 +19,17 @@ namespace ModUpdateMenu
 
         private IList<ModStatus> currentStatuses = null;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.config = this.Helper.ReadConfig<ModUpdateMenuConfig>();
             this.button = new UpdateButton(helper);
             this.menu = new UpdateMenu();
 
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
-            GraphicsEvents.OnPostRenderEvent += this.GraphicsEvents_OnPostRenderHudEvent;
-            InputEvents.ButtonPressed += this.InputEvents_ButtonPressed;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.Display.Rendered += this.OnRendered;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
 
             new Thread(() =>
             {
@@ -77,13 +79,15 @@ namespace ModUpdateMenu
             }).Start();
         }
 
-        private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
             if (e.Button != SButton.MouseLeft)
                 return;
 
-            if (this.button.PointContainsButton(e.Cursor.ScreenPixels) &&
-                Game1.activeClickableMenu is TitleMenu && TitleMenu.subMenu == null)
+            if (this.button.PointContainsButton(e.Cursor.ScreenPixels) && Game1.activeClickableMenu is TitleMenu && TitleMenu.subMenu == null)
             {
                 TitleMenu.subMenu = this.menu;
                 this.menu.Activated();
@@ -91,15 +95,21 @@ namespace ModUpdateMenu
             }
         }
 
-        private void GameEvents_UpdateTick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             this.button.ShowUpdateButton = this.ShouldDrawUpdateButton();
         }
 
-        private void GraphicsEvents_OnPostRenderHudEvent(object sender, EventArgs e)
+        /// <summary>Raised after the game draws to the sprite patch in a draw tick, just before the final sprite batch is rendered to the screen.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnRendered(object sender, RenderedEventArgs e)
         {
             if (Game1.activeClickableMenu is TitleMenu && this.ShouldDrawUpdateButton())
-                this.button.Draw(Game1.spriteBatch);
+                this.button.Draw(e.SpriteBatch);
         }
 
         public void NotifySMAPI(ISemanticVersion version)

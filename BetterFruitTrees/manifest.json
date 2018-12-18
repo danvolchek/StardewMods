@@ -5,7 +5,7 @@
   "Description": "Fruit trees can be placed and will grow even if there is something in the 3x3 area surrounding them. Also, Junimo Huts will harvest fruit trees.",
   "UniqueID": "cat.betterfruittrees",
   "EntryDll": "BetterFruitTrees.dll",
-  "MinimumApiVersion": "2.8",
+  "MinimumApiVersion": "2.9.0",
   "UpdateKeys": [ "Nexus:1976" ],
   "Dependencies": [
     {

@@ -57,18 +57,26 @@ namespace BetterGardenPots
                 harmony.Patch(original, prefix == null ? null : new HarmonyMethod(prefix), postfix == null ? null : new HarmonyMethod(postfix));
             }
 
-            SaveEvents.AfterReturnToTitle += this.SaveEvents_AfterReturnToTitle;
-            SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
+            helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
         }
 
-        private void SaveEvents_AfterLoad(object sender, EventArgs e)
+        /// <summary>Raised after the player loads a save slot.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaveLoaded(object sender, EventArgs e)
         {
             if (Context.IsMainPlayer)
+            {
                 foreach (IEventSubscriber subscriber in this.subscribers)
                     subscriber.Subscribe();
+            }
         }
 
-        private void SaveEvents_AfterReturnToTitle(object sender, EventArgs e)
+        /// <summary>Raised after the game returns to the title screen.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
         {
             foreach (IEventSubscriber subscriber in this.subscribers)
                 subscriber.Unsubscribe();

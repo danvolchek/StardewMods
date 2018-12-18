@@ -9,7 +9,6 @@ using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using StardewValley.TerrainFeatures;
-using ChangeType = StardewModdingAPI.Events.ChangeType;
 
 namespace WinterGrass
 {
@@ -34,8 +33,8 @@ namespace WinterGrass
 
             this.yesterdayGrassByLocation = new Dictionary<GameLocation, Dictionary<Vector2, Grass>>();
 
-            SaveEvents.AfterLoad += this.AfterLoad;
-            SaveEvents.AfterReturnToTitle += (sender, args) => this.Unsubscribe();
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            helper.Events.GameLoop.ReturnedToTitle += (sender, args) => this.Unsubscribe();
         }
 
         private void Subscribe()
@@ -43,11 +42,11 @@ namespace WinterGrass
             if (this.isSubscribed)
                 return;
 
-            SaveEvents.BeforeSave += this.BeforeSave;
-            PlayerEvents.InventoryChanged += this.InventoryChanged;
-            GameEvents.OneSecondTick += this.OneSecondTick;
-            TimeEvents.AfterDayStarted += this.AfterDayStarted;
-            MenuEvents.MenuClosed += this.MenuClosed;
+            this.Helper.Events.GameLoop.DayStarted += this.OnDayStarted;
+            this.Helper.Events.GameLoop.Saving += this.OnSaving;
+            this.Helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            this.Helper.Events.Display.MenuChanged += this.OnMenuChanged;
+            this.Helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
 
             this.Monitor.Log("Subscribed to events.", LogLevel.Trace);
 
@@ -59,11 +58,11 @@ namespace WinterGrass
             if (!this.isSubscribed)
                 return;
 
-            SaveEvents.BeforeSave -= this.BeforeSave;
-            PlayerEvents.InventoryChanged -= this.InventoryChanged;
-            GameEvents.OneSecondTick -= this.OneSecondTick;
-            TimeEvents.AfterDayStarted -= this.AfterDayStarted;
-            MenuEvents.MenuClosed -= this.MenuClosed;
+            this.Helper.Events.GameLoop.DayStarted -= this.OnDayStarted;
+            this.Helper.Events.GameLoop.Saving -= this.OnSaving;
+            this.Helper.Events.GameLoop.UpdateTicked -= this.OnUpdateTicked;
+            this.Helper.Events.Display.MenuChanged -= this.OnMenuChanged;
+            this.Helper.Events.Player.InventoryChanged -= this.OnInventoryChanged;
 
             this.Monitor.Log("Unsubscribed from events.", LogLevel.Trace);
 
@@ -71,7 +70,7 @@ namespace WinterGrass
         }
 
         //Event listener -> After the day starts, re add grass that was removed on the first day of winter, handle newly grown grass, and fix grass color
-        private void AfterDayStarted(object sender, EventArgs e)
+        private void OnDayStarted(object sender, EventArgs e)
         {
             if (Game1.currentSeason.Equals("winter"))
             {
@@ -82,26 +81,37 @@ namespace WinterGrass
             }
         }
 
-        //These could be removed if there was a way to save before Game1.NewDayAfterFade() - they attempt to imitate that
-        //(BeforeSave happens after that, which is too late - NewDayAfterFade removes grass to be deleted for winter)
-
-        //If the user glitches to stay up forever, we will be repeatedly saving the grass
-        //Event listener -> After the user is supposed to pass out, the day is over, so save existing grass
-        private void OneSecondTick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (Game1.timeOfDay >= 2600 || Game1.newDay) this.SaveGrass();
-        }
+            //These could be removed if there was a way to save before Game1.NewDayAfterFade() - they attempt to imitate that
+            //(BeforeSave happens after that, which is too late - NewDayAfterFade removes grass to be deleted for winter)
 
-        //Event listener -> If the user chose yes to go to sleep, the day is over, so save existing grass
-        private void MenuClosed(object sender, EventArgsClickableMenuClosed e)
-        {
-            if (e.PriorMenu is DialogueBox && Game1.player.currentLocation is FarmHouse && Game1.newDay)
+            //If the user glitches to stay up forever, we will be repeatedly saving the grass
+            //Event listener -> After the user is supposed to pass out, the day is over, so save existing grass
+            if (e.IsOneSecond && (Game1.timeOfDay >= 2600 || Game1.newDay))
                 this.SaveGrass();
         }
 
-        //Event listener -> Before a save occurs, write existing grass to a file
-        private void BeforeSave(object sender, EventArgs e)
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
+            // If the user chose yes to go to sleep, the day is over, so save existing grass
+
+            if (e.OldMenu is DialogueBox && Game1.player.currentLocation is FarmHouse && Game1.newDay)
+                this.SaveGrass();
+        }
+
+        /// <summary>Raised before the game begins writes data to the save file (except the initial save creation).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaving(object sender, SavingEventArgs e)
+        {
+            // Before a save occurs, write existing grass to a file
             if (Game1.currentSeason.Equals("winter") || Game1.currentSeason.Equals("fall") && Game1.dayOfMonth == 28)
             {
                 Dictionary<string, Dictionary<Vector2, GrassSave>> savedItems =
@@ -116,16 +126,19 @@ namespace WinterGrass
                     savedItems[item.Key.Name] = grass;
                 }
 
-                Directory.CreateDirectory(this.saveFile.Substring(0,
-                    this.saveFile.LastIndexOf(Path.DirectorySeparatorChar)));
+                Directory.CreateDirectory(new FileInfo(this.saveFile).Directory.FullName);
 
                 this.WriteToFile(this.saveFile, savedItems);
             }
         }
 
-        //Event listener -> After a save loads, if its winter, add back in saved grass
-        private void AfterLoad(object sender, EventArgs e)
+        /// <summary>Raised after the player loads a save slot.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
+            // After a save loads, if its winter, add back in saved grass
+
             if (!Context.IsMainPlayer)
             {
                 this.Unsubscribe();
@@ -134,8 +147,7 @@ namespace WinterGrass
 
             this.Subscribe();
 
-            this.saveFile =
-                $"{this.Helper.DirectoryPath}{Path.DirectorySeparatorChar}Saved Grass{Path.DirectorySeparatorChar}{new string(Game1.player.Name.Where(char.IsLetterOrDigit).ToArray())}_{Game1.uniqueIDForThisGame}.txt";
+            this.saveFile = Path.Combine(this.Helper.DirectoryPath, "Saved Grass", $"{Constants.SaveFolderName}.txt");
 
             if (Game1.currentSeason.Equals("winter"))
             {
@@ -148,23 +160,22 @@ namespace WinterGrass
                             foreach (KeyValuePair<Vector2, GrassSave> item2 in item.Value)
                             {
                                 l.terrainFeatures[item2.Key] = new Grass(item2.Value.GrassType, item2.Value.NumWeeds);
-                                ((Grass) l.terrainFeatures[item2.Key]).grassSourceOffset.Value = 80;
+                                ((Grass)l.terrainFeatures[item2.Key]).grassSourceOffset.Value = 80;
                             }
                     }
             }
         }
 
-        //Event listener -> After the user places down a grass starter, fix the color of the newly placed grass
-        private void InventoryChanged(object sender, EventArgsInventoryChanged e)
+        /// <summary>Raised after items are added or removed to a player's inventory.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnInventoryChanged(object sender, InventoryChangedEventArgs e)
         {
-            if (e.QuantityChanged.Any(item =>
-                    item.ChangeType == ChangeType.Removed || item.ChangeType == ChangeType.StackChange &&
-                    item.StackChange < 0 && item.Item.ParentSheetIndex == 297)
-                || e.Removed.Any(item =>
-                    item.ChangeType == ChangeType.Removed || item.ChangeType == ChangeType.StackChange &&
-                    item.StackChange < 0 && item.Item.ParentSheetIndex == 297))
-                if (Game1.currentSeason.Equals("winter"))
-                    this.FixGrassColor();
+            // After the user places down a grass starter, fix the color of the newly placed grass
+            if (e.IsLocalPlayer && Game1.IsWinter && e.Removed.Any(item => item.ParentSheetIndex == 297))
+            {
+                this.FixGrassColor();
+            }
         }
 
         //Writes saved grass data to a file
@@ -172,8 +183,7 @@ namespace WinterGrass
         {
             try
             {
-                using (StreamWriter file =
-                    new StreamWriter(path))
+                using (StreamWriter file = new StreamWriter(path))
                 {
                     foreach (KeyValuePair<string, Dictionary<Vector2, GrassSave>> item in savedItems)
                     {
@@ -243,7 +253,7 @@ namespace WinterGrass
         {
             string str = "";
             foreach (KeyValuePair<Vector2, GrassSave> item in grass)
-                str += item.Key.X + "," + item.Key.Y + "," + item.Value.GrassType + "," + item.Value.NumWeeds + ",";
+                str += $"{item.Key.X},{item.Key.Y},{item.Value.GrassType},{item.Value.NumWeeds},";
             return str;
         }
 
@@ -258,9 +268,13 @@ namespace WinterGrass
                 Dictionary<Vector2, Grass> yesterdayGrass = locPair.Value;
 
                 if (currentGrass != null && this.yesterdayGrassByLocation != null)
+                {
                     foreach (KeyValuePair<Vector2, Grass> item in currentGrass)
+                    {
                         if (!yesterdayGrass.ContainsKey(item.Key))
                             locPair.Key.terrainFeatures.Remove(item.Key);
+                    }
+                }
             }
         }
 
@@ -274,12 +288,16 @@ namespace WinterGrass
                     locPair.Key?.terrainFeatures?.Pairs.ToDictionary(entry => entry.Key, entry => entry.Value);
 
                 if (currentTerrainFeatures != null && this.yesterdayGrassByLocation != null)
+                {
                     foreach (KeyValuePair<Vector2, Grass> item in locPair.Value)
+                    {
                         if (!currentTerrainFeatures.ContainsKey(item.Key))
                         {
                             item.Value.grassSourceOffset.Value = 80;
                             locPair.Key.terrainFeatures[item.Key] = item.Value;
                         }
+                    }
+                }
             }
         }
 
@@ -291,8 +309,10 @@ namespace WinterGrass
                 IEnumerable<Grass> currentTerrainFeatures =
                     l?.terrainFeatures?.Pairs.Select(item => item.Value).OfType<Grass>();
                 if (currentTerrainFeatures != null)
+                {
                     foreach (Grass item in currentTerrainFeatures)
                         item.grassSourceOffset.Value = 80;
+                }
             }
         }
 
@@ -307,8 +327,7 @@ namespace WinterGrass
                         .ToDictionary(entry => entry.Key,
                             entry => entry.Value as Grass);
                 if (this.yesterdayGrassByLocation != null)
-                    this.Monitor.Log("Saved " + this.yesterdayGrassByLocation.Select(item => item.Value.Count).Sum() +
-                                     " clumps.");
+                    this.Monitor.Log($"Saved {this.yesterdayGrassByLocation.Select(item => item.Value.Count).Sum()} clumps.");
                 else
                     this.Monitor.Log("There was an error saving grass.", LogLevel.Error);
             }

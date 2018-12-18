@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,24 +21,27 @@ namespace DesertObelisk
         private BluePrint obeliskBlueprint;
         private List<DesertObelisk> savedTempObelisks;
 
-        //Is listenening for events
+        /// <summary>Whether the mod is listening for events.</summary>
         private bool isSubscribed;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            if (helper.ModRegistry.IsLoaded("Entoarox.ExtendedMinecart"))
+                DesertWarpX -= 2;
 
-            if (helper.ModRegistry.IsLoaded("Entoarox.ExtendedMinecart")) DesertWarpX -= 2;
-            var savesFolder = $"{helper.DirectoryPath}{Path.DirectorySeparatorChar}saves";
-            if (!Directory.Exists(savesFolder))
-                Directory.CreateDirectory(savesFolder);
+            DirectoryInfo savesFolder = new DirectoryInfo(Path.Combine(helper.DirectoryPath, "saves"));
+            if (!savesFolder.Exists)
+                savesFolder.Create();
+
             this.modifier = new AssetModifier(helper, this.Monitor, DesertWarpX);
             this.savedTempObelisks = new List<DesertObelisk>();
             this.obeliskBlueprint = new BluePrint("Desert Obelisk");
 
-            SaveEvents.AfterLoad += this.AfterLoad;
-            SaveEvents.AfterReturnToTitle += (sender, args) => this.Unsubscribe();
-            MenuEvents.MenuChanged += this.MenuChanged;
-            MenuEvents.MenuClosed += this.MenuClosed;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            helper.Events.GameLoop.ReturnedToTitle += (sender, args) => this.Unsubscribe();
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
         }
 
         private void Subscribe()
@@ -47,8 +49,8 @@ namespace DesertObelisk
             if (this.isSubscribed)
                 return;
 
-            SaveEvents.AfterSave += this.AfterSave;
-            SaveEvents.BeforeSave += this.BeforeSave;
+            Helper.Events.GameLoop.Saved += this.OnSaved;
+            Helper.Events.GameLoop.Saving += this.OnSaving;
             this.modifier.ModifyMap();
 
             this.Monitor.Log("Subscribed to events.", LogLevel.Trace);
@@ -61,15 +63,18 @@ namespace DesertObelisk
             if (!this.isSubscribed)
                 return;
 
-            SaveEvents.AfterSave -= this.AfterSave;
-            SaveEvents.BeforeSave -= this.BeforeSave;
+            Helper.Events.GameLoop.Saved -= this.OnSaved;
+            Helper.Events.GameLoop.Saving -= this.OnSaving;
 
             this.Monitor.Log("Unsubscribed from events.", LogLevel.Trace);
 
             this.isSubscribed = false;
         }
 
-        private void AfterLoad(object sender, EventArgs e)
+        /// <summary>Raised after the player loads a save slot.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
             if (!Context.IsMainPlayer)
             {
@@ -79,53 +84,55 @@ namespace DesertObelisk
 
             this.Subscribe();
 
-            this.LoadObelisksFromFile(
-                $"saves{Path.DirectorySeparatorChar}{Constants.SaveFolderName}_{savedObeliskPath}");
+            this.LoadObelisksFromFile(Path.Combine("saves", $"{Constants.SaveFolderName}_{savedObeliskPath}"));
         }
 
-        private void AfterSave(object sender, EventArgs e)
+        /// <summary>Raised after the game finishes writing data to the save file (except the initial save creation).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaved(object sender, SavedEventArgs e)
         {
             this.LoadAndClearTempObelisks(this.savedTempObelisks);
         }
 
-        private void BeforeSave(object sender, EventArgs e)
+        /// <summary>Raised before the game begins writes data to the save file (except the initial save creation).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaving(object sender, EventArgs e)
         {
-            this.SaveObelisksToFile(
-                $"saves{Path.DirectorySeparatorChar}{Constants.SaveFolderName}_{savedObeliskPath}");
+            this.SaveObelisksToFile(Path.Combine("saves", $"{Constants.SaveFolderName}_{savedObeliskPath}"));
 
             this.ClearAndSaveTempObelisks(this.savedTempObelisks);
         }
 
-        private void MenuChanged(object sender, EventArgsClickableMenuChanged e)
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
-            //Only if the player has access to the desert
-            if (!Game1.player.mailReceived.Contains("ccVault"))
-                return;
+            // add blueprint if player has access to the desert
+            if (e.NewMenu != null && Game1.player.mailReceived.Contains("ccVault"))
+            {
+                if (e.NewMenu is CarpenterMenu cMenu && this.Helper.Reflection.GetField<bool>(cMenu, "magicalConstruction").GetValue())
+                    this.Helper.Reflection.GetField<List<BluePrint>>(cMenu, "blueprints").GetValue().Insert(3, this.obeliskBlueprint);
+            }
 
-            if (e.NewMenu is CarpenterMenu cMenu &&
-                this.Helper.Reflection.GetField<bool>(cMenu, "magicalConstruction").GetValue())
-                this.Helper.Reflection.GetField<List<BluePrint>>(cMenu, "blueprints").GetValue()
-                    .Insert(3, this.obeliskBlueprint);
-
-            this.HandleMenuClosed(e.PriorMenu);
-        }
-
-        private void MenuClosed(object sender, EventArgsClickableMenuClosed e)
-        {
-            this.HandleMenuClosed(e.PriorMenu);
+            // handle closed menu
+            this.HandleMenuClosed(e.OldMenu);
         }
 
         private void HandleMenuClosed(IClickableMenu m)
         {
-            if (m is CarpenterMenu cMenu &&
-                this.Helper.Reflection.GetField<bool>(cMenu, "magicalConstruction").GetValue()) this.ConvertObelisks();
+            if (m is CarpenterMenu cMenu && this.Helper.Reflection.GetField<bool>(cMenu, "magicalConstruction").GetValue())
+                this.ConvertObelisks();
         }
 
         private void SaveObelisksToFile(string path)
         {
-            this.Helper.Data.WriteJsonFile<IList<Vector2>>(path,
-                Game1.getFarm().buildings.OfType<DesertObelisk>().Select(item => new Vector2(item.tileX.Value, item.tileY.Value))
-                    .ToList());
+            this.Helper.Data.WriteJsonFile<IList<Vector2>>(
+                path,
+                Game1.getFarm().buildings.OfType<DesertObelisk>().Select(item => new Vector2(item.tileX.Value, item.tileY.Value)).ToList()
+            );
         }
 
         private void LoadObelisksFromFile(string path)

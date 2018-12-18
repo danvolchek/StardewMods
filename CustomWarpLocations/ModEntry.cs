@@ -13,6 +13,7 @@ namespace CustomWarpLocations
 {
     public class ModEntry : Mod
     {
+        /// <summary>The path to the current custom data file, relative to the mod folder.</summary>
         private static string LocationSaveFileName;
 
         private static readonly List<string> AllowedWarpLocations = new List<string>
@@ -39,44 +40,39 @@ namespace CustomWarpLocations
         public override void Entry(IModHelper helper)
         {
             this.config = helper.ReadConfig<ModConfig>();
-            Directory.CreateDirectory(
-                $"{this.Helper.DirectoryPath}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}");
+            Directory.CreateDirectory(Path.Combine(this.Helper.DirectoryPath, "Data"));
 
-            SaveEvents.AfterLoad += this.AfterLoad;
-            GameEvents.EighthUpdateTick += this.InterceptWarps;
-            ControlEvents.KeyPressed += this.KeyPressed;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
         }
 
-        /**
-         * Reads/Creates a warp location save data file after the game loads.
-         **/
-        private void AfterLoad(object sender, EventArgs e)
+        /// <summary>Raised after the player loads a save slot.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaveLoaded(object sender, EventArgs e)
         {
-            LocationSaveFileName =
-                $"{this.Helper.DirectoryPath}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}{Constants.SaveFolderName}.json";
-
-            if (File.Exists(LocationSaveFileName))
+            // reads/Create a warp location save data file after the game loads
+            LocationSaveFileName = Path.Combine("Data", $"{Constants.SaveFolderName}.json");
+            if (File.Exists(Path.Combine(Helper.DirectoryPath, LocationSaveFileName)))
             {
-                WarpLocations = this.Helper.ReadJsonFile<NewWarpLocations>(LocationSaveFileName);
+                WarpLocations = this.Helper.Data.ReadJsonFile<NewWarpLocations>(LocationSaveFileName);
                 this.ValidateWarpLocations(WarpLocations);
             }
             else
             {
                 WarpLocations = new NewWarpLocations();
             }
-
-            this.Helper.WriteJsonFile(LocationSaveFileName, WarpLocations);
+            this.Helper.Data.WriteJsonFile(LocationSaveFileName, WarpLocations);
         }
 
-        /**
-         * Handles pressed keys in order to save new warp locations.
-         **/
-        private void KeyPressed(object sender, EventArgsKeyPressed e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (!Context.IsWorldReady)
-                return;
-
-            if (e.KeyPressed.ToString().ToLower() != this.config.LocationSaveKey.ToLower())
+            // handle pressed keys to save new warp locations
+            if (!Context.IsWorldReady || e.Button != this.config.LocationSaveKey)
                 return;
 
             if (!AllowedWarpLocations.Contains(Game1.currentLocation.Name))
@@ -88,7 +84,7 @@ namespace CustomWarpLocations
             if (Game1.player.ActiveObject != null)
             {
                 var location = this.GetWarpLocation();
-                switch (Game1.player.ActiveObject.parentSheetIndex)
+                switch (Game1.player.ActiveObject.ParentSheetIndex)
                 {
                     case 688: //Farm Totem
                         this.SetWarpLocation(WarpLocationCategory.Farm, true, location);
@@ -107,13 +103,13 @@ namespace CustomWarpLocations
                         break;
                 }
 
-                this.Helper.WriteJsonFile(LocationSaveFileName, WarpLocations);
+                this.Helper.Data.WriteJsonFile(LocationSaveFileName, WarpLocations);
             }
             else if (Game1.player.CurrentTool != null && Game1.player.CurrentTool is Wand)
             {
                 //Return Scepter
                 this.SetWarpLocation(WarpLocationCategory.Farm, false, this.GetWarpLocation());
-                this.Helper.WriteJsonFile(LocationSaveFileName, WarpLocations);
+                this.Helper.Data.WriteJsonFile(LocationSaveFileName, WarpLocations);
             }
         }
 
@@ -187,42 +183,43 @@ namespace CustomWarpLocations
                 Game1.player.currentLocation.temporarySprites.Add(new TemporaryAnimatedSprite(354,
                     Game1.random.Next(25, 75), 6, 1,
                     new Vector2(
-                        Game1.random.Next((int) Game1.player.position.X - Game1.tileSize * 4,
-                            (int) Game1.player.position.X + Game1.tileSize * 3),
-                        Game1.random.Next((int) Game1.player.position.Y - Game1.tileSize * 4,
-                            (int) Game1.player.position.Y + Game1.tileSize * 3)), false,
+                        Game1.random.Next((int)Game1.player.position.X - Game1.tileSize * 4,
+                            (int)Game1.player.position.X + Game1.tileSize * 3),
+                        Game1.random.Next((int)Game1.player.position.Y - Game1.tileSize * 4,
+                            (int)Game1.player.position.Y + Game1.tileSize * 3)), false,
                     Game1.random.NextDouble() < 0.5));
         }
 
-        /**
-         * Replaces the game's warp code with my own!
-         **/
-        private void InterceptWarps(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (!Context.IsWorldReady)
-                return;
-
-            foreach (var action in Game1.delayedActions)
+            // Replaces the game's warp code with my own!
+            if (Context.IsWorldReady && e.IsMultipleOf(8))
             {
-                var afterFadeFunction = action.afterFadeBehavior;
-                if (afterFadeFunction != null)
+                foreach (var action in Game1.delayedActions)
                 {
-                    WarpOverride newWarp = null;
-                    switch (afterFadeFunction.Method.Name)
+                    var afterFadeFunction = action.afterFadeBehavior;
+                    if (afterFadeFunction != null)
                     {
-                        case "totemWarpForReal":
-                            newWarp = new TotemWarpOverride(afterFadeFunction.Target);
-                            break;
-                        case "wandWarpForReal":
-                            newWarp = new WandWarpOverride();
-                            break;
-                        case "obeliskWarpForReal":
-                            newWarp = new ObeliskWarpOverride(afterFadeFunction.Target);
-                            break;
-                    }
+                        WarpOverride newWarp = null;
+                        switch (afterFadeFunction.Method.Name)
+                        {
+                            case "totemWarpForReal":
+                                newWarp = new TotemWarpOverride(afterFadeFunction.Target);
+                                break;
+                            case "wandWarpForReal":
+                                newWarp = new WandWarpOverride();
+                                break;
+                            case "obeliskWarpForReal":
+                                newWarp = new ObeliskWarpOverride(afterFadeFunction.Target);
+                                break;
+                        }
 
-                    if (newWarp != null)
-                        action.afterFadeBehavior = newWarp.DoWarp;
+                        if (newWarp != null)
+                            action.afterFadeBehavior = newWarp.DoWarp;
+                    }
                 }
             }
         }
@@ -255,8 +252,8 @@ namespace CustomWarpLocations
          **/
         private WarpLocation GetWarpLocation()
         {
-            return new WarpLocation(Game1.currentLocation.Name, (int) Game1.player.getTileLocation().X,
-                (int) Game1.player.getTileLocation().Y);
+            return new WarpLocation(Game1.currentLocation.Name, (int)Game1.player.getTileLocation().X,
+                (int)Game1.player.getTileLocation().Y);
         }
     }
 }

@@ -1,15 +1,14 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RangeDisplay.RangeHandling;
-using RangeDisplay.RangeHandling.RangeCreators;
+using RangeDisplay.RangeHandling.RangeCreators.Buildings;
+using RangeDisplay.RangeHandling.RangeCreators.Objects;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using RangeDisplay.RangeHandling.RangeCreators.Buildings;
-using RangeDisplay.RangeHandling.RangeCreators.Objects;
 using SObject = StardewValley.Object;
 
 namespace RangeDisplay
@@ -67,21 +66,24 @@ namespace RangeDisplay
                 helper.WriteConfig(this.config);
             }
 
-            GraphicsEvents.OnPreRenderHudEvent += this.OnPreRenderHudEvent;
-            InputEvents.ButtonPressed += this.ButtonPressed;
-            GameEvents.EighthUpdateTick += this.EighthUpdateTick;
+            helper.Events.Display.RenderingHud += this.OnRenderingHud;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
 
             if (this.config.ShowRangeOfHeldItem || this.config.ShowRangeOfHoveredOverItem)
             {
-                ControlEvents.MouseChanged += this.MouseChanged;
+                helper.Events.Input.CursorMoved += this.OnCursorMoved;
                 if (this.config.ShowRangeOfHoveredOverItem)
-                    InputEvents.ButtonReleased += this.ButtonReleased;
+                    helper.Events.Input.ButtonReleased += this.OnButtonReleased;
             }
 
-            GameEvents.FirstUpdateTick += this.FirstUpdateTick;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
         }
 
-        private void FirstUpdateTick(object sender, EventArgs e)
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             this.sprinklerRangeCreator.ModRegistryReady(this.Helper.ModRegistry);
             this.scarecrowRangeCreator.ModRegistryReady(this.Helper.ModRegistry);
@@ -129,7 +131,10 @@ namespace RangeDisplay
             }
         }
 
-        private void ButtonReleased(object sender, EventArgsInput e)
+        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
             if (this.DoesMatchConfigKey(e.Button, this.config.HoverModifierKey) && this.config.ShowRangeOfHoveredOverItem)
             {
@@ -142,9 +147,12 @@ namespace RangeDisplay
         {
             string buttonAsString = b.ToString().ToLower();
             return configValue.ToLower().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Any(Item => buttonAsString.Equals(Item.Trim()));
-        }       
+        }
 
-        private void MouseChanged(object sender, EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player moves the in-game cursor.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnCursorMoved(object sender, CursorMovedEventArgs e)
         {
             if (this.activeObject != null && Game1.activeClickableMenu == null && this.config.ShowRangeOfHeldItem)
                 RefreshRangeItems(Game1.currentLocation);
@@ -152,9 +160,12 @@ namespace RangeDisplay
                 RefreshRangeItems(Game1.currentLocation);
         }
 
-        private void EighthUpdateTick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (!Context.IsWorldReady || Game1.currentLocation == null)
+            if (!Context.IsWorldReady || Game1.currentLocation == null || !e.IsMultipleOf(8))
                 return;
 
             RefreshRangeItems(Game1.currentLocation);
@@ -162,7 +173,10 @@ namespace RangeDisplay
             this.activeObject = Game1.player.ActiveObject;
         }
 
-        private void ButtonPressed(object sender, EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
             if (DoesMatchConfigKey(e.Button, this.config.CycleActiveDisplayKey))
             {
@@ -196,11 +210,14 @@ namespace RangeDisplay
             }
         }
 
-        private void OnPreRenderHudEvent(object sender, EventArgs e)
+        /// <summary>Raised after drawing the HUD (item toolbar, clock, etc) to the sprite batch, but before it's rendered to the screen. The vanilla HUD may be hidden at this point (e.g. because a menu is open).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnRenderingHud(object sender, RenderingHudEventArgs e)
         {
             if (!Context.IsWorldReady)
                 return;
-            this.displayManager.Draw(Game1.spriteBatch);
+            this.displayManager.Draw(e.SpriteBatch);
         }
     }
 }

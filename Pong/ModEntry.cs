@@ -1,11 +1,9 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Pong.Framework.Common;
 using Pong.Framework.Menus;
 using Pong.Menus;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using System;
-using Pong.Framework.Common;
 
 namespace Pong
 {
@@ -19,6 +17,8 @@ namespace Pong
 
         internal static ModEntry Instance;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.PongId = this.ModManifest.UniqueID;
@@ -31,24 +31,30 @@ namespace Pong
             }
             this.SwitchToNewMenu(new StartMenu());
 
-            GraphicsEvents.OnPostRenderEvent += this.OnPostRender;
-            GraphicsEvents.Resize += this.Resize;
-            InputEvents.ButtonPressed += this.InputEvents_ButtonPressed;
-            ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
+            helper.Events.Display.Rendered += this.OnRendered;
+            helper.Events.Display.WindowResized += this.OnWindowResized;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.Input.CursorMoved += this.OnCursorMoved;
         }
 
-        private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player moves the in-game cursor.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnCursorMoved(object sender, CursorMovedEventArgs e)
         {
-            this.currentMenu?.MouseStateChanged(e);
+            this.currentMenu?.OnCursorMoved(e);
         }
 
-        private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
             if (this.currentMenu == null)
                 return;
 
             //e.SuppressButton();
-            if(this.currentMenu.ButtonPressed(e))
+            if (this.currentMenu.OnButtonPressed(e))
                 SoundManager.PlayKeyPressSound();
         }
 
@@ -70,13 +76,19 @@ namespace Pong
             this.currentMenu.SwitchToNewMenu += this.SwitchToNewMenuEvent;
         }
 
-        private void OnPostRender(object sender, EventArgs e)
+        /// <summary>Raised after the game draws to the sprite patch in a draw tick, just before the final sprite batch is rendered to the screen.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnRendered(object sender, RenderedEventArgs e)
         {
             this.currentMenu?.Update();
             this.currentMenu?.Draw(Game1.spriteBatch);
         }
 
-        private void Resize(object sender, EventArgs e)
+        /// <summary>Raised after the game window is resized.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnWindowResized(object sender, WindowResizedEventArgs e)
         {
             this.currentMenu?.Resize();
         }

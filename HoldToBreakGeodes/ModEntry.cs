@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework.Input;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
@@ -13,40 +11,48 @@ namespace HoldToBreakGeodes
         private int leftClickXPos;
         private int leftClickYPos;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.leftClickPressed = false;
-            ControlEvents.MouseChanged += this.MouseChanged;
-            GameEvents.FourthUpdateTick += this.ReSendLeftClick;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
-        /**
-         * Records the click position of left clicks.
-         **/
-        private void MouseChanged(object sender, EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            this.leftClickPressed = e.NewState.LeftButton == ButtonState.Pressed;
-            bool leftClickWasPressed = e.PriorState.LeftButton == ButtonState.Pressed;
-            if (!this.leftClickPressed || leftClickWasPressed) return;
-
-            this.leftClickXPos = e.NewPosition.X;
-            this.leftClickYPos = e.NewPosition.Y;
+            // record the left-click position
+            if (e.Button == SButton.MouseLeft)
+            {
+                this.leftClickXPos = (int)e.Cursor.ScreenPixels.X;
+                this.leftClickYPos = (int)e.Cursor.ScreenPixels.Y;
+            }
         }
 
-        /**
-         * Re sends a left click to the geode menu if one is already not being broken, the player has the room and money for it, and the click was on the geode spot.
-         **/
-        private void ReSendLeftClick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (!this.leftClickPressed || !(Game1.activeClickableMenu is GeodeMenu gMenu)) return;
+            // Re-send a left click to the geode menu if one is already not being broken, the player has the room and money for it, and the click was on the geode spot.
+            if (e.IsMultipleOf(4) && this.Helper.Input.IsDown(SButton.MouseLeft) && Game1.activeClickableMenu is GeodeMenu menu)
+            {
+                bool clintNotBusy =
+                    menu.heldItem != null
+                    && menu.heldItem.Name.Contains("Geode")
+                    && Game1.player.money >= 25 && menu.geodeAnimationTimer <= 0;
 
-            bool clintNotBusy = gMenu.heldItem != null && gMenu.heldItem.Name.Contains("Geode") &&
-                                Game1.player.money >= 25 && gMenu.geodeAnimationTimer <= 0;
-            bool playerHasRoom = Game1.player.freeSpotsInInventory() > 1 ||
-                                 (Game1.player.freeSpotsInInventory() == 1 && gMenu.heldItem != null && gMenu.heldItem.Stack == 1);
-            if (clintNotBusy && playerHasRoom &&
-                gMenu.geodeSpot.containsPoint(this.leftClickXPos, this.leftClickYPos))
-                gMenu.receiveLeftClick(this.leftClickXPos, this.leftClickYPos, false);
+                bool playerHasRoom =
+                    Game1.player.freeSpotsInInventory() > 1
+                    || (Game1.player.freeSpotsInInventory() == 1 && menu.heldItem != null && menu.heldItem.Stack == 1);
+
+                if (clintNotBusy && playerHasRoom && menu.geodeSpot.containsPoint(this.leftClickXPos, this.leftClickYPos))
+                    menu.receiveLeftClick(this.leftClickXPos, this.leftClickYPos, false);
+            }
         }
     }
 }

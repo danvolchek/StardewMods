@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Harmony;
 using StardewModdingAPI;
@@ -9,7 +10,7 @@ namespace RemovableHorseHats
 {
     public class RemovableHorseHatsMod : Mod
     {
-        private IEnumerable<string> keysToRemoveHat;
+        private HashSet<SButton> keysToRemoveHat;
         internal static bool IsRemoveHatKeyDown { get; private set; }
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
@@ -17,10 +18,15 @@ namespace RemovableHorseHats
         public override void Entry(IModHelper helper)
         {
             RemovableHorseHatsConfig config = helper.ReadConfig<RemovableHorseHatsConfig>();
-            this.keysToRemoveHat = config.KeysToRemoveHat.ToLowerInvariant().Split(' ').Select(item => item.Trim()).Where(item => !string.IsNullOrEmpty(item));
+            this.keysToRemoveHat = new HashSet<SButton>(
+                config.KeysToRemoveHat
+                    .Split(' ')
+                    .Select(raw => Enum.TryParse(raw, true, out SButton button) ? button : SButton.None)
+                    .Where(key => key != SButton.None)
+            );
 
-            InputEvents.ButtonPressed += this.InputEvents_ButtonPressed;
-            InputEvents.ButtonReleased += this.InputEvents_ButtonReleased;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.Input.ButtonReleased += this.OnButtonReleased;
 
 
             HarmonyInstance harmony = HarmonyInstance.Create("cat.removablehorsehats");
@@ -29,17 +35,21 @@ namespace RemovableHorseHats
                 new HarmonyMethod(typeof(HorseCheckActionPatch).GetMethod(nameof(HorseCheckActionPatch.Prefix))), null);
         }
 
-        private void InputEvents_ButtonReleased(object sender, EventArgsInput e)
+        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            string key = e.Button.ToString().ToLowerInvariant();
-            if (this.keysToRemoveHat.Any(item => item == key))
+            if (this.keysToRemoveHat.Contains(e.Button))
                 IsRemoveHatKeyDown = false;
         }
 
-        private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            string key = e.Button.ToString().ToLowerInvariant();
-            if (this.keysToRemoveHat.Any(item => item == key))
+            if (this.keysToRemoveHat.Contains(e.Button))
                 IsRemoveHatKeyDown = true;
         }
     }
