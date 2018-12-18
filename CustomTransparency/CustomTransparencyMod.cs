@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Harmony;
 using StardewModdingAPI;
 
@@ -9,6 +8,8 @@ namespace CustomTransparency
     {
         internal static CustomTransparencyModConfig Config;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             HarmonyInstance instance = HarmonyInstance.Create("cat.customtransparency");
@@ -37,17 +38,6 @@ namespace CustomTransparency
             else changed = true;
 
             return changed;
-        }
-
-        //Big thanks to Routine for this workaround for mac users.
-        //https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/PyTK/PyUtils.cs#L117
-        /// <summary>Gets the correct type of the object, handling different assembly names for mac/linux users.</summary>
-        internal static Type GetSDVType(string type)
-        {
-            const string prefix = "StardewValley.";
-            Type defaultSDV = Type.GetType($"{prefix}{type}, Stardew Valley");
-
-            return defaultSDV ?? Type.GetType($"{prefix}{type}, StardewValley");
         }
     }
 }

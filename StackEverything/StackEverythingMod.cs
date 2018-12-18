@@ -1,4 +1,8 @@
-﻿using Harmony;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Harmony;
 using Microsoft.Xna.Framework;
 using StackEverything.ObjectCopiers;
 using StackEverything.Patches;
@@ -8,17 +12,14 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using StardewValley.Tools;
 using SObject = StardewValley.Object;
 
 namespace StackEverything
 {
     public class StackEverythingMod : Mod
     {
-        public static readonly Type[] PatchedTypes = { GetSDVType("Objects.Furniture"), GetSDVType("Objects.Wallpaper") };
+        public static readonly Type[] PatchedTypes = { typeof(Furniture), typeof(Wallpaper) };
         private readonly IList<IObjectCopier> copiers = new List<IObjectCopier>();
         private bool isInDecorateableLocation;
 
@@ -40,7 +41,7 @@ namespace StackEverything
                 {"drawInMenu", typeof(DrawInMenuPatch)}
             };
 
-            IList<Type> typesToPatch = PatchedTypes.Union(new[] { GetSDVType("Object") }).ToList();
+            IList<Type> typesToPatch = PatchedTypes.Union(new[] { typeof(SObject) }).ToList();
 
 
             if (helper.ModRegistry.IsLoaded("Platonymous.CustomFarming"))
@@ -75,9 +76,9 @@ namespace StackEverything
             //fix furniture pickup in decoratable locations and item placement putting down the whole furniture stack
             IDictionary<string, Tuple<Type, Type>> otherReplacements = new Dictionary<string, Tuple<Type, Type>>()
             {
-                {"leftClick", new Tuple<Type, Type>(GetSDVType("Locations.DecoratableLocation"), typeof(FurniturePickupPatch))},
-                {"tryToPlaceItem", new Tuple<Type, Type>(GetSDVType("Utility"), typeof(TryToPlaceItemPatch))},
-                {"doDoneFishing", new Tuple<Type, Type>(GetSDVType("Tools.FishingRod"), typeof(DoDoneFishingPatch))}
+                {nameof(DecoratableLocation.leftClick), new Tuple<Type, Type>(typeof(DecoratableLocation), typeof(FurniturePickupPatch))},
+                {nameof(Utility.tryToPlaceItem), new Tuple<Type, Type>(typeof(Utility), typeof(TryToPlaceItemPatch))},
+                {"doDoneFishing", new Tuple<Type, Type>(typeof(FishingRod), typeof(DoDoneFishingPatch))}
             };
 
             foreach (KeyValuePair<string, Tuple<Type, Type>> replacement in otherReplacements)
@@ -170,17 +171,6 @@ namespace StackEverything
 
             this.Monitor.Log($"{obj.GetType().Name} was not copied.", LogLevel.Trace);
             return obj;
-        }
-
-        //Big thanks to Routine for this workaround for mac users.
-        //https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/PyTK/PyUtils.cs#L117
-        /// <summary>Gets the correct type of the object, handling different assembly names for mac/linux users.</summary>
-        private static Type GetSDVType(string type)
-        {
-            const string prefix = "StardewValley.";
-            Type defaultSDV = Type.GetType(prefix + type + ", Stardew Valley");
-
-            return defaultSDV != null ? defaultSDV : Type.GetType(prefix + type + ", StardewValley");
         }
     }
 }

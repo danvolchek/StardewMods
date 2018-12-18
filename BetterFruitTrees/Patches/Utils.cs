@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
@@ -100,7 +99,7 @@ namespace BetterFruitTrees.Patches
                 {
                     Rectangle buildingArea = new Rectangle(building.tileX.Value, building.tileY.Value,
                         building.tilesWide.Value, building.tilesHigh.Value);
-                    if (buildingArea.Contains((int) tile.X, (int) tile.Y))
+                    if (buildingArea.Contains((int)tile.X, (int)tile.Y))
                         return true;
                 }
 
@@ -207,21 +206,9 @@ namespace BetterFruitTrees.Patches
         /// <summary>
         ///     Gets the private harvest timer field of <see cref="StardewValley.Characters.JunimoHarvester" />
         /// </summary>
-        internal static IReflectedField<int> GetJunimoHarvesterHarvestTimer(
-            StardewValley.Characters.JunimoHarvester harvester)
+        internal static IReflectedField<int> GetJunimoHarvesterHarvestTimer(StardewValley.Characters.JunimoHarvester harvester)
         {
             return Reflection.GetField<int>(harvester, "harvestTimer");
-        }
-
-        //Big thanks to Routine for this workaround for mac users.
-        //https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/PyTK/PyUtils.cs#L117
-        /// <summary>Gets the correct type of the object, handling different assembly names for mac/linux users.</summary>
-        internal static Type GetSDVType(string type)
-        {
-            const string prefix = "StardewValley.";
-            Type defaultSDV = Type.GetType(prefix + type + ", Stardew Valley");
-
-            return defaultSDV ?? Type.GetType(prefix + type + ", StardewValley");
         }
     }
 }

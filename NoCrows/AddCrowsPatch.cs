@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Harmony;
+using StardewValley;
 
 namespace NoCrows
 {
@@ -8,7 +9,7 @@ namespace NoCrows
     {
         private static MethodBase TargetMethod()
         {
-            return NoCrowsMod.GetSDVType("Farm").GetMethod("addCrows");
+            return typeof(Farm).GetMethod(nameof(Farm.addCrows));
         }
 
         private static bool Prefix()

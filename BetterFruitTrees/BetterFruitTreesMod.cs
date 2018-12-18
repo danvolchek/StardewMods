@@ -9,6 +9,7 @@ using Harmony;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Buildings;
 using StardewValley.Characters;
 using static BetterFruitTrees.Extensions.ListExtensions;
 using SObject = StardewValley.Object;
@@ -52,18 +53,15 @@ namespace BetterFruitTrees
 
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>
             {
-                {"placementAction", typeof(SObject), typeof(PlacementPatch)}
+                { nameof(SObject.placementAction), typeof(SObject), typeof(PlacementPatch)}
             };
 
             Type junimoHarvesterType = typeof(JunimoHarvester);
             IList<Tuple<string, Type, Type>> junimoReplacements = new List<Tuple<string, Type, Type>>
             {
-                {"tryToHarvestHere", junimoHarvesterType, typeof(TryToHarvestHerePatch)},
-                {"update", junimoHarvesterType, typeof(UpdatePatch)},
-                {
-                    "areThereMatureCropsWithinRadius", Utils.GetSDVType("Buildings.JunimoHut"),
-                    typeof(AreThereMatureCropsWithinRadiusPatch)
-                }
+                { nameof(JunimoHarvester.tryToHarvestHere), junimoHarvesterType, typeof(TryToHarvestHerePatch) },
+                { nameof(JunimoHarvester.update), junimoHarvesterType, typeof(UpdatePatch) },
+                { "areThereMatureCropsWithinRadius", typeof(JunimoHut), typeof(AreThereMatureCropsWithinRadiusPatch) }
             };
 
 
