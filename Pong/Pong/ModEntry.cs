@@ -70,9 +70,15 @@ namespace Pong
             this.currentMenu.SwitchToNewMenu += this.SwitchToNewMenuEvent;
         }
 
+        private int i = 0;
         private void OnPostRender(object sender, EventArgs e)
         {
-            this.currentMenu?.Update();
+            //if(this.i++ % 60 == 0)
+            //{
+                this.currentMenu?.Update();
+            //    this.i = 0;
+            //}
+
             this.currentMenu?.Draw(Game1.spriteBatch);
         }
 
