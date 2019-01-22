@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using Pong.Framework.Common;
 using Pong.Framework.Enums;
@@ -36,7 +36,7 @@ namespace Pong.Menus
 
         private bool paused;
 
-        private const int MessageSendFrequency = 10;
+        private const int MessageSendFrequency = 5;
 
         public GameMenu(long? enemyPlayer = null)
         {
@@ -112,6 +112,7 @@ namespace Pong.Menus
         {
             while (this.shouldSyncData)
             {
+                this.state.CurrentTime = GetUnixTimestamp();
                 MailBox.Send(new MessageEnvelope(this.state, this.enemyPlayerId));
                 Thread.Sleep(MessageSendFrequency);
             }
@@ -133,11 +134,19 @@ namespace Pong.Menus
             if (e.Type == typeof(GameState).Name && !this.isLeader)
             {
                 GameState newState = e.ReadAs<GameState>();
+                double diff = GetUnixTimestamp() - newState.CurrentTime;
+
                 newState.BallVelocityState.Invert();
                 newState.BallPositionState.Invert();
                 newState.PaddlePositionState.Invert();
 
                 this.state.SetState(newState);
+
+                //diff seconds, 60 frames per second -> need to run diff * 60
+
+                for (int i = 0; i < diff * 60; i++)
+                    this.Update();
+
             }
             else if (e.Type == typeof(PositionState).Name && this.isLeader)
             {
@@ -146,6 +155,11 @@ namespace Pong.Menus
                 this.followerPaddlePosition.SetState(newState);
             }
 
+        }
+
+        private static double GetUnixTimestamp()
+        {
+            return DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
         }
 
         public override void BeforeMenuSwitch()

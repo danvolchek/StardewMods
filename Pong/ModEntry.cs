@@ -1,4 +1,4 @@
-﻿using Pong.Framework.Common;
+using Pong.Framework.Common;
 using Pong.Framework.Menus;
 using Pong.Menus;
 using StardewModdingAPI;
@@ -81,7 +81,12 @@ namespace Pong
         /// <param name="e">The event arguments.</param>
         private void OnRendered(object sender, RenderedEventArgs e)
         {
-            this.currentMenu?.Update();
+            //if(this.i++ % 60 == 0)
+            //{
+                this.currentMenu?.Update();
+            //    this.i = 0;
+            //}
+
             this.currentMenu?.Draw(Game1.spriteBatch);
         }
 

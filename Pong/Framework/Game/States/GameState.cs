@@ -11,6 +11,8 @@
         public PositionState BallPositionState { get; set; } = new PositionState();
         public PositionState PaddlePositionState { get; set; } = new PositionState();
 
+        public double CurrentTime;
+
         public GameState()
         {
             this.Reset();
