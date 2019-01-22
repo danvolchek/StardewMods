@@ -7,7 +7,6 @@ namespace HoldToBreakGeodes
 {
     public class ModEntry : Mod
     {
-        private bool leftClickPressed;
         private int leftClickXPos;
         private int leftClickYPos;
 
@@ -15,7 +14,6 @@ namespace HoldToBreakGeodes
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            this.leftClickPressed = false;
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
