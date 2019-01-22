@@ -54,7 +54,7 @@ namespace CustomWarpLocations
         {
             // reads/Create a warp location save data file after the game loads
             LocationSaveFileName = Path.Combine("Data", $"{Constants.SaveFolderName}.json");
-            if (File.Exists(Path.Combine(Helper.DirectoryPath, LocationSaveFileName)))
+            if (File.Exists(Path.Combine(this.Helper.DirectoryPath, LocationSaveFileName)))
             {
                 WarpLocations = this.Helper.Data.ReadJsonFile<NewWarpLocations>(LocationSaveFileName);
                 this.ValidateWarpLocations(WarpLocations);

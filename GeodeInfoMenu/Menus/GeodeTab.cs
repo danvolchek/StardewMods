@@ -19,12 +19,12 @@ namespace GeodeInfoMenu
          ***/
         private string hoverText = "";
         public List<ClickableComponent> optionSlots = new List<ClickableComponent>();
-        private List<OptionsElement> options = new List<OptionsElement>();
+        private readonly List<OptionsElement> options = new List<OptionsElement>();
         private int optionsSlotHeld = -1;
         public int currentItemIndex;
-        private ClickableTextureComponent upArrow;
-        private ClickableTextureComponent downArrow;
-        private ClickableTextureComponent scrollBar;
+        private readonly ClickableTextureComponent upArrow;
+        private readonly ClickableTextureComponent downArrow;
+        private readonly ClickableTextureComponent scrollBar;
         private bool scrolling;
         private Rectangle scrollBarRunner;
         private const int NUM_ITEMS = 6;
@@ -35,11 +35,11 @@ namespace GeodeInfoMenu
         /// <summary>
         /// Where to draw the header text.
         /// </summary>
-        private Point headerBounds;
+        private readonly Point headerBounds;
         /// <summary>
         /// The header itself.
         /// </summary>
-        private OptionsElement header;
+        private readonly OptionsElement header;
 
         /// <summary>
         /// The name of the geode this tab represents.
@@ -67,8 +67,12 @@ namespace GeodeInfoMenu
             for (int index = 0; index < GeodeTab.NUM_ITEMS; ++index)
             {
                 List<ClickableComponent> optionSlots = this.optionSlots;
-                ClickableComponent clickableComponent = new ClickableComponent(new Rectangle(this.xPositionOnScreen + Game1.tileSize / 4, this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom + (index + 1) * ((height - Game1.tileSize * 2) / (NUM_ITEMS + 1)), width - Game1.tileSize / 2, (height - Game1.tileSize * 2) / (NUM_ITEMS + 1) + Game1.pixelZoom), string.Concat((object)index));
-                clickableComponent.myID = index;
+                ClickableComponent clickableComponent = new ClickableComponent(
+                    new Rectangle(this.xPositionOnScreen + Game1.tileSize / 4,
+                        this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom +
+                        (index + 1) * ((height - Game1.tileSize * 2) / (NUM_ITEMS + 1)), width - Game1.tileSize / 2,
+                        (height - Game1.tileSize * 2) / (NUM_ITEMS + 1) + Game1.pixelZoom),
+                    string.Concat((object) index)) {myID = index};
                 int num1 = index < GeodeTab.NUM_ITEMS - 1 ? index + 1 : -7777;
                 clickableComponent.downNeighborID = num1;
                 int num2 = index > 0 ? index - 1 : -7777;

@@ -37,7 +37,7 @@ namespace ModUpdateMenu.Menus
         private IList<ModStatus> originalStatuses;
 
         private IList<ModStatus> statuses;
-        private IList<ClickableComponent> components = new List<ClickableComponent>();
+        private readonly IList<ClickableComponent> components = new List<ClickableComponent>();
 
         private int numDisplayableMods;
         private int displayIndex;

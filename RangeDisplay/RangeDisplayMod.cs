@@ -16,11 +16,11 @@ namespace RangeDisplay
     public class RangeDisplayMod : Mod
     {
         private DisplayManager displayManager;
-        private HudMessageManager hudMessageManager = new HudMessageManager();
+        private readonly HudMessageManager hudMessageManager = new HudMessageManager();
         private IList<IObjectRangeCreator> objectRangeCreators;
         private IList<IBuildingRangeCreator> buildingRangeCreators;
 
-        private RangeItem[] allRangeItems = (RangeItem[])Enum.GetValues(typeof(RangeItem));
+        private readonly RangeItem[] allRangeItems = (RangeItem[])Enum.GetValues(typeof(RangeItem));
         private int displayIndex = -1;
 
         private SObject activeObject = null;
@@ -139,7 +139,7 @@ namespace RangeDisplay
             if (this.DoesMatchConfigKey(e.Button, this.config.HoverModifierKey) && this.config.ShowRangeOfHoveredOverItem)
             {
                 this.isModifierKeyDown = false;
-                RefreshRangeItems(Game1.currentLocation);
+                this.RefreshRangeItems(Game1.currentLocation);
             }
         }
 
@@ -155,9 +155,9 @@ namespace RangeDisplay
         private void OnCursorMoved(object sender, CursorMovedEventArgs e)
         {
             if (this.activeObject != null && Game1.activeClickableMenu == null && this.config.ShowRangeOfHeldItem)
-                RefreshRangeItems(Game1.currentLocation);
+                this.RefreshRangeItems(Game1.currentLocation);
             else if (this.config.ShowRangeOfHoveredOverItem && this.isModifierKeyDown)
-                RefreshRangeItems(Game1.currentLocation);
+                this.RefreshRangeItems(Game1.currentLocation);
         }
 
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
@@ -168,7 +168,7 @@ namespace RangeDisplay
             if (!Context.IsWorldReady || Game1.currentLocation == null || !e.IsMultipleOf(8))
                 return;
 
-            RefreshRangeItems(Game1.currentLocation);
+            this.RefreshRangeItems(Game1.currentLocation);
 
             this.activeObject = Game1.player.ActiveObject;
         }
@@ -178,7 +178,7 @@ namespace RangeDisplay
         /// <param name="e">The event arguments.</param>
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (DoesMatchConfigKey(e.Button, this.config.CycleActiveDisplayKey))
+            if (this.DoesMatchConfigKey(e.Button, this.config.CycleActiveDisplayKey))
             {
                 if (this.displayIndex == this.allRangeItems.Length - 1)
                 {
@@ -203,10 +203,10 @@ namespace RangeDisplay
                 this.displayManager.DisplayOnly(this.allRangeItems[this.displayIndex]);
                 this.hudMessageManager.AddHudMessage(this.allRangeItems[this.displayIndex]);
             }
-            else if (DoesMatchConfigKey(e.Button, this.config.HoverModifierKey) && this.config.ShowRangeOfHoveredOverItem)
+            else if (this.DoesMatchConfigKey(e.Button, this.config.HoverModifierKey) && this.config.ShowRangeOfHoveredOverItem)
             {
                 this.isModifierKeyDown = true;
-                RefreshRangeItems(Game1.currentLocation);
+                this.RefreshRangeItems(Game1.currentLocation);
             }
         }
 

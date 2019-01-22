@@ -12,10 +12,10 @@ namespace RangeDisplay
     {
         private readonly Texture2D border;
         private readonly Texture2D filledin;
-        private IReadOnlyDictionary<RangeItem, Color> colorMapping;
-        private IDictionary<Vector2, ISet<RangeItem>> tilesToDraw = new Dictionary<Vector2, ISet<RangeItem>>();
-        private IDictionary<Vector2, RangeItem> tilesToForceDraw = new Dictionary<Vector2, RangeItem>();
-        private IDictionary<RangeItem, bool> shouldDisplayRangeItem = new Dictionary<RangeItem, bool>();
+        private readonly IReadOnlyDictionary<RangeItem, Color> colorMapping;
+        private readonly IDictionary<Vector2, ISet<RangeItem>> tilesToDraw = new Dictionary<Vector2, ISet<RangeItem>>();
+        private readonly IDictionary<Vector2, RangeItem> tilesToForceDraw = new Dictionary<Vector2, RangeItem>();
+        private readonly IDictionary<RangeItem, bool> shouldDisplayRangeItem = new Dictionary<RangeItem, bool>();
 
         public DisplayManager(Texture2D border, Texture2D filledin, IReadOnlyDictionary<RangeItem, Color> colorMapping)
         {
@@ -60,7 +60,7 @@ namespace RangeDisplay
                 int width = (int)(Game1.tileSize * (1.0 / numToDisplay));
                 int height = Game1.tileSize;
 
-                Vector2 screenPosition = ConvertTilePositionToScreenCoordinates(tileItem.Key);
+                Vector2 screenPosition = this.ConvertTilePositionToScreenCoordinates(tileItem.Key);
 
                 int i = 0;
                 foreach (RangeItem currentItem in Enum.GetValues(typeof(RangeItem)))

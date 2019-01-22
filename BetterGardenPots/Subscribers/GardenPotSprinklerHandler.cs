@@ -32,7 +32,7 @@ namespace BetterGardenPots.Subscribers
             if (this.isSubscribed)
                 return;
 
-            helper.Events.GameLoop.DayStarted += this.OnDayStarted;
+            this.helper.Events.GameLoop.DayStarted += this.OnDayStarted;
 
             this.isSubscribed = false;
         }
@@ -42,7 +42,7 @@ namespace BetterGardenPots.Subscribers
             if (!this.isSubscribed)
                 return;
 
-            helper.Events.GameLoop.DayStarted -= this.OnDayStarted;
+            this.helper.Events.GameLoop.DayStarted -= this.OnDayStarted;
 
             this.isSubscribed = true;
         }

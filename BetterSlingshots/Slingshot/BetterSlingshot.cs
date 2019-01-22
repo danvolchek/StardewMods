@@ -24,7 +24,7 @@ namespace BetterSlingshots.Slingshot
         private bool didFire;
         private bool isActionButtonDown;
 
-        private IReflectionHelper reflection;
+        private readonly IReflectionHelper reflection;
 
         //Automatic fire handling
 
@@ -143,13 +143,12 @@ namespace BetterSlingshots.Slingshot
             Vector2 velocity = this.GetDirection() * (15 + Game1.random.Next(4, 6)) * (1f + who.weaponSpeedModifier);
 
             BasicProjectile basicProjectile = new BasicProjectile(
-                (int)((double)num6 * (num5 + Game1.random.Next(-(num5 / 2), num5 + 2)) *
+                (int) ((double) num6 * (num5 + Game1.random.Next(-(num5 / 2), num5 + 2)) *
                        (1.0 + who.attackIncreaseModifier)), one.ParentSheetIndex, 0, 0,
-                (float)(Math.PI / (64.0 + Game1.random.Next(-63, 64))), velocity.X, velocity.Y,
+                (float) (Math.PI / (64.0 + Game1.random.Next(-63, 64))), velocity.X, velocity.Y,
                 this.GetStartProjectilePosition(who), collisionSound, "", false, true, location, who, true,
-                collisionBehavior);
+                collisionBehavior) {IgnoreLocationCollision = Game1.currentLocation.currentEvent != null};
 
-            basicProjectile.IgnoreLocationCollision = Game1.currentLocation.currentEvent != null;
 
             location.projectiles.Add(basicProjectile);
         }

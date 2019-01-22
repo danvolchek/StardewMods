@@ -99,7 +99,7 @@ namespace DesertObelisk
 
         public void ModifyMap()
         {
-            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            this.helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
@@ -127,7 +127,7 @@ namespace DesertObelisk
             buildingsLayer.Tiles[this.desertWarpX + 1, 42] =
                 new StaticTile(buildingsLayer, markerTileSheet, BlendMode.Alpha, 5);
 
-            helper.Events.GameLoop.UpdateTicked -= this.OnUpdateTicked;
+            this.helper.Events.GameLoop.UpdateTicked -= this.OnUpdateTicked;
         }
     }
 }

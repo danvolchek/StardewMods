@@ -28,8 +28,8 @@ namespace GeodeInfoMenu
          * Existing Fields
          ***/
         private string hoverText = "";
-        private List<ClickableComponent> tabs = new List<ClickableComponent>();
-        private List<IClickableMenu> pages = new List<IClickableMenu>();
+        private readonly List<ClickableComponent> tabs = new List<ClickableComponent>();
+        private readonly List<IClickableMenu> pages = new List<IClickableMenu>();
         //all items, reg geode, frozen geode, magma geode, omni geode
         //15960    , 15961    , 15962       , 15963      , 15964
         public int currentTab;
@@ -228,7 +228,7 @@ namespace GeodeInfoMenu
         {
 
             for (int index = 0; index < this.tabs.Count; ++index)
-                this.tabs[index].downNeighborID = -99999;
+                tabs[index].downNeighborID = -99999;
 
         }
 
@@ -295,7 +295,7 @@ namespace GeodeInfoMenu
             {
                 if (playSound)
                     Game1.playSound("bigDeSelect");
-                Exit();
+                this.Exit();
                 return;
             }
 
@@ -418,14 +418,14 @@ namespace GeodeInfoMenu
         {
             if (((IEnumerable<InputButton>)Game1.options.menuButton).Contains<InputButton>(new InputButton(key)) && this.readyToClose())
             {
-                Exit();
+                this.Exit();
                 Game1.playSound("bigDeSelect");
                 return;
             }
 
             if (this.config.PressingEscapeWhileTypingInSearchBoxInstantlyClosesMenu && key == Keys.Escape)
             {
-                Exit();
+                this.Exit();
                 Game1.playSound("bigDeSelect");
                 return;
             }

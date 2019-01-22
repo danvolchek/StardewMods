@@ -20,19 +20,19 @@ namespace GeodeInfoMenu.Menus
         /// <summary>
         /// The search text box.
         /// </summary>
-        private UpdatingTextBox searchBox;
+        private readonly UpdatingTextBox searchBox;
         /// <summary>
         /// All search results that were found.
         /// </summary>
-        private IList<OptionsElement> searchResults;
+        private readonly IList<OptionsElement> searchResults;
         /// <summary>
         /// Bounds of each visible search result.
         /// </summary>
-        List<ClickableComponent> visibleSearchResults;
+        readonly List<ClickableComponent> visibleSearchResults;
         /// <summary>
         /// The header text.
         /// </summary>
-        private OptionsElement headerText;
+        private readonly OptionsElement headerText;
         /// <summary>
         /// Delegate definition to be called when search box text changes.
         /// </summary>
@@ -40,15 +40,15 @@ namespace GeodeInfoMenu.Menus
         /// <summary>
         /// Where to draw header text.
         /// </summary>
-        private Point headerBounds;
+        private readonly Point headerBounds;
         /// <summary>
         /// Mod config.
         /// </summary>
-        private GeodeInfoMenuConfig config;
+        private readonly GeodeInfoMenuConfig config;
         /// <summary>
         /// Mod itself to create search results.
         /// </summary>
-        private GeodeInfoMenuMod mod;
+        private readonly GeodeInfoMenuMod mod;
 
         /***
          * Existing Fields
@@ -56,10 +56,10 @@ namespace GeodeInfoMenu.Menus
         private string hoverText = "";
         private int optionsSlotHeld = -1;
         int currentItemIndex;
-        private ClickableTextureComponent upArrow;
-        private ClickableTextureComponent downArrow;
-        private ClickableTextureComponent scrollBar;
-        private Rectangle scrollBarRunner;
+        private readonly ClickableTextureComponent upArrow;
+        private readonly ClickableTextureComponent downArrow;
+        private readonly ClickableTextureComponent scrollBar;
+        private readonly Rectangle scrollBarRunner;
         private const int NUM_ITEMS = 6;
 
         /// <summary>
@@ -75,11 +75,11 @@ namespace GeodeInfoMenu.Menus
         {
             this.config = config;
             this.mod = mod;
-            searchResults = new List<OptionsElement>();
-            visibleSearchResults = new List<ClickableComponent>();
-            headerText = new OptionsElement("Search for a drop: ");
+            this.searchResults = new List<OptionsElement>();
+            this.visibleSearchResults = new List<ClickableComponent>();
+            this.headerText = new OptionsElement("Search for a drop: ");
             this.headerBounds = new Point(this.xPositionOnScreen + Game1.tileSize / 4, this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom);
-            searchBox = new UpdatingTextBox(new TextChangedDelegate(SearchBoxTextChanged), Game1.content.Load<Texture2D>("LooseSprites\\textBox"), (Texture2D)null, Game1.smallFont, Game1.textColor)
+            this.searchBox = new UpdatingTextBox(new TextChangedDelegate(this.SearchBoxTextChanged), Game1.content.Load<Texture2D>("LooseSprites\\textBox"), (Texture2D)null, Game1.smallFont, Game1.textColor)
             {
                 X = this.xPositionOnScreen + Game1.tileSize / 4 + Game1.tileSize * 8,
                 Y = this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom + Game1.tileSize / 2,
@@ -94,8 +94,12 @@ namespace GeodeInfoMenu.Menus
             for (int index = 0; index < SearchTab.NUM_ITEMS; ++index)
             {
                 List<ClickableComponent> optionSlots = this.visibleSearchResults;
-                ClickableComponent clickableComponent = new ClickableComponent(new Rectangle(this.xPositionOnScreen + Game1.tileSize / 4, this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom + (index + 1) * ((height - Game1.tileSize * 2) / (NUM_ITEMS + 1)), width - Game1.tileSize / 2, (height - Game1.tileSize * 2) / (NUM_ITEMS + 1) + Game1.pixelZoom), string.Concat((object)index));
-                clickableComponent.myID = index;
+                ClickableComponent clickableComponent = new ClickableComponent(
+                    new Rectangle(this.xPositionOnScreen + Game1.tileSize / 4,
+                        this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom +
+                        (index + 1) * ((height - Game1.tileSize * 2) / (NUM_ITEMS + 1)), width - Game1.tileSize / 2,
+                        (height - Game1.tileSize * 2) / (NUM_ITEMS + 1) + Game1.pixelZoom),
+                    string.Concat((object) index)) {myID = index};
                 int num1 = index < SearchTab.NUM_ITEMS - 1 ? index + 1 : -7777;
                 clickableComponent.downNeighborID = num1;
                 int num2 = index > 0 ? index - 1 : -7777;
@@ -199,12 +203,12 @@ namespace GeodeInfoMenu.Menus
         {
             b.End();
             b.Begin(SpriteSortMode.FrontToBack, BlendState.NonPremultiplied, SamplerState.PointClamp, (DepthStencilState)null, (RasterizerState)null);
-            headerText.draw(b, headerBounds.X, headerBounds.Y);
+            this.headerText.draw(b, this.headerBounds.X, this.headerBounds.Y);
 
             b.End();
             b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, (DepthStencilState)null, (RasterizerState)null);
 
-            searchBox.Draw(b);
+            this.searchBox.Draw(b);
 
             for (int index = 0; index < this.visibleSearchResults.Count; ++index)
             {
@@ -366,7 +370,7 @@ namespace GeodeInfoMenu.Menus
 
         public override void receiveRightClick(int x, int y, bool playSound = true)
         {
-            if (config.RightClickOnOnlySearchBoxToClearText)
+            if (this.config.RightClickOnOnlySearchBoxToClearText)
             {
                 if (x >= this.searchBox.X && x <= this.searchBox.X + this.searchBox.Width)
                     if (y >= this.searchBox.Y && y <= this.searchBox.Y + this.searchBox.Height)

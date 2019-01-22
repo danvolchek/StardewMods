@@ -18,10 +18,10 @@ namespace GeodeInfoMenu.Menus
         public int textLimit = -1;
         public bool limitWidth = true;
         private string _text = "";
-        private Texture2D _textBoxTexture;
+        private readonly Texture2D _textBoxTexture;
         private Texture2D _caretTexture;
-        private SpriteFont _font;
-        private Color _textColor;
+        private readonly SpriteFont _font;
+        private readonly Color _textColor;
         public bool numbersOnly;
         private bool _showKeyboard;
         private bool _selected;
@@ -31,15 +31,10 @@ namespace GeodeInfoMenu.Menus
          ***/
         public string Text
         {
-            get
-            {
-                return this._text;
-            }
+            get => this._text;
             set
             {
-                this._text = value;
-                if (this._text == null)
-                    this._text = "";
+                this._text = value ?? "";
                 if (this._text == "")
                 {
                     this.callback();
@@ -61,26 +56,14 @@ namespace GeodeInfoMenu.Menus
             }
         }
 
-        private TextChangedDelegate callback;
+        private readonly TextChangedDelegate callback;
 
         /***
          * Existing Properties
          ***/
-        public SpriteFont Font
-        {
-            get
-            {
-                return this._font;
-            }
-        }
+        public SpriteFont Font => this._font;
 
-        public Color TextColor
-        {
-            get
-            {
-                return this._textColor;
-            }
-        }
+        public Color TextColor => this._textColor;
 
         public int X { get; set; }
 
@@ -96,10 +79,7 @@ namespace GeodeInfoMenu.Menus
 
         public bool Selected
         {
-            get
-            {
-                return this._selected;
-            }
+            get => this._selected;
             set
             {
                 if (this._selected == value)

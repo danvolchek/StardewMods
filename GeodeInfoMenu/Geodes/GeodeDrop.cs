@@ -31,7 +31,7 @@ namespace GeodeInfoMenu
         /// <summary>
         /// A mapping of hard coded drops to their item ids.
         /// </summary>
-        private static IDictionary<HardCodedGeodeDrop, int> SItems = SItems = new Dictionary<HardCodedGeodeDrop, int> {
+        private static readonly IDictionary<HardCodedGeodeDrop, int> SItems = new Dictionary<HardCodedGeodeDrop, int> {
                 { HardCodedGeodeDrop.Stone, 390}, { HardCodedGeodeDrop.Clay, 330}, { HardCodedGeodeDrop.EarthCrystal, 86}, { HardCodedGeodeDrop.FrozenTear, 84}, { HardCodedGeodeDrop.FireQuartz, 82}, { HardCodedGeodeDrop.Coal, 382}, { HardCodedGeodeDrop.CopperOre, 378},
                 { HardCodedGeodeDrop.IronOre, 380}, { HardCodedGeodeDrop.GoldOre,384}, { HardCodedGeodeDrop.IridiumOre,386}, { HardCodedGeodeDrop.PrismaticShard, 74}
             };

@@ -73,10 +73,7 @@ namespace Pong.Framework.Menus.Elements
             int height = SpriteText.getHeightOfString(this.Text);
 
 
-            if (this.centered)
-                this.Bounds = new Rectangle(this.xPos - width / 2, this.yPos, width, height);
-            else
-                this.Bounds = new Rectangle(this.xPos, this.yPos, width, height);
+            this.Bounds = this.centered ? new Rectangle(this.xPos - width / 2, this.yPos, width, height) : new Rectangle(this.xPos, this.yPos, width, height);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace GeodeInfoMenu.Menus
         /// <summary>
         /// The geodes that can be broken and how many of them it will take to get this item.
         /// </summary>
-        Tuple<int, int>[] breakableGeodes;
+        readonly Tuple<int, int>[] breakableGeodes;
 
         /// <summary>
         /// Construct an instance.

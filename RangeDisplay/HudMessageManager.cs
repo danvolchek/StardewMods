@@ -24,7 +24,7 @@ namespace RangeDisplay
             string name = Enum.GetName(typeof(RangeItem), item);
             name = name.Replace('_', ' ');
 
-            AddHudMessage(name + "s");
+            this.AddHudMessage(name + "s");
         }
     }
 }

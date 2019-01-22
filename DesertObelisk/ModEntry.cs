@@ -49,8 +49,8 @@ namespace DesertObelisk
             if (this.isSubscribed)
                 return;
 
-            Helper.Events.GameLoop.Saved += this.OnSaved;
-            Helper.Events.GameLoop.Saving += this.OnSaving;
+            this.Helper.Events.GameLoop.Saved += this.OnSaved;
+            this.Helper.Events.GameLoop.Saving += this.OnSaving;
             this.modifier.ModifyMap();
 
             this.Monitor.Log("Subscribed to events.", LogLevel.Trace);
@@ -63,8 +63,8 @@ namespace DesertObelisk
             if (!this.isSubscribed)
                 return;
 
-            Helper.Events.GameLoop.Saved -= this.OnSaved;
-            Helper.Events.GameLoop.Saving -= this.OnSaving;
+            this.Helper.Events.GameLoop.Saved -= this.OnSaved;
+            this.Helper.Events.GameLoop.Saving -= this.OnSaving;
 
             this.Monitor.Log("Unsubscribed from events.", LogLevel.Trace);
 

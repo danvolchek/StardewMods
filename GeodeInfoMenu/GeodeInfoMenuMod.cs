@@ -57,7 +57,7 @@ namespace GeodeInfoMenu
             this.Geodes = new Dictionary<GeodeType, int> {
                 {GeodeType.Normal, 535}, {GeodeType.FrozenGeode, 536}, {GeodeType.MagmaGeode, 537}, {GeodeType.OmniGeode, 749}
             };
-            this.dropNameToGeodeDrop = GetAllPossibleDropMappings();
+            this.dropNameToGeodeDrop = this.GetAllPossibleDropMappings();
             GeodeMenu.tabIcons = helper.Content.Load<Texture2D>("Sprites/tabs.png");
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Display.MenuChanged += this.OnMenuChanged;
@@ -77,7 +77,7 @@ namespace GeodeInfoMenu
             if (Game1.activeClickableMenu is GeodeMenu menu)
             {
                 this.menuStateInfo = menu.SaveState();
-                Game1.activeClickableMenu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.menuStateInfo, true);
+                Game1.activeClickableMenu = new GeodeMenu(this, this.config, this.GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.menuStateInfo, true);
             }
         }
 
@@ -87,7 +87,7 @@ namespace GeodeInfoMenu
         private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
             // save the last geode menu state
-            SaveMenuState(e.OldMenu);
+            this.SaveMenuState(e.OldMenu);
             this.GeodeBreakingMenu = null;
         }
 
@@ -122,7 +122,7 @@ namespace GeodeInfoMenu
             }
             if (e.Button == this.config.ActivationKey && canOpen)
             {
-                GeodeMenu menu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.config.RememberMenuStateAfterClose ? this.menuStateInfo : null);
+                GeodeMenu menu = new GeodeMenu(this, this.config, this.GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.config.RememberMenuStateAfterClose ? this.menuStateInfo : null);
                 Game1.activeClickableMenu = menu;
                 menu.SetSearchTabSearchBoxSelectedStatus(true);
             }
@@ -156,7 +156,7 @@ namespace GeodeInfoMenu
         /// <returns>Whether this item can be dropped from geodes</returns>
         public bool GetInfoToBuildSearchResult(GeodeDrop item, out Tuple<int, int>[] searchResultInfo, out bool showStar)
         {
-            bool[] geodesToCrack = GetCrackedGeodeFromWantedItem(item);
+            bool[] geodesToCrack = this.GetCrackedGeodeFromWantedItem(item);
             if (geodesToCrack == null)
             {
                 searchResultInfo = null;
@@ -169,8 +169,8 @@ namespace GeodeInfoMenu
             {
                 if (geodesToCrack[i])
                 {
-                    int geodeParentSheetIndex = this.Geodes[GetGeodeTypes()[i]];
-                    int amnt = GeodesUntilTreasure(geodeParentSheetIndex, item.ParentSheetIndex);
+                    int geodeParentSheetIndex = this.Geodes[this.GetGeodeTypes()[i]];
+                    int amnt = this.GeodesUntilTreasure(geodeParentSheetIndex, item.ParentSheetIndex);
                     searchResultInfo[currIndex++] = new Tuple<int, int>(geodeParentSheetIndex, amnt);
                 }
             }
@@ -224,9 +224,9 @@ namespace GeodeInfoMenu
             else
             {
                 bool[] acceptable = new bool[] { false, false, false, false };
-                GeodeType[] types = GetGeodeTypes();
+                GeodeType[] types = this.GetGeodeTypes();
                 for (int i = 0; i < types.Length; i++)
-                    foreach (int drop in GetDropsFromGeode(types[i]))
+                    foreach (int drop in this.GetDropsFromGeode(types[i]))
                         if (drop == item.ParentSheetIndex)
                         {
                             acceptable[i] = true;
@@ -248,7 +248,7 @@ namespace GeodeInfoMenu
                 GeodeDrop geodeDrop = new GeodeDrop(item);
                 mapping.Add(Game1.objectInformation[geodeDrop.ParentSheetIndex].Split('/')[0].ToLower(), geodeDrop);
             }
-            foreach (GeodeType type in GetGeodeTypes())
+            foreach (GeodeType type in this.GetGeodeTypes())
             {
                 foreach (string drop in Game1.objectInformation[this.Geodes[type]].Split('/')[6].Split(' '))
                 {
@@ -268,7 +268,7 @@ namespace GeodeInfoMenu
         /// <returns>An integer array of item ids</returns>
         private int[] GetDropsFromGeode(GeodeType type)
         {
-            return Array.ConvertAll(Game1.objectInformation[this.Geodes[type]].Split('/')[6].Split(' '), s => int.Parse(s));
+            return Array.ConvertAll(Game1.objectInformation[this.Geodes[type]].Split('/')[6].Split(' '), int.Parse);
         }
 
         /// <summary>
@@ -280,14 +280,14 @@ namespace GeodeInfoMenu
         {
             IList<Tuple<int[], bool[]>> list = new List<Tuple<int[], bool[]>>();
 
-            foreach (GeodeType type in GetGeodeTypes())
+            foreach (GeodeType type in this.GetGeodeTypes())
             {
                 int GeodesCracked = (int)Game1.stats.GeodesCracked + 1;
                 int[] items = new int[amount];
                 bool[] stars = new bool[amount];
                 for (int i = 0; i < amount; i++)
                 {
-                    items[i] = GeodeSimulator(this.Geodes[type], GeodesCracked++);
+                    items[i] = this.GeodeSimulator(this.Geodes[type], GeodesCracked++);
                     stars[i] = this.HasNotDonatedItemToMuseum(items[i]);
                 }
                 list.Add(new Tuple<int[], bool[]>(items, stars));
@@ -319,7 +319,9 @@ namespace GeodeInfoMenu
         {
             int GeodesCracked = (int)Game1.stats.GeodesCracked + 1;
             int tries = 0;
-            while (tries++ < 1000 && GeodeSimulator(geodeBeingCracked, GeodesCracked++) != wantedItem) ;
+            while (tries++ < 1000 && this.GeodeSimulator(geodeBeingCracked, GeodesCracked++) != wantedItem)
+            {
+            }
 
             return tries;
         }
@@ -434,7 +436,7 @@ namespace GeodeInfoMenu
             int iGeodeIndex = 0;
             for (int i = 0; i < geodes.Length; i++)
                 if (geodes[i])
-                    iGeodes[iGeodeIndex++] = this.Geodes[GetGeodeTypes()[i]];
+                    iGeodes[iGeodeIndex++] = this.Geodes[this.GetGeodeTypes()[i]];
             return iGeodes;
         }
 
