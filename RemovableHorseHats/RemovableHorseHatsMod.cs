@@ -4,52 +4,53 @@ using System.Linq;
 using Harmony;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewValley.Characters;
 
 namespace RemovableHorseHats
 {
     public class RemovableHorseHatsMod : Mod
     {
-        private IEnumerable<string> keysToRemoveHat;
+        private HashSet<SButton> keysToRemoveHat;
         internal static bool IsRemoveHatKeyDown { get; private set; }
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             RemovableHorseHatsConfig config = helper.ReadConfig<RemovableHorseHatsConfig>();
-            this.keysToRemoveHat = config.KeysToRemoveHat.ToLowerInvariant().Split(new char[]{' '}).Select(item => item.Trim()).Where(item => !string.IsNullOrEmpty(item));
+            this.keysToRemoveHat = new HashSet<SButton>(
+                config.KeysToRemoveHat
+                    .Split(' ')
+                    .Select(raw => Enum.TryParse(raw, true, out SButton button) ? button : SButton.None)
+                    .Where(key => key != SButton.None)
+            );
 
-            InputEvents.ButtonPressed += this.InputEvents_ButtonPressed;
-            InputEvents.ButtonReleased += this.InputEvents_ButtonReleased;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.Input.ButtonReleased += this.OnButtonReleased;
 
 
             HarmonyInstance harmony = HarmonyInstance.Create("cat.removablehorsehats");
 
-            harmony.Patch(GetSDVType("Characters.Horse").GetMethod("checkAction"),
-                new HarmonyMethod(typeof(HorseCheckActionPatch).GetMethod("Prefix")), null);
+            harmony.Patch(typeof(Horse).GetMethod(nameof(Horse.checkAction)),
+                new HarmonyMethod(typeof(HorseCheckActionPatch).GetMethod(nameof(HorseCheckActionPatch.Prefix))), null);
         }
 
-        private void InputEvents_ButtonReleased(object sender, EventArgsInput e)
+        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            string key = e.Button.ToString().ToLowerInvariant();
-            if (this.keysToRemoveHat.Any(item => item == key))
+            if (this.keysToRemoveHat.Contains(e.Button))
                 IsRemoveHatKeyDown = false;
         }
 
-        private void InputEvents_ButtonPressed(object sender, EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            string key = e.Button.ToString().ToLowerInvariant();
-            if (this.keysToRemoveHat.Any(item => item == key))
+            if (this.keysToRemoveHat.Contains(e.Button))
                 IsRemoveHatKeyDown = true;
-        }
-
-        //Big thanks to Routine for this workaround for mac users.
-        //https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/PyTK/PyUtils.cs#L117
-        /// <summary>Gets the correct type of the object, handling different assembly names for mac/linux users.</summary>
-        private static Type GetSDVType(string type)
-        {
-            const string prefix = "StardewValley.";
-            Type defaultSDV = Type.GetType(prefix + type + ", Stardew Valley");
-
-            return defaultSDV ?? Type.GetType(prefix + type + ", StardewValley");
         }
     }
 }

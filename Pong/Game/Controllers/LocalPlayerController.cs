@@ -5,14 +5,13 @@ namespace Pong.Game.Controllers
 {
     internal class LocalPlayerController : StatePaddleController
     {
-        public LocalPlayerController(PositionState intendedState) : base(intendedState)
-        {
-            ControlEvents.MouseChanged += this.MouseChanged;
-        }
+        public LocalPlayerController(PositionState intendedState) : base(intendedState) { }
 
-        private void MouseChanged(object sender, EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player moves the in-game cursor.</summary>
+        /// <param name="e">The event arguments.</param>
+        public void OnCursorMoved(CursorMovedEventArgs e)
         {
-            this.intendedState.XPosition = e.NewPosition.X;
+            this.intendedState.XPosition = (int)e.NewPosition.ScreenPixels.X;
         }
     }
 }

@@ -11,17 +11,20 @@ namespace AutoStacker
     {
         private AutoStackerConfig config;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.config = helper.ReadConfig<AutoStackerConfig>();
-            ControlEvents.KeyPressed += this.KeyPressed;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
         }
 
-        private void KeyPressed(object sender, EventArgsKeyPressed e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            string key = e.KeyPressed.ToString().ToLower();
-
-            if (key == this.config.ActivationKey.ToLower())
+            if (e.Button == this.config.ActivationKey)
             {
                 this.StackOwnInventory();
             }

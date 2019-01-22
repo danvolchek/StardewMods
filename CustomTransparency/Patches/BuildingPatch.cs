@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using Harmony;
+using StardewValley.Buildings;
 
 namespace CustomTransparency.Patches
 {
@@ -10,7 +11,7 @@ namespace CustomTransparency.Patches
     {
         private static MethodBase TargetMethod()
         {
-            return CustomTransparencyMod.GetSDVType("Buildings.Building").GetMethod("Update");
+            return typeof(Building).GetMethod(nameof(Building.Update));
         }
 
         /// <summary>
@@ -23,7 +24,7 @@ namespace CustomTransparency.Patches
             foreach (CodeInstruction instruction in instructions)
             {
                 if (!changed && instruction.opcode == OpCodes.Ldc_R4 &&
-                    (float) instruction.operand <= 0.41f && (float) instruction.operand >= 0.39f)
+                    (float)instruction.operand <= 0.41f && (float)instruction.operand >= 0.39f)
                 {
                     changed = true;
                     instruction.operand = CustomTransparencyMod.Config.MinimumBuildingTransparency;

@@ -1,10 +1,10 @@
 ﻿{
-  "Name": "HoldToBreakGeodes",
+  "Name": "Hold To Break Geodes",
   "Author": "Cat",
   "Version": "1.2.0",
   "Description": "Hold left click/<gamepad key> to continuously break geodes.",
   "UniqueID": "cat.holdtobreakgeodes",
   "EntryDll": "HoldToBreakGeodes.dll",
-  "MinimumApiVersion": "2.6-beta",
+  "MinimumApiVersion": "2.9.0",
   "UpdateKeys": [ "Nexus:1689" ]
 }

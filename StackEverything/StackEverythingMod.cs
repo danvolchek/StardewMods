@@ -1,4 +1,8 @@
-﻿using Harmony;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Harmony;
 using Microsoft.Xna.Framework;
 using StackEverything.ObjectCopiers;
 using StackEverything.Patches;
@@ -8,22 +12,21 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using StardewValley.Tools;
 using SObject = StardewValley.Object;
 
 namespace StackEverything
 {
     public class StackEverythingMod : Mod
     {
-        public static readonly Type[] PatchedTypes = { GetSDVType("Objects.Furniture"), GetSDVType("Objects.Wallpaper") };
+        public static readonly Type[] PatchedTypes = { typeof(Furniture), typeof(Wallpaper) };
         private readonly IList<IObjectCopier> copiers = new List<IObjectCopier>();
         private bool isInDecorateableLocation;
 
         private IList<Furniture> lastKnownFurniture;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.lastKnownFurniture = new List<Furniture>();
@@ -35,12 +38,12 @@ namespace StackEverything
             //fix maximumStackSize, getStack, addToStack, and drawInMenu
             IDictionary<string, Type> patchedTypeReplacements = new Dictionary<string, Type>
             {
-                {"maximumStackSize", typeof(MaximumStackSizePatch)},
-                {"addToStack", typeof(AddToStackPatch)},
-                {"drawInMenu", typeof(DrawInMenuPatch)}
+                [nameof(SObject.maximumStackSize)] = typeof(MaximumStackSizePatch),
+                [nameof(SObject.addToStack)] = typeof(AddToStackPatch),
+                [nameof(SObject.drawInMenu)] = typeof(DrawInMenuPatch)
             };
 
-            IList<Type> typesToPatch = PatchedTypes.Union(new[] { GetSDVType("Object") }).ToList();
+            IList<Type> typesToPatch = PatchedTypes.Union(new[] { typeof(SObject) }).ToList();
 
 
             if (helper.ModRegistry.IsLoaded("Platonymous.CustomFarming"))
@@ -75,9 +78,9 @@ namespace StackEverything
             //fix furniture pickup in decoratable locations and item placement putting down the whole furniture stack
             IDictionary<string, Tuple<Type, Type>> otherReplacements = new Dictionary<string, Tuple<Type, Type>>()
             {
-                {"leftClick", new Tuple<Type, Type>(GetSDVType("Locations.DecoratableLocation"), typeof(FurniturePickupPatch))},
-                {"tryToPlaceItem", new Tuple<Type, Type>(GetSDVType("Utility"), typeof(TryToPlaceItemPatch))},
-                {"doDoneFishing", new Tuple<Type, Type>(GetSDVType("Tools.FishingRod"), typeof(DoDoneFishingPatch))}
+                {nameof(DecoratableLocation.leftClick), new Tuple<Type, Type>(typeof(DecoratableLocation), typeof(FurniturePickupPatch))},
+                {nameof(Utility.tryToPlaceItem), new Tuple<Type, Type>(typeof(Utility), typeof(TryToPlaceItemPatch))},
+                {"doDoneFishing", new Tuple<Type, Type>(typeof(FishingRod), typeof(DoDoneFishingPatch))}
             };
 
             foreach (KeyValuePair<string, Tuple<Type, Type>> replacement in otherReplacements)
@@ -100,48 +103,55 @@ namespace StackEverything
             this.copiers.Add(new TapperCopier());
             this.copiers.Add(new FurnitureCopier());
 
-            LocationEvents.ObjectsChanged += this.LocationEvents_ObjectsChanged;
-            GameEvents.QuarterSecondTick += this.GameEvents_QuarterSecondTick;
+            helper.Events.World.ObjectListChanged += this.OnObjectListChanged;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
-        /// <summary>
-        ///     Placed down furniture is the same instance as furniture in the inventory, leading to really weird behavior.
-        ///     Instead, we'll copy them.
-        /// </summary>
-        private void GameEvents_QuarterSecondTick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            bool wasInDecoratableLocation = this.isInDecorateableLocation;
-
-            if (!(Game1.currentLocation is DecoratableLocation decLoc))
+            // Placed down furniture is the same instance as furniture in the inventory, leading to really weird behavior.
+            // Instead, we'll copy them.
+            if (e.IsMultipleOf(15)) // quarter second
             {
-                this.isInDecorateableLocation = false;
-                return;
-            }
+                bool wasInDecoratableLocation = this.isInDecorateableLocation;
 
-            this.isInDecorateableLocation = true;
-
-            if (wasInDecoratableLocation)
-                for (int i = 0; i < decLoc.furniture.Count; i++)
+                if (!(Game1.currentLocation is DecoratableLocation decLoc))
                 {
-                    Furniture f = decLoc.furniture[i];
-                    if (!this.lastKnownFurniture.Contains(f) && Game1.player.Items.Contains(f))
-                    {
-                        this.Monitor.Log($"{f.GetType().Name} was placed down and exists in the inventory.",
-                            LogLevel.Trace);
-                        decLoc.furniture[i] = (Furniture)this.Copy(f);
-                    }
+                    this.isInDecorateableLocation = false;
+                    return;
                 }
 
-            this.lastKnownFurniture.Clear();
-            foreach (Furniture f in decLoc.furniture) this.lastKnownFurniture.Add(f);
+                this.isInDecorateableLocation = true;
+
+                if (wasInDecoratableLocation)
+                    for (int i = 0; i < decLoc.furniture.Count; i++)
+                    {
+                        Furniture f = decLoc.furniture[i];
+                        if (!this.lastKnownFurniture.Contains(f) && Game1.player.Items.Contains(f))
+                        {
+                            this.Monitor.Log($"{f.GetType().Name} was placed down and exists in the inventory.",
+                                LogLevel.Trace);
+                            decLoc.furniture[i] = (Furniture)this.Copy(f);
+                        }
+                    }
+
+                this.lastKnownFurniture.Clear();
+                foreach (Furniture f in decLoc.furniture)
+                    this.lastKnownFurniture.Add(f);
+            }
         }
 
-        /// <summary>
-        ///     Placed down tappers are the same instance as tappers in the inventory, leading to really weird behavior.
-        ///     Instead, we'll copy them.
-        /// </summary>
-        private void LocationEvents_ObjectsChanged(object sender, EventArgsLocationObjectsChanged e)
+        /// <summary>Raised after objects are added or removed in a location.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnObjectListChanged(object sender, ObjectListChangedEventArgs e)
         {
+            // Placed down tappers are the same instance as tappers in the inventory, leading to really weird behavior.
+            // Instead, we'll copy them.
+
             if (e.Location != Game1.player.currentLocation)
                 return;
 
@@ -170,17 +180,6 @@ namespace StackEverything
 
             this.Monitor.Log($"{obj.GetType().Name} was not copied.", LogLevel.Trace);
             return obj;
-        }
-
-        //Big thanks to Routine for this workaround for mac users.
-        //https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/PyTK/PyUtils.cs#L117
-        /// <summary>Gets the correct type of the object, handling different assembly names for mac/linux users.</summary>
-        private static Type GetSDVType(string type)
-        {
-            const string prefix = "StardewValley.";
-            Type defaultSDV = Type.GetType(prefix + type + ", Stardew Valley");
-
-            return defaultSDV != null ? defaultSDV : Type.GetType(prefix + type + ", StardewValley");
         }
     }
 }

@@ -1,10 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.TerrainFeatures;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BetterFruitTrees
 {
@@ -13,16 +13,17 @@ namespace BetterFruitTrees
     /// </summary>
     internal class GrowHelper
     {
-        public GrowHelper()
+        /// <summary>Construct an instance.</summary>
+        /// <param name="events">The available mod events.</param>
+        public GrowHelper(IModEvents events)
         {
-            SaveEvents.BeforeSave += this.BeforeSave;
-
+            events.GameLoop.Saving += this.OnSaving;
         }
 
         /// <summary>
         ///     Before a save, check every fruit tree to see if it can grow. If not, make it grow.
         /// </summary>
-        private void BeforeSave(object sender, EventArgs e)
+        private void OnSaving(object sender, SavingEventArgs e)
         {
             foreach (GameLocation l in Game1.locations)
                 foreach (KeyValuePair<Vector2, TerrainFeature> fruitTree in l.terrainFeatures.Pairs.Where(

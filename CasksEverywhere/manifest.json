@@ -5,6 +5,6 @@
   "Description": "Makes casks work everywhere.",
   "UniqueID": "cat.caskseverywhere",
   "EntryDll": "CasksEverywhere.dll",
-  "MinimumApiVersion": "2.8",
+  "MinimumApiVersion": "2.9.0",
   "UpdateKeys": [ "Nexus:2994" ]
 }

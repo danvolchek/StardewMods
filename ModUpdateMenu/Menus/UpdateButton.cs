@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,7 +20,7 @@ namespace ModUpdateMenu.Menus
         internal ButtonStatus ButtonStatus { get; set; } = ButtonStatus.Unknown;
         internal ButtonStatus SMAPIButtonStatus { get; set; } = ButtonStatus.Unknown;
 
-        private Point mousePosition;
+        private Point mousePosition = Point.Zero;
 
         public UpdateButton(IModHelper helper)
         {
@@ -32,44 +31,48 @@ namespace ModUpdateMenu.Menus
                 new Rectangle(36, Game1.viewport.Height - 150 - 48, 81, 75), buttonTexture, new Rectangle(0, 0, 27, 25),
                 3, false);
 
-            ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
-            GraphicsEvents.Resize += this.GraphicsEvents_Resize;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.Input.CursorMoved += this.OnCursorMoved;
+            helper.Events.Display.WindowResized += this.OnWindowResized;
         }
 
-        private void GraphicsEvents_Resize(object sender, EventArgs e)
+        /// <summary>Raised after the game window is resized.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnWindowResized(object sender, WindowResizedEventArgs e)
         {
             this.updateButton.bounds.Y = Game1.viewport.Height - 150 - 48;
         }
 
-        private void GameEvents_UpdateTick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             if (!this.ShowUpdateButton)
                 return;
 
-            if (this.mousePosition != null)
+            if (this.mousePosition != Point.Zero)
                 this.updateButton.tryHover(this.mousePosition.X, this.mousePosition.Y, 0.25f);
-
-
         }
 
-        private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player moves the in-game cursor.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnCursorMoved(object sender, CursorMovedEventArgs e)
         {
             if (!this.ShowUpdateButton)
                 return;
 
-            bool isUpdateButtonHovered = this.updateButton.containsPoint(e.NewPosition.X, e.NewPosition.Y);
-
+            this.mousePosition = new Point((int)e.NewPosition.ScreenPixels.X, (int)e.NewPosition.ScreenPixels.Y);
+            bool isUpdateButtonHovered = this.updateButton.containsPoint(this.mousePosition.X, this.mousePosition.Y);
             if (isUpdateButtonHovered != this.wasUpdateButtonHovered)
             {
                 this.updateButton.sourceRect.X += this.wasUpdateButtonHovered ? -27 : 27;
                 if (!this.wasUpdateButtonHovered)
                     Game1.playSound("Cowboy_Footstep");
             }
-
             this.wasUpdateButtonHovered = isUpdateButtonHovered;
-
-            this.mousePosition = e.NewPosition;
         }
 
         internal bool PointContainsButton(Vector2 p)

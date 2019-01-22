@@ -58,7 +58,7 @@ namespace BetterFruitTrees.Patches.JunimoHarvester
                 if (lastItemHarvested != null && __instance.currentLocation.farmers.Any())
                 {
                     Multiplayer multiplayer =
-                        Utils.Reflection.GetField<Multiplayer>(Utils.GetSDVType("Game1"), "multiplayer").GetValue();
+                        Utils.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
                     multiplayer.broadcastSprites(__instance.currentLocation, new TemporaryAnimatedSprite(
                         "Maps\\springobjects",
                         Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet,

@@ -5,6 +5,6 @@
   "Description": "Lets you choose how transparent trees/buildings are when you walk behind them.",
   "UniqueID": "cat.customtransparency",
   "EntryDll": "CustomTransparency.dll",
-  "MinimumApiVersion": "2.0",
+  "MinimumApiVersion": "2.9.0",
   "UpdateKeys": [ "Nexus:2359" ]
 }

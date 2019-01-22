@@ -14,7 +14,7 @@ namespace CasksEverywhere
     {
         private static MethodBase TargetMethod()
         {
-            return typeof(Cask).GetMethod("performObjectDropInAction");
+            return typeof(Cask).GetMethod(nameof(Cask.performObjectDropInAction));
         }
 
         /// <summary>

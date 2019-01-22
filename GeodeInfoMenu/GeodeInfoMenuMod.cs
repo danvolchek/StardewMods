@@ -1,12 +1,12 @@
-﻿using GeodeInfoMenu.Menus;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using GeodeInfoMenu.Menus;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace GeodeInfoMenu
 {
@@ -59,39 +59,35 @@ namespace GeodeInfoMenu
             };
             this.dropNameToGeodeDrop = GetAllPossibleDropMappings();
             GeodeMenu.tabIcons = helper.Content.Load<Texture2D>("Sprites/tabs.png");
-            ControlEvents.KeyPressed += this.KeyPressed;
-            MenuEvents.MenuClosed += this.MenuClosed;
-            GraphicsEvents.Resize += this.WindowResized;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
+            helper.Events.Display.WindowResized += this.OnWindowResized;
 
         }
 
         /***
-         * Event Listeners
-         ***/
-
-        /// <summary>
-        /// Window resized event listener. Re-creates the menu to make it fit in the new window.
-        /// </summary>
-        /// <param name="sender">Event sender</param>
-        /// <param name="e">Event arguments</param>
-        private void WindowResized(object sender, EventArgs e)
+        ** Event Listeners
+        ****/
+        /// <summary>Raised after the game window is resized.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnWindowResized(object sender, EventArgs e)
         {
-            if (Game1.activeClickableMenu is GeodeMenu)
+            // recreate menu to fit new window size
+            if (Game1.activeClickableMenu is GeodeMenu menu)
             {
-                this.menuStateInfo = (Game1.activeClickableMenu as GeodeMenu).SaveState();
-                GeodeMenu menu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.menuStateInfo, true);
-                Game1.activeClickableMenu = menu;
+                this.menuStateInfo = menu.SaveState();
+                Game1.activeClickableMenu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.menuStateInfo, true);
             }
         }
 
-        /// <summary>
-        /// Menu closed event listener. Saves the last geode menu state.
-        /// </summary>
-        /// <param name="sender">Event sender</param>
-        /// <param name="e">Event arguments</param>
-        private void MenuClosed(object sender, EventArgsClickableMenuClosed e)
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
-            SaveMenuState(e.PriorMenu);
+            // save the last geode menu state
+            SaveMenuState(e.OldMenu);
             this.GeodeBreakingMenu = null;
         }
 
@@ -101,10 +97,8 @@ namespace GeodeInfoMenu
         /// <param name="e">A menu</param>
         public void SaveMenuState(StardewValley.Menus.IClickableMenu e)
         {
-            if (e is GeodeMenu)
-            {
-                this.menuStateInfo = (e as GeodeMenu).SaveState();
-            }
+            if (e is GeodeMenu menu)
+                this.menuStateInfo = menu.SaveState();
         }
 
         /// <summary>
@@ -115,21 +109,18 @@ namespace GeodeInfoMenu
             return this.GeodeBreakingMenu;
         }
 
-        /// <summary>
-        /// Key pressed event listener. Listens for the activation key and opens the menu.
-        /// </summary>
-        /// <param name="sender">Event sender</param>
-        /// <param name="e">Event arguments</param>
-        private void KeyPressed(object sender, EventArgsKeyPressed e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
+            // open the menu if activation key pressed
             bool canOpen = Game1.activeClickableMenu == null || Game1.activeClickableMenu is StardewValley.Menus.GeodeMenu;
-
             if (Game1.activeClickableMenu is StardewValley.Menus.GeodeMenu)
             {
                 this.GeodeBreakingMenu = Game1.activeClickableMenu;
             }
-
-            if (e.KeyPressed.ToString().ToLower() == this.config.ActivationKey.ToLower() && canOpen)
+            if (e.Button == this.config.ActivationKey && canOpen)
             {
                 GeodeMenu menu = new GeodeMenu(this, this.config, GetNextDropsForGeodes(this.config.NumberOfNextGeodeDropsToShow), this.config.RememberMenuStateAfterClose ? this.menuStateInfo : null);
                 Game1.activeClickableMenu = menu;

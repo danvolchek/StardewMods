@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BetterGardenPots.Patches.Utility;
-using Harmony;
-using StardewModdingAPI;
 using BetterGardenPots.Extensions;
 using BetterGardenPots.Patches.IndoorPot;
+using BetterGardenPots.Patches.Utility;
 using BetterGardenPots.Subscribers;
+using Harmony;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewValley;
+using StardewValley.Objects;
 
 namespace BetterGardenPots
 {
@@ -16,6 +18,8 @@ namespace BetterGardenPots
     {
         private readonly IList<IEventSubscriber> subscribers = new List<IEventSubscriber>();
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             HarmonyInstance harmony = HarmonyInstance.Create("cat.bettergardenpots");
@@ -24,25 +28,23 @@ namespace BetterGardenPots
 
             if (config.MakeSprinklersWaterGardenPots) this.subscribers.Add(new GardenPotSprinklerHandler(this.Helper));
 
-            Type indoorPotType = GetSDVType("Objects.IndoorPot");
+            Type indoorPotType = typeof(IndoorPot);
 
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>();
 
             if (config.MakeBeeHousesNoticeFlowersInGardenPots)
-                replacements.Add("findCloseFlower", GetSDVType("Utility"), typeof(FindCloseFlowerPatch));
+                replacements.Add(nameof(Utility.findCloseFlower), typeof(Utility), typeof(FindCloseFlowerPatch));
 
             if (config.HarvestMatureCropsWhenGardenPotBreaks)
-                replacements.Add("performToolAction", indoorPotType, typeof(PerformToolActionPatch));
+                replacements.Add(nameof(IndoorPot.performToolAction), indoorPotType, typeof(PerformToolActionPatch));
 
             if (config.AllowPlantingAncientSeedsInGardenPots)
-                replacements.Add("performObjectDropInAction", indoorPotType,
-                    typeof(PerformObjectDropInActionPatchFruit));
+                replacements.Add(nameof(IndoorPot.performObjectDropInAction), indoorPotType, typeof(PerformObjectDropInActionPatchFruit));
 
             if (config.AllowCropsToGrowInAnySeasonOutsideWhenInGardenPot)
             {
-                replacements.Add("DayUpdate", indoorPotType, typeof(DayUpdatePatch));
-                replacements.Add("performObjectDropInAction", indoorPotType,
-                    typeof(PerformObjectDropInActionPatchSeasons));
+                replacements.Add(nameof(IndoorPot.DayUpdate), indoorPotType, typeof(DayUpdatePatch));
+                replacements.Add(nameof(IndoorPot.performObjectDropInAction), indoorPotType, typeof(PerformObjectDropInActionPatchSeasons));
             }
 
             foreach (Tuple<string, Type, Type> replacement in replacements)
@@ -55,32 +57,29 @@ namespace BetterGardenPots
                 harmony.Patch(original, prefix == null ? null : new HarmonyMethod(prefix), postfix == null ? null : new HarmonyMethod(postfix));
             }
 
-            SaveEvents.AfterReturnToTitle += this.SaveEvents_AfterReturnToTitle;
-            SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
+            helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
         }
 
-        private void SaveEvents_AfterLoad(object sender, EventArgs e)
+        /// <summary>Raised after the player loads a save slot.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaveLoaded(object sender, EventArgs e)
         {
             if (Context.IsMainPlayer)
+            {
                 foreach (IEventSubscriber subscriber in this.subscribers)
                     subscriber.Subscribe();
+            }
         }
 
-        private void SaveEvents_AfterReturnToTitle(object sender, EventArgs e)
+        /// <summary>Raised after the game returns to the title screen.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
         {
             foreach (IEventSubscriber subscriber in this.subscribers)
                 subscriber.Unsubscribe();
-        }
-
-        //Big thanks to Routine for this workaround for mac users.
-        //https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/PyTK/PyUtils.cs#L117
-        /// <summary>Gets the correct type of the object, handling different assembly names for mac/linux users.</summary>
-        private static Type GetSDVType(string type)
-        {
-            const string prefix = "StardewValley.";
-            Type defaultSDV = Type.GetType(prefix + type + ", Stardew Valley");
-
-            return defaultSDV ?? Type.GetType(prefix + type + ", StardewValley");
         }
     }
 }

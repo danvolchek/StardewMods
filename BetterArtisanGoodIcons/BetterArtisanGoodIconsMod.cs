@@ -1,11 +1,11 @@
-﻿using BetterArtisanGoodIcons.Extensions;
-using BetterArtisanGoodIcons.Patches.SObjectPatches;
-using Harmony;
-using StardewModdingAPI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using BetterArtisanGoodIcons.Extensions;
+using Harmony;
+using StardewModdingAPI;
+using StardewValley.Objects;
 
 namespace BetterArtisanGoodIcons
 {
@@ -14,7 +14,8 @@ namespace BetterArtisanGoodIcons
     /// honey and non-honey versions of things.</remarks>
     public class BetterArtisanGoodIconsMod : Mod
     {
-
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             ArtisanGoodsManager.Init(this.Helper, this.Monitor);
@@ -22,13 +23,13 @@ namespace BetterArtisanGoodIcons
             HarmonyInstance harmony = HarmonyInstance.Create("cat.betterartisangoodicons");
 
             //Don't need to override draw for Object because artisan goods can't be placed down.
-            Type objectType = GetSDVType("Object");
+            Type objectType = typeof(StardewValley.Object);
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>
             {
-                {"drawWhenHeld", objectType, typeof(DrawWhenHeldPatch)},
-                {"drawInMenu", objectType, typeof(DrawInMenuPatch)},
-                {"draw", objectType, typeof(DrawPatch)},
-                {"draw", GetSDVType("Objects.Furniture"), typeof(Patches.FurniturePatches.DrawPatch)}
+                {"drawWhenHeld", objectType, typeof(Patches.SObjectPatches.DrawWhenHeldPatch)},
+                {"drawInMenu", objectType, typeof(Patches.SObjectPatches.DrawInMenuPatch)},
+                {"draw", objectType, typeof(Patches.SObjectPatches.DrawPatch)},
+                {"draw", typeof(Furniture), typeof(Patches.FurniturePatches.DrawPatch)}
             };
 
             foreach (Tuple<string, Type, Type> replacement in replacements)
@@ -40,17 +41,6 @@ namespace BetterArtisanGoodIcons
 
                 harmony.Patch(original, prefix == null ? null : new HarmonyMethod(prefix), postfix == null ? null : new HarmonyMethod(postfix));
             }
-        }
-
-        //Big thanks to Routine for this workaround for mac users.
-        //https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/PyTK/PyUtils.cs#L117
-        /// <summary>Gets the correct type of the object, handling different assembly names for mac/linux users.</summary>
-        private static Type GetSDVType(string type)
-        {
-            const string prefix = "StardewValley.";
-            Type defaultSDV = Type.GetType(prefix + type + ", Stardew Valley");
-
-            return defaultSDV != null ? defaultSDV : Type.GetType(prefix + type + ", StardewValley");
         }
     }
 }

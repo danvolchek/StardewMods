@@ -5,6 +5,6 @@
   "Description": "Shows an in game menu on the title screen about mods that need updates.",
   "UniqueID": "cat.modupdatemenu",
   "EntryDll": "ModUpdateMenu.dll",
-  "MinimumApiVersion": "2.8",
+  "MinimumApiVersion": "2.9.0",
   "UpdateKeys": [ "Nexus:2536" ]
 }

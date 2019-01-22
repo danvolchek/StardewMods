@@ -1,8 +1,10 @@
-﻿namespace CustomWarpLocations
+﻿using StardewModdingAPI;
+
+namespace CustomWarpLocations
 {
     internal class ModConfig
     {
-        public string LocationSaveKey { get; set; } = "f5";
+        public SButton LocationSaveKey { get; set; } = SButton.F5;
 
         public bool AdvancedMode { get; set; } = false;
     }

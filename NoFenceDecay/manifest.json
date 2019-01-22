@@ -5,6 +5,6 @@
   "Description": "Makes all fences and gates last forever.",
   "UniqueID": "cat.nofencedecay",
   "EntryDll": "NoFenceDecay.dll",
-  "MinimumApiVersion": "2.8-beta.4",
-  "UpdateKeys": ["Nexus:1180"]
+  "MinimumApiVersion": "2.9.0",
+  "UpdateKeys": [ "Nexus:1180" ]
 }

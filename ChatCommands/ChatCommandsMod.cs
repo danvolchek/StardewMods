@@ -25,17 +25,14 @@ namespace ChatCommands
 
         private bool wasEscapeDown;
 
-        /// <summary>
-        ///     Whether this <see cref="ICommandHandler" /> can handle the given input.
-        /// </summary>
+        /// <summary>Get whether this <see cref="ICommandHandler" /> can handle the given input.</summary>
         public bool CanHandle(string input)
         {
             return input.Length > 1 && this.commandValidator.IsValidCommand(input.Substring(1));
         }
 
-        /// <summary>
-        ///     Handles the given input.
-        /// </summary>
+        /// <summary>Handle the given input.</summary>
+        /// <param name="input">The input to handle.</param>
         public void Handle(string input)
         {
             input = input.Substring(1);
@@ -49,6 +46,8 @@ namespace ChatCommands
             this.consoleNotifier.Notify(false);
         }
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.commandValidator = new CommandValidator(helper.ConsoleCommands);
@@ -57,10 +56,9 @@ namespace ChatCommands
             this.inputState = helper.Reflection.GetField<InputState>(typeof(Game1), "input").GetValue();
 
             Console.SetOut(this.consoleNotifier);
-            SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
-            GameEvents.SecondUpdateTick += this.GameEvents_HalfSecondTick;
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
-            SaveEvents.AfterReturnToTitle += this.SaveEvents_AfterReturnToTitle;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
 
             this.modConfig = helper.ReadConfig<ChatCommandsConfig>();
 
@@ -75,62 +73,63 @@ namespace ChatCommands
                 command.Register(helper.ConsoleCommands);
         }
 
-        private void SaveEvents_AfterReturnToTitle(object sender, EventArgs e)
+        /// <summary>Raised after the game returns to the title screen.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
         {
             (Game1.chatBox as CommandChatBox)?.ClearHistory();
         }
 
-        private void GameEvents_UpdateTick(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            KeyboardState keyboardState = this.inputState.GetKeyboardState();
-
-            if (keyboardState.IsKeyDown(Keys.Escape) != this.wasEscapeDown)
+            // escape console
+            if (this.Helper.Input.IsDown(SButton.Escape) && !this.wasEscapeDown)
             {
                 this.wasEscapeDown = !this.wasEscapeDown;
                 (Game1.chatBox as CommandChatBox)?.EscapeStatusChanged(this.wasEscapeDown);
             }
-        }
 
-        /// <summary>
-        ///     Resend the left, right, up, or down keys if one of them is being held.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void GameEvents_HalfSecondTick(object sender, EventArgs e)
-        {
-            if (Game1.chatBox == null || !Game1.chatBox.isActive())
-                return;
-
-            bool isLeftDown = Keyboard.GetState().IsKeyDown(Keys.Left);
-            bool isRightDown = Keyboard.GetState().IsKeyDown(Keys.Right);
-            bool isUpDown = Keyboard.GetState().IsKeyDown(Keys.Up);
-            bool isDownDown = Keyboard.GetState().IsKeyDown(Keys.Down);
-
-            if (isLeftDown ^ isRightDown ^ isUpDown ^ isDownDown)
+            // resend the direction keys if held
+            if (e.IsMultipleOf(2) && Game1.chatBox != null && Game1.chatBox.isActive())
             {
-                Keys downKey = isLeftDown ? Keys.Left : (isRightDown ? Keys.Right : (isUpDown ? Keys.Up : Keys.Down));
+                bool isLeftDown = this.Helper.Input.IsDown(SButton.Left);
+                bool isRightDown = this.Helper.Input.IsDown(SButton.Right);
+                bool isUpDown = this.Helper.Input.IsDown(SButton.Up);
+                bool isDownDown = this.Helper.Input.IsDown(SButton.Down);
 
-                if (this.repeatWaitPeriod != 0)
-                    this.repeatWaitPeriod--;
-
-                if (this.repeatWaitPeriod == 0)
+                if (isLeftDown ^ isRightDown ^ isUpDown ^ isDownDown)
                 {
-                    Game1.chatBox.receiveKeyPress(downKey);
-                    if (isUpDown || isDownDown)
-                        this.repeatWaitPeriod = BaseWaitPeriod;
+                    SButton heldKey = isLeftDown
+                        ? SButton.Left
+                        : (isRightDown ? SButton.Right : (isUpDown ? SButton.Up : SButton.Down));
+
+                    if (this.repeatWaitPeriod != 0)
+                        this.repeatWaitPeriod--;
+
+                    if (this.repeatWaitPeriod == 0)
+                    {
+                        Game1.chatBox.receiveKeyPress((Keys)heldKey);
+                        if (isUpDown || isDownDown)
+                            this.repeatWaitPeriod = BaseWaitPeriod;
+                    }
+                }
+                else
+                {
+                    this.repeatWaitPeriod = BaseWaitPeriod;
                 }
             }
-            else
-            {
-                this.repeatWaitPeriod = BaseWaitPeriod;
-            }
         }
 
-        /// <summary>
-        ///     Replace the game's chatbox with a <see cref="CommandChatBox" />.
-        /// </summary>
-        private void SaveEvents_AfterLoad(object sender, EventArgs e)
+        /// <summary>Raised after the player loads a save slot.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
+            // replace the game's chatbox
             if (Game1.chatBox != null && Game1.chatBox is CommandChatBox) return;
             if (Game1.chatBox != null)
                 Game1.onScreenMenus.Remove(Game1.chatBox);

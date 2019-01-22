@@ -1,9 +1,9 @@
-﻿using System;
+﻿using StardewModdingAPI;
 
 namespace AutoStacker
 {
     class AutoStackerConfig
     {
-        public String ActivationKey { get; set; } = "k";
+        public SButton ActivationKey { get; set; } = SButton.K;
     }
 }

@@ -34,9 +34,11 @@ namespace Pong.Menus
             this.InitDrawables();
         }
 
-        public override bool ButtonPressed(EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="e">The event arguments.</param>
+        public override bool OnButtonPressed(ButtonPressedEventArgs e)
         {
-            bool result = base.ButtonPressed(e);
+            bool result = base.OnButtonPressed(e);
 
             if (this.CurrentModal != null)
                 return result;

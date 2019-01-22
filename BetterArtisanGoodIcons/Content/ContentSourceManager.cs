@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI;
 
 namespace BetterArtisanGoodIcons.Content
 {
@@ -10,7 +10,7 @@ namespace BetterArtisanGoodIcons.Content
     internal class ContentSourceManager
     {
         /// <summary>Map an <see cref="ArtisanGood"/> to its source name to make content pack debugging easier.</summary>
-        private static IDictionary<ArtisanGood,string> artisanGoodToSourceType = new Dictionary<ArtisanGood, string>
+        private static readonly IDictionary<ArtisanGood, string> artisanGoodToSourceType = new Dictionary<ArtisanGood, string>
         {
             {ArtisanGood.Honey, "Flowers" },
             {ArtisanGood.Jelly, "Fruits" },
@@ -23,7 +23,7 @@ namespace BetterArtisanGoodIcons.Content
         internal static IEnumerable<ArtisanGoodTextureProvider> GetTextureProviders(IModHelper helper, IMonitor monitor)
         {
             //Load content packs first so vanilla icons can be overwritten
-            foreach (IContentPack pack in helper.GetContentPacks())
+            foreach (IContentPack pack in helper.ContentPacks.GetOwned())
             {
                 foreach (ArtisanGoodTextureProvider provider in TryLoadContentSource(new ContentPackSource(pack), monitor))
                     yield return provider;

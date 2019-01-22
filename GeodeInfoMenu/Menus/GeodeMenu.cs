@@ -10,24 +10,19 @@ using System.Linq;
 
 namespace GeodeInfoMenu
 {
-    /// <summary>
-    /// Represents the main geode info menu.
-    /// </summary>
+    /// <summary>The main geode info menu.</summary>
     class GeodeMenu : IClickableMenu
     {
         /***
          * New Fields
          ***/
-        /// <summary>
-        /// The icons to draw as the tabs.
-        /// </summary>
+        /// <summary>The icons to draw as the tabs.</summary>
         public static Texture2D tabIcons;
-        /// <summary>
-        /// The mod config.
-        /// </summary>
-        private GeodeInfoMenuConfig config;
 
-        private GeodeInfoMenuMod modEntry;
+        /// <summary>The mod config.</summary>
+        private readonly GeodeInfoMenuConfig config;
+
+        private readonly GeodeInfoMenuMod modEntry;
 
         /***
          * Existing Fields

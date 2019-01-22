@@ -4,7 +4,6 @@ using System.Linq;
 using BetterGardenPots.APIs;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
-using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
@@ -23,7 +22,7 @@ namespace BetterGardenPots.Subscribers
         public GardenPotSprinklerHandler(IModHelper helper)
         {
             this.helper = helper;
-            GameEvents.FirstUpdateTick += this.GameEvents_FirstUpdateTick;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
         }
 
         private bool isSubscribed;
@@ -33,7 +32,7 @@ namespace BetterGardenPots.Subscribers
             if (this.isSubscribed)
                 return;
 
-            TimeEvents.AfterDayStarted += this.TimeEvents_AfterDayStarted;
+            helper.Events.GameLoop.DayStarted += this.OnDayStarted;
 
             this.isSubscribed = false;
         }
@@ -43,12 +42,15 @@ namespace BetterGardenPots.Subscribers
             if (!this.isSubscribed)
                 return;
 
-            TimeEvents.AfterDayStarted -= this.TimeEvents_AfterDayStarted;
+            helper.Events.GameLoop.DayStarted -= this.OnDayStarted;
 
             this.isSubscribed = true;
         }
 
-        private void GameEvents_FirstUpdateTick(object sender, EventArgs e)
+        /// <summary>Raised after the game is launched, right before the first update tick.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnGameLaunched(object sender, EventArgs e)
         {
             if (this.helper.ModRegistry.IsLoaded("tZed.SimpleSprinkler"))
             {
@@ -66,7 +68,10 @@ namespace BetterGardenPots.Subscribers
             }
         }
 
-        private void TimeEvents_AfterDayStarted(object sender, EventArgs e)
+        /// <summary>Raised after the game begins a new day (including when the player loads a save).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnDayStarted(object sender, EventArgs e)
         {
             foreach (GameLocation location in GetMainAndInnerLocations(Game1.locations))
                 foreach (Vector2 wateredTile in this.GetWateredTiles(location))
@@ -104,7 +109,7 @@ namespace BetterGardenPots.Subscribers
 
         public IEnumerable<Vector2> GetRange(SObject obj, Vector2 position)
         {
-            if(this.prismaticToolsAPI != null && obj.ParentSheetIndex == this.prismaticToolsAPI.SprinklerIndex)
+            if (this.prismaticToolsAPI != null && obj.ParentSheetIndex == this.prismaticToolsAPI.SprinklerIndex)
                 foreach (Vector2 pos in this.prismaticToolsAPI.GetSprinklerCoverage(position))
                     yield return pos;
             else
@@ -121,7 +126,7 @@ namespace BetterGardenPots.Subscribers
                 if (this.simpleSprinklersAPI != null && this.simpleSprinklersAPI.GetNewSprinklerCoverage().TryGetValue(obj.ParentSheetIndex, out Vector2[] sExtra))
                     foreach (Vector2 extraPos in sExtra)
                         yield return extraPos + position;
-            }       
+            }
         }
 
         public IEnumerable<Vector2> GetDefaultRange(SObject obj, Vector2 position)

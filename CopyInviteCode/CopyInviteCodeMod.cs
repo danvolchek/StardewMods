@@ -14,31 +14,32 @@ namespace CopyInviteCode
     {
         private ClipboardItem clipboardItem;
 
-        private readonly IDictionary<GamePlatform, IClipboardManager> clipboardManagers =
-            new Dictionary<GamePlatform, IClipboardManager>
-            {
-                {GamePlatform.Linux, new LinuxClipboardManager()},
-                {GamePlatform.Mac, new MacClipboardManager()},
-                {GamePlatform.Windows, new WindowsClipboardManager()}
-            };
+        private readonly IDictionary<GamePlatform, IClipboardManager> clipboardManagers = new Dictionary<GamePlatform, IClipboardManager>
+        {
+            [GamePlatform.Linux] = new LinuxClipboardManager(),
+            [GamePlatform.Mac] = new MacClipboardManager(),
+            [GamePlatform.Windows] = new WindowsClipboardManager()
+        };
 
         private Texture2D clipboardTexture;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.clipboardTexture = helper.Content.Load<Texture2D>("assets/clipboard.png");
             this.clipboardItem = new ClipboardItem(this.clipboardTexture);
 
-            MenuEvents.MenuChanged += this.MenuEvents_MenuChanged;
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
         }
 
-        /// <summary>
-        ///     When a menu changes, check if its the invite code menu. If so, add the copy to clipboard option.
-        /// </summary>
-        private void MenuEvents_MenuChanged(object sender, EventArgsClickableMenuChanged e)
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
-            if (e.NewMenu is ConfirmationDialog confDialog && this.Helper.Reflection
-                    .GetField<string>(confDialog, "message").GetValue().StartsWith(GetFirstPartOfInviteMessage()))
+            // When a menu changes, check if its the invite code menu. If so, add the copy to clipboard option.
+            if (e.NewMenu is ConfirmationDialog confDialog && this.Helper.Reflection.GetField<string>(confDialog, "message").GetValue().StartsWith(GetFirstPartOfInviteMessage()))
                 this.AddCopyToClipboardOption(confDialog);
         }
 
@@ -78,7 +79,7 @@ namespace CopyInviteCode
                 .Replace(GetFirstPartOfInviteMessage(), "")
                 .Trim();
 
-           this.SetClipboardText(code);
+            this.SetClipboardText(code);
         }
 
         /// <summary>

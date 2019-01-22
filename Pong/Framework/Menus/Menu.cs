@@ -1,12 +1,12 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Pong.Framework.Common;
-using Pong.Framework.Menus.Elements;
-using StardewModdingAPI.Events;
-using StardewValley;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Pong.Framework.Menus.Elements;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Framework.Menus
@@ -28,13 +28,15 @@ namespace Pong.Framework.Menus
 
         public event EventHandler<SwitchMenuEventArgs> SwitchToNewMenu;
 
-        public virtual bool ButtonPressed(EventArgsInput e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="e">The event arguments.</param>
+        public virtual bool OnButtonPressed(ButtonPressedEventArgs e)
         {
             if (this.CurrentModal != null)
-                return this.CurrentModal.ButtonPressed(e);
+                return this.CurrentModal.OnButtonPressed(e);
 
             bool clicked = false;
-            if (e.IsUseToolButton)
+            if (e.Button.IsUseToolButton())
             {
                 foreach (IClickable clickable in this.drawables.OfType<IClickable>())
                 {
@@ -79,28 +81,32 @@ namespace Pong.Framework.Menus
             return clicked;
         }
 
-        public virtual void MouseStateChanged(EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player moves the in-game cursor.</summary>
+        /// <param name="e">The event arguments.</param>
+        public virtual void OnCursorMoved(CursorMovedEventArgs e)
         {
             if (this.CurrentModal != null)
             {
-                this.CurrentModal.MouseStateChanged(e);
+                this.CurrentModal.OnCursorMoved(e);
                 return;
             }
 
+            int x = (int)e.NewPosition.ScreenPixels.X;
+            int y = (int)e.NewPosition.ScreenPixels.Y;
             foreach (IDrawable drawable in this.drawables)
             {
                 switch (drawable)
                 {
                     case IHighlightable highlightable:
-                        highlightable.Highlighted = highlightable.Bounds.Contains(e.NewPosition);
+                        highlightable.Highlighted = highlightable.Bounds.Contains(x, y);
                         break;
                     case ConditionalElement conditional:
                         if (conditional.GetElementForHighlight() is IHighlightable condHighlightable)
-                            condHighlightable.Highlighted = condHighlightable.Bounds.Contains(e.NewPosition);
+                            condHighlightable.Highlighted = condHighlightable.Bounds.Contains(x, y);
                         break;
                     case ElementContainer container:
                         foreach (IHighlightable element in container.Elements.OfType<IHighlightable>())
-                            element.Highlighted = element.Bounds.Contains(e.NewPosition);
+                            element.Highlighted = element.Bounds.Contains(x, y);
                         break;
                 }
             }
@@ -108,7 +114,7 @@ namespace Pong.Framework.Menus
 
         public virtual void BeforeMenuSwitch()
         {
-            
+
         }
 
 

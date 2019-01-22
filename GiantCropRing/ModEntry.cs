@@ -21,11 +21,13 @@ namespace GiantCropRing
 
         private int totalNumberOfSeenTimeTicks;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            this.Helper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
-            TimeEvents.TimeOfDayChanged += this.TimeEvents_TimeOfDayChanged;
-            MenuEvents.MenuChanged += this.MenuChanged;
+            helper.Events.GameLoop.DayEnding += this.OnDayEnding;
+            helper.Events.GameLoop.TimeChanged += this.OnTimeChanged;
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
             this.config = helper.ReadConfig<ModConfig>();
             this.giantRingTexture = this.Helper.Content.Load<Texture2D>("assets/ring.png");
 
@@ -33,8 +35,10 @@ namespace GiantCropRing
             GiantRing.price = this.config.cropRingPrice / 2;
         }
 
-
-        private void TimeEvents_TimeOfDayChanged(object sender, EventArgsIntChanged e)
+        /// <summary>Raised after the in-game clock time changes.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnTimeChanged(object sender, TimeChangedEventArgs e)
         {
             bool left = Game1.player.leftRing.Value is GiantRing;
             bool right = Game1.player.rightRing.Value is GiantRing;
@@ -48,18 +52,19 @@ namespace GiantCropRing
                 this.numberOfTimeTicksWearingOneRing++;
 
             this.totalNumberOfSeenTimeTicks++;
-
         }
 
-        private void MenuChanged(object sender, EventArgsClickableMenuChanged e)
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
             if (Game1.activeClickableMenu is ShopMenu)
             {
                 ShopMenu shop = (ShopMenu)Game1.activeClickableMenu;
                 if (shop.portraitPerson != null && shop.portraitPerson.Name == "Pierre") // && Game1.dayOfMonth % 7 == )
                 {
-                    var items =
-                        this.Helper.Reflection.GetField<Dictionary<Item, int[]>>(shop, "itemPriceAndStock").GetValue();
+                    var items = this.Helper.Reflection.GetField<Dictionary<Item, int[]>>(shop, "itemPriceAndStock").GetValue();
                     var selling = this.Helper.Reflection.GetField<List<Item>>(shop, "forSale").GetValue();
 
                     var ring = new GiantRing();
@@ -69,7 +74,10 @@ namespace GiantCropRing
             }
         }
 
-        private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
+        /// <summary>Raised before the game ends the current day. This happens before it starts setting up the next day and before <see cref="IGameLoopEvents.Saving"/>.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
             double chance = 0.0;
 

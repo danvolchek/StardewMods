@@ -1,13 +1,11 @@
 ﻿using System;
-using StardewValley;
-using StardewValley.TerrainFeatures;
 using Microsoft.Xna.Framework;
-using StardewValley.Tools;
+using StardewValley;
 using SObject = StardewValley.Object;
 
 namespace BetterHay
 {
-    class BetterHayGrass
+    internal class BetterHayGrass
     {
         //Tries to add an item to the player's inventory
         public static bool TryAddItemToInventory(int which)

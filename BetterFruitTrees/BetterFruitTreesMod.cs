@@ -7,8 +7,8 @@ using BetterFruitTrees.Patches.JunimoHarvester;
 using BetterFruitTrees.Patches.JunimoHut;
 using Harmony;
 using StardewModdingAPI;
-using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Buildings;
 using StardewValley.Characters;
 using static BetterFruitTrees.Extensions.ListExtensions;
 using SObject = StardewValley.Object;
@@ -26,15 +26,10 @@ namespace BetterFruitTrees
             Utils.Reflection = helper.Reflection;
             if (helper.ModRegistry.IsLoaded("cat.fruittreesanywhere"))
             {
-                this.Monitor.Log("You have both this mod, and the old version ('Fruit Trees Anywhere') installed!",
-                    LogLevel.Error);
-                this.Monitor.Log(
-                    "In order for this mod to work properly, you need to delete the FruitTreesAnywhere folder!",
-                    LogLevel.Error);
-                this.Monitor.Log(
-                    "This mod does everything the old version does and fruit tree junimo harvesting, so please delete FruitTreesAnywhere!",
-                    LogLevel.Error);
-                SaveEvents.AfterLoad += this.ShowErrorMessage;
+                this.Monitor.Log("You have both this mod, and the old version ('Fruit Trees Anywhere') installed!", LogLevel.Error);
+                this.Monitor.Log("In order for this mod to work properly, you need to delete the FruitTreesAnywhere folder!", LogLevel.Error);
+                this.Monitor.Log("This mod does everything the old version does and fruit tree junimo harvesting, so please delete FruitTreesAnywhere!", LogLevel.Error);
+                helper.Events.GameLoop.SaveLoaded += this.ShowErrorMessage;
                 return;
             }
 
@@ -42,28 +37,24 @@ namespace BetterFruitTrees
 
             this.Config = helper.ReadConfig<BetterFruitTreesConfig>();
 
-            GrowHelper growHelper = new GrowHelper();
+            new GrowHelper(helper.Events);
 
             HarmonyInstance harmony = HarmonyInstance.Create("cat.betterfruittrees");
 
-            Utils.HarvestThreeAtOnce =
-                this.Config.Wait_To_Harvest_Fruit_Trees_Until_They_Have_Three_Fruits__Then_Harvest_All_Three_At_Once;
+            Utils.HarvestThreeAtOnce = this.Config.Wait_To_Harvest_Fruit_Trees_Until_They_Have_Three_Fruits__Then_Harvest_All_Three_At_Once;
 
 
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>
             {
-                {"placementAction", typeof(SObject), typeof(PlacementPatch)}
+                { nameof(SObject.placementAction), typeof(SObject), typeof(PlacementPatch)}
             };
 
             Type junimoHarvesterType = typeof(JunimoHarvester);
             IList<Tuple<string, Type, Type>> junimoReplacements = new List<Tuple<string, Type, Type>>
             {
-                {"tryToHarvestHere", junimoHarvesterType, typeof(TryToHarvestHerePatch)},
-                {"update", junimoHarvesterType, typeof(UpdatePatch)},
-                {
-                    "areThereMatureCropsWithinRadius", Utils.GetSDVType("Buildings.JunimoHut"),
-                    typeof(AreThereMatureCropsWithinRadiusPatch)
-                }
+                { nameof(JunimoHarvester.tryToHarvestHere), junimoHarvesterType, typeof(TryToHarvestHerePatch) },
+                { nameof(JunimoHarvester.update), junimoHarvesterType, typeof(UpdatePatch) },
+                { "areThereMatureCropsWithinRadius", typeof(JunimoHut), typeof(AreThereMatureCropsWithinRadiusPatch) }
             };
 
 
