@@ -1,5 +1,5 @@
 # StardewMods
-This repo contains the mods I've created for Stardew Valley. Each folder contains some more information and a link to the NexusMods page for downloads.
+This repo contains the mods I've created for Stardew Valley. Each folder contains some more information and a link to the NexusMods page for downloads. See [my NexusMods profile](https://www.nexusmods.com/users/44734342?tab=user+files) for download links for every mod.
 
 ## Overview
 - [Auto Stacker](/AutoStacker): Automatically stacks items in your inventory into as few stacks as possible at the press of a key.
