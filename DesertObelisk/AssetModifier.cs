@@ -87,7 +87,7 @@ namespace DesertObelisk
                     "337 10 768 10/3/3/-1/-1/-2/-1/null/Desert Obelisk/Warps you to the desert./Buildings/none/48/128/-1/null/Farm/1000000/true");
         }
 
-        public bool CanLoad<Texture2D>(IAssetInfo asset)
+        public bool CanLoad<T>(IAssetInfo asset)
         {
             return asset.AssetNameEquals(@"Buildings\Desert Obelisk");
         }

@@ -226,10 +226,8 @@ namespace GeodeInfoMenu
 
         public void SetTabNeighborsForCurrentPage()
         {
-
-            for (int index = 0; index < this.tabs.Count; ++index)
-                tabs[index].downNeighborID = -99999;
-
+            foreach (ClickableComponent tab in this.tabs)
+                tab.downNeighborID = -99999;
         }
 
         /***
