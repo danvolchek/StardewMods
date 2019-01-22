@@ -71,6 +71,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="manifest.json" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\Desert Obelisk Starblue.png">

@@ -86,6 +86,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="manifest.json" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\honey.png">

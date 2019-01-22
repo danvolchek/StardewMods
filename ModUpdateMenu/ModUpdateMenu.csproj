@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\statusIcons.png">
