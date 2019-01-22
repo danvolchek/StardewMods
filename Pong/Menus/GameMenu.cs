@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Pong.Framework.Common;
@@ -55,17 +56,17 @@ namespace Pong.Menus
             if (!this.isMultiplayerGame)
             {
                 playerTwoPaddle = new Paddle(new ComputerController(this.ball), Side.Top);
-                playerOnePaddle = new Paddle(localPlayerController = new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
+                playerOnePaddle = new Paddle(this.localPlayerController = new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
             }
             else if (this.isLeader)
             {
                 playerTwoPaddle = new Paddle(new StatePaddleController(this.followerPaddlePosition), Side.Top);
-                playerOnePaddle = new Paddle(localPlayerController = new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
+                playerOnePaddle = new Paddle(this.localPlayerController = new LocalPlayerController(this.state.PaddlePositionState), Side.Bottom);
             }
             else
             {
                 playerTwoPaddle = new Paddle(new StatePaddleController(this.state.PaddlePositionState), Side.Top);
-                playerOnePaddle = new Paddle(localPlayerController = new LocalPlayerController(this.followerPaddlePosition), Side.Bottom);
+                playerOnePaddle = new Paddle(this.localPlayerController = new LocalPlayerController(this.followerPaddlePosition), Side.Bottom);
             }
 
             this.nonReactiveCollideables = new List<INonReactiveDrawableCollideable>
@@ -196,7 +197,7 @@ namespace Pong.Menus
         public override void OnCursorMoved(CursorMovedEventArgs e)
         {
             base.OnCursorMoved(e);
-            localPlayerController.OnCursorMoved(e);
+            this.localPlayerController.OnCursorMoved(e);
         }
 
         public override void Update()

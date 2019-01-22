@@ -107,7 +107,7 @@ namespace DesertObelisk
         /// <param name="e">The event arguments.</param>
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (!Context.IsWorldReady || e.IsOneSecond)
+            if (!Context.IsWorldReady || !e.IsOneSecond)
                 return;
             GameLocation desert = Game1.getLocationFromName("Desert");
             TileSheet markerTileSheet = new TileSheet("zDesertObeliskTileSheet", desert.map,

@@ -83,7 +83,7 @@ namespace CustomWarpLocations
 
             if (Game1.player.ActiveObject != null)
             {
-                var location = this.GetWarpLocation();
+                WarpLocation location = this.GetWarpLocation();
                 switch (Game1.player.ActiveObject.ParentSheetIndex)
                 {
                     case 688: //Farm Totem
