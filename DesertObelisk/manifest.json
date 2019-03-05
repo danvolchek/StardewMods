@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Desert Obelisk",
   "Author": "Cat",
-  "Version": "1.5.0",
+  "Version": "1.6.0",
   "Description": "Adds a desert obelisk that warps you to the desert!",
   "UniqueID": "cat.desertobelisk",
   "EntryDll": "DesertObelisk.dll",
