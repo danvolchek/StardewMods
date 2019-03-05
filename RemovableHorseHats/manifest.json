@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Removable Horse Hats",
   "Author": "Cat",
-  "Version": "1.0.1",
+  "Version": "1.1.0",
   "Description": "Lets you remove the hat from your horse by holding down a key and clicking it.",
   "UniqueID": "cat.removablehorsehats",
   "EntryDll": "RemovableHorseHats.dll",
