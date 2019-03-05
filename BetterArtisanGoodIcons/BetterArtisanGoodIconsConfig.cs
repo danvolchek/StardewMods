@@ -2,6 +2,6 @@
 {
     internal class BetterArtisanGoodIconsConfig
     {
-        public bool DisableSmallSourceIcons { get; set; } = false;
+        public bool DisableSmallSourceIcons { get; set; } = true;
     }
 }
