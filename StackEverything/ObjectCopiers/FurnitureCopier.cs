@@ -14,25 +14,17 @@ namespace StackEverything.ObjectCopiers
         public SObject Copy(SObject obj)
         {
             Furniture toCopy = obj as Furniture;
+            Furniture furniture = toCopy.getOne() as Furniture;
 
-            Furniture furniture = new Furniture(toCopy.ParentSheetIndex, toCopy.TileLocation);
-
-            furniture.defaultBoundingBox.Value = toCopy.defaultBoundingBox.Value;
-            furniture.boundingBox.Value = toCopy.boundingBox.Value;
-            furniture.rotations.Value = toCopy.rotations.Value;
-            furniture.currentRotation.Value = 0;
-            furniture.Quality = toCopy.Quality;
-            
-
-            furniture.updateDrawPosition();
-
-            if (toCopy.rotations.Value == 2)
-                furniture.currentRotation.Value = toCopy.currentRotation.Value;
-
-            for (int i = 0; i < toCopy.currentRotation.Value; i++)
+            // Attempting to copy the rotation of the placed object is awful.
+            // Try to match up the bounding boxes, giving up after 8 failed attempts.
+            int attempts = 0;
+            while (!furniture.boundingBox.Value.Equals(toCopy.boundingBox.Value) && attempts < 8)
+            {
                 furniture.rotate();
+                attempts++;
+            }
 
-            furniture.initializeLightSource(toCopy.TileLocation);
             return furniture;
         }
     }
