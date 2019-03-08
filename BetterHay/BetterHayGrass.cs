@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewValley;
 using SObject = StardewValley.Object;
 
@@ -21,20 +20,6 @@ namespace BetterHay
         //Drops an item on the given tileLocation
         public static void DropOnGround(Vector2 tileLocation, int which)
         {
-            Random random;
-            if (Game1.IsMultiplayer)
-            {
-                random = Game1.recentMultiplayerRandom;
-            }
-            else
-            {
-                double uniqueId = Game1.uniqueIDForThisGame;
-                double tilePos = tileLocation.X * 1000.0 + tileLocation.Y * 11.0;
-                double mineLevel = Game1.mine?.mineLevel ?? 0;
-                double timesReachedBottom = Game1.player.timesReachedMineBottom;
-                random = new Random((int)(uniqueId + tilePos + mineLevel + timesReachedBottom));
-            }
-
             Game1.createObjectDebris(which, (int)tileLocation.X, (int)tileLocation.Y);
         }
     }
