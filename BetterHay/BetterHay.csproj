@@ -86,7 +86,7 @@
     <Compile Include="BetterHayGrass.cs" />
     <Compile Include="HopperPatch.cs" />
     <Compile Include="ModConfig.cs" />
-    <Compile Include="ModEntry.cs" />
+    <Compile Include="BetterHayMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
