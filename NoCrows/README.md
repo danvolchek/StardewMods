@@ -5,4 +5,4 @@ See [This link](http://www.nexusmods.com/stardewvalley/mods/1682?) for the Nexus
 
 ## How it works
 
-The mod replaces the game's pointer to the function which adds crows with a pointer to a function that does nothing.
+The mod uses Harmony to make the method which adds crows to the farm do nothing.

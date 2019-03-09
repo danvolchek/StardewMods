@@ -7,4 +7,4 @@ See [This link](http://www.nexusmods.com/stardewvalley/mods/1430?) for the Nexus
 
 The mod has two parts:
 - Collect Hay Without Silos: If you have no silos or they're full, the mod simulates the relevant hay drop code as if you did.
-- Pull Hay out of Hoppers Anytime: The mod replaces the existing Hoppers with new ones that allow you to withdraw hay whenever.
+- Pull Hay out of Hoppers Anytime: The mod uses Harmony to patch the hopper interaction method to always try to pull at least one hay out.

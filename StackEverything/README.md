@@ -13,5 +13,3 @@ This mod uses [Harmony](https://github.com/pardeike/Harmony) to:
  - replace `DecoratableLocation.leftClick` to not overwrite items when picking up furniture with a full inventory.
 
 It also replaces placed down tappers and furniture into new instances of those items so there isn't the same instance of the same item in multiple locations.
-
-Note that this repo does not contain the Harmony dll, and the ones found in the mentioned link are not compiled targeting .NET 4.5. You'll need to compile for .NET 4.5 yourself, or just copy the dll packaged in the release.
