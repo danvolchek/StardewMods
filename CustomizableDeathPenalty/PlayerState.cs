@@ -36,8 +36,11 @@ namespace CustomizableDeathPenalty
                         slingshotCopy.CurrentParentTileIndex = slingshot.InitialParentTileIndex;
                         slingshotCopy.IndexOfMenuItemView = slingshot.IndexOfMenuItemView;
 
-                        slingshotCopy.attachments[0] = slingshot.attachments[0].getOne() as StardewValley.Object;
-                        slingshotCopy.attachments[0].Stack = slingshot.attachments[0].Stack;
+                        if (slingshot.attachments[0] != null)
+                        {
+                            slingshotCopy.attachments[0] = slingshot.attachments[0].getOne() as StardewValley.Object;
+                            slingshotCopy.attachments[0].Stack = slingshot.attachments[0].Stack;
+                        }
                         copy = slingshotCopy;
                     }else if (item is FishingRod rod)
                     {
@@ -45,9 +48,11 @@ namespace CustomizableDeathPenalty
 
                         for (int index = 0; index < rodCopy.numAttachmentSlots.Value; index++)
                         {
-                            rodCopy.attachments[index] = rod.attachments[index].getOne() as StardewValley.Object;
-                            rodCopy.attachments[index].Stack = rod.attachments[index].Stack;
-
+                            if (rod.attachments[index] != null)
+                            {
+                                rodCopy.attachments[index] = rod.attachments[index].getOne() as StardewValley.Object;
+                                rodCopy.attachments[index].Stack = rod.attachments[index].Stack;
+                            }
                         }
 
                         copy = rodCopy;
