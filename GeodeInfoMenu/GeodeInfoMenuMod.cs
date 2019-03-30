@@ -22,7 +22,7 @@ namespace GeodeInfoMenu
         /// <summary>
         /// A mapping of GeodeType to item id of that geode.
         /// </summary>
-        private IDictionary<GeodeType, int> Geodes;
+        private IDictionary<GeodeType, int> geodes;
 
         /// <summary>
         /// A mapping of item name to that GeodeDrop.
@@ -42,7 +42,7 @@ namespace GeodeInfoMenu
         /// <summary>
         /// The menu where players actually break geodes.
         /// </summary>
-        private StardewValley.Menus.IClickableMenu GeodeBreakingMenu = null;
+        private StardewValley.Menus.IClickableMenu geodeBreakingMenu;
 
 
         /// <summary>
@@ -54,20 +54,30 @@ namespace GeodeInfoMenu
             this.config = helper.ReadConfig<GeodeInfoMenuConfig>();
             this.config.NumberOfNextGeodeDropsToShow = this.config.NumberOfNextGeodeDropsToShow < 0 ? 0 : this.config.NumberOfNextGeodeDropsToShow;
             this.config.NumberOfNextGeodeDropsToShow = this.config.NumberOfNextGeodeDropsToShow > 999 ? 9 : this.config.NumberOfNextGeodeDropsToShow;
-            this.Geodes = new Dictionary<GeodeType, int> {
+            this.geodes = new Dictionary<GeodeType, int> {
                 {GeodeType.Normal, 535}, {GeodeType.FrozenGeode, 536}, {GeodeType.MagmaGeode, 537}, {GeodeType.OmniGeode, 749}
             };
-            this.dropNameToGeodeDrop = this.GetAllPossibleDropMappings();
             GeodeMenu.tabIcons = helper.Content.Load<Texture2D>("Sprites/tabs.png");
+
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Display.MenuChanged += this.OnMenuChanged;
             helper.Events.Display.WindowResized += this.OnWindowResized;
-
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
         }
+
+
 
         /***
         ** Event Listeners
         ****/
+        /// <summary>Raised after the game is launched, right before the first update tick.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            this.dropNameToGeodeDrop = this.GetAllPossibleDropMappings();
+        }
+
         /// <summary>Raised after the game window is resized.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
@@ -88,7 +98,7 @@ namespace GeodeInfoMenu
         {
             // save the last geode menu state
             this.SaveMenuState(e.OldMenu);
-            this.GeodeBreakingMenu = null;
+            this.geodeBreakingMenu = null;
         }
 
         /// <summary>
@@ -106,7 +116,7 @@ namespace GeodeInfoMenu
         /// </summary>
         public StardewValley.Menus.IClickableMenu GetLastMenu()
         {
-            return this.GeodeBreakingMenu;
+            return this.geodeBreakingMenu;
         }
 
         /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
@@ -118,7 +128,7 @@ namespace GeodeInfoMenu
             bool canOpen = Game1.activeClickableMenu == null || Game1.activeClickableMenu is StardewValley.Menus.GeodeMenu;
             if (Game1.activeClickableMenu is StardewValley.Menus.GeodeMenu)
             {
-                this.GeodeBreakingMenu = Game1.activeClickableMenu;
+                this.geodeBreakingMenu = Game1.activeClickableMenu;
             }
             if (e.Button == this.config.ActivationKey && canOpen)
             {
@@ -169,7 +179,7 @@ namespace GeodeInfoMenu
             {
                 if (geodesToCrack[i])
                 {
-                    int geodeParentSheetIndex = this.Geodes[this.GetGeodeTypes()[i]];
+                    int geodeParentSheetIndex = this.geodes[this.GetGeodeTypes()[i]];
                     int amnt = this.GeodesUntilTreasure(geodeParentSheetIndex, item.ParentSheetIndex);
                     searchResultInfo[currIndex++] = new Tuple<int, int>(geodeParentSheetIndex, amnt);
                 }
@@ -250,7 +260,7 @@ namespace GeodeInfoMenu
             }
             foreach (GeodeType type in this.GetGeodeTypes())
             {
-                foreach (string drop in Game1.objectInformation[this.Geodes[type]].Split('/')[6].Split(' '))
+                foreach (string drop in Game1.objectInformation[this.geodes[type]].Split('/')[6].Split(' '))
                 {
                     string name = Game1.objectInformation[Convert.ToInt32(drop)].Split('/')[0].ToLower();
                     if (!mapping.ContainsKey(name))
@@ -268,7 +278,7 @@ namespace GeodeInfoMenu
         /// <returns>An integer array of item ids</returns>
         private int[] GetDropsFromGeode(GeodeType type)
         {
-            return Array.ConvertAll(Game1.objectInformation[this.Geodes[type]].Split('/')[6].Split(' '), int.Parse);
+            return Array.ConvertAll(Game1.objectInformation[this.geodes[type]].Split('/')[6].Split(' '), int.Parse);
         }
 
         /// <summary>
@@ -287,7 +297,7 @@ namespace GeodeInfoMenu
                 bool[] stars = new bool[amount];
                 for (int i = 0; i < amount; i++)
                 {
-                    items[i] = this.GeodeSimulator(this.Geodes[type], GeodesCracked++);
+                    items[i] = this.GeodeSimulator(this.geodes[type], GeodesCracked++);
                     stars[i] = this.HasNotDonatedItemToMuseum(items[i]);
                 }
                 list.Add(new Tuple<int[], bool[]>(items, stars));
@@ -436,7 +446,7 @@ namespace GeodeInfoMenu
             int iGeodeIndex = 0;
             for (int i = 0; i < geodes.Length; i++)
                 if (geodes[i])
-                    iGeodes[iGeodeIndex++] = this.Geodes[this.GetGeodeTypes()[i]];
+                    iGeodes[iGeodeIndex++] = this.geodes[this.GetGeodeTypes()[i]];
             return iGeodes;
         }
 

@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Geode Info Menu",
   "Author": "Cat",
-  "Version": "1.5.0",
+  "Version": "1.5.1",
   "Description": "Press the activation key to open up a menu with information about future geode openings!",
   "UniqueID": "cat.geodeinfomenu",
   "EntryDll": "GeodeInfoMenu.dll",
