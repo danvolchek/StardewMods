@@ -17,7 +17,7 @@ namespace ModUpdateMenu
         private UpdateMenu menu;
         private ModUpdateMenuConfig config;
 
-        private IList<ModStatus> currentStatuses = null;
+        private IList<ModStatus> currentStatuses;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -25,12 +25,19 @@ namespace ModUpdateMenu
         {
             this.config = this.Helper.ReadConfig<ModUpdateMenuConfig>();
             this.button = new UpdateButton(helper);
-            this.menu = new UpdateMenu();
 
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             helper.Events.Display.Rendered += this.OnRendered;
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+        }
 
+        /// <summary>Raised after the game is launched, right before the first update tick. </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            this.menu = new UpdateMenu();
             new Thread(() =>
             {
                 IUpdateStatusRetriever statusRetriever = new UpdateStatusRetriever(this.Helper);
@@ -67,10 +74,10 @@ namespace ModUpdateMenu
                         if (attempts == 0)
                             throw new Exception("All update attempts failed.");
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
                         this.Monitor.Log("Failed retrieving update info from SMAPI: ", LogLevel.Debug);
-                        this.Monitor.Log(e.ToString(), LogLevel.Debug);
+                        this.Monitor.Log(ex.ToString(), LogLevel.Debug);
                         this.Notify(null);
                         this.NotifySMAPI(null);
                         break;
