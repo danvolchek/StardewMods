@@ -33,8 +33,8 @@ namespace ModUpdateMenu
         }
 
         /// <summary>Raised after the game is launched, right before the first update tick. </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             this.menu = new UpdateMenu();
