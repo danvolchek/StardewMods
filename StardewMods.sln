@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStacker", "AutoStacker\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterArtisanGoodIcons", "BetterArtisanGoodIcons\BetterArtisanGoodIcons.csproj", "{F4AC84CC-F578-4553-8DE1-EC9F851D3700}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterDoors", "BetterDoors\BetterDoors.csproj", "{B0C1C09B-830E-456A-B052-3B60EB38607E}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterFruitTrees", "BetterFruitTrees\BetterFruitTrees.csproj", "{25913FD8-607A-4129-9E1E-6BD730AA1927}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterGardenPots", "BetterGardenPots\BetterGardenPots.csproj", "{128B627C-2EF4-42F5-B397-1C3F9593CC42}"
@@ -59,8 +61,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{2C8D25AD-6
 		.gitignore = .gitignore
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomMapDoors", "CustomMapDoors\CustomMapDoors.csproj", "{B0C1C09B-830E-456A-B052-3B60EB38607E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
