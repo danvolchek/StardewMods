@@ -1,4 +1,5 @@
-﻿using BetterDoors.Framework.Utility;
+﻿using System;
+using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -37,14 +38,14 @@ namespace BetterDoors.Framework.ContentPacks
 
                 string error = null;
                 IDictionary<string, Texture2D> spriteSheets = new Dictionary<string, Texture2D>();
-                HashSet<string> spriteNames = new HashSet<string>();
+                HashSet<string> spriteNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
                 foreach (ContentPackDoorEntry doorEntry in loadedPack.Doors)
                 {
                     if (!contentPack.HasFile(doorEntry.ImageFilePath))
                     {
                         error = $"{doorEntry.ImageFilePath} doesn't exist";
                     }
-                    else if (!spriteNames.Add(doorEntry.Name.ToLower()))
+                    else if (!spriteNames.Add(doorEntry.Name))
                     {
                         error = $"{doorEntry.Name} is repeated more than once";
                     }
