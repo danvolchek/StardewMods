@@ -38,7 +38,7 @@ namespace BetterDoors.Framework.ContentPacks
 
                 string error = null;
                 IDictionary<string, Texture2D> spriteSheets = new Dictionary<string, Texture2D>();
-                HashSet<string> spriteNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+                ISet<string> spriteNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
                 foreach (ContentPackDoorEntry doorEntry in loadedPack.Doors)
                 {
                     if (!contentPack.HasFile(doorEntry.ImageFilePath))
