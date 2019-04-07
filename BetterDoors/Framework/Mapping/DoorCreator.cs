@@ -64,6 +64,7 @@ namespace BetterDoors.Framework.Mapping
                             continue;
                         }
 
+                        // Get the right door type to create.
                         if (!manager.GetDoorSprite(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection, out error, out GeneratedDoorTileInfo tileInfo))
                         {
                             Utils.LogContentPackError(this.monitor, $"The tile property at {x} {y} is invalid. Info: {error}.");

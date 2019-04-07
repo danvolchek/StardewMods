@@ -1,11 +1,12 @@
-﻿using BetterDoors.Framework.Enums;
+﻿using System;
+using BetterDoors.Framework.Enums;
 using System.Collections.Generic;
 
 namespace BetterDoors.Framework.DoorGeneration
 {
     internal class GeneratedSpriteManager
     {
-        private readonly IDictionary<string, IDictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>> spritesByMod = new Dictionary<string, IDictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>>();
+        private readonly IDictionary<string, IDictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>> spritesByMod = new Dictionary<string, IDictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>>(StringComparer.InvariantCultureIgnoreCase);
 
         public bool GetDoorSprite(string modId, string spriteName, Orientation orientation, OpeningDirection openingDirection, out string error, out GeneratedDoorTileInfo generatedDoorTileInfo)
         {
@@ -42,7 +43,7 @@ namespace BetterDoors.Framework.DoorGeneration
         public void RegisterDoorSprite(string modId, string spriteName, Orientation orientation, OpeningDirection openingDirection, GeneratedDoorTileInfo generatedDoorTileInfo)
         {
             if (!this.spritesByMod.ContainsKey(modId))
-                this.spritesByMod[modId] = new Dictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>();
+                this.spritesByMod[modId] = new Dictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>(StringComparer.InvariantCultureIgnoreCase);
 
             if (!this.spritesByMod[modId].ContainsKey(spriteName))
                 this.spritesByMod[modId][spriteName] = new Dictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>();

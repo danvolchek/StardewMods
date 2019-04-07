@@ -78,9 +78,10 @@ namespace BetterDoors.Framework
 
         private int ToggleCallback()
         {
+            State oldState = this.State;
             this.State = this.GetNextState();
 
-            if (this.State != State.Closed && this.State != State.Open)
+            if (this.State != oldState)
             {
                 return 100;
             }

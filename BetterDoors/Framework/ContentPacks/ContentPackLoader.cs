@@ -44,7 +44,7 @@ namespace BetterDoors.Framework.ContentPacks
                     {
                         error = $"{doorEntry.ImageFilePath} doesn't exist";
                     }
-                    else if (!spriteNames.Add(doorEntry.Name))
+                    else if (!spriteNames.Add(doorEntry.Name.ToLower()))
                     {
                         error = $"{doorEntry.Name} is repeated more than once";
                     }
