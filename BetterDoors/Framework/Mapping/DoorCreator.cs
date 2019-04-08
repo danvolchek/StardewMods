@@ -1,5 +1,4 @@
-﻿using BetterDoors.Framework.ContentPacks;
-using BetterDoors.Framework.DoorGeneration;
+﻿using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
@@ -18,22 +17,19 @@ namespace BetterDoors.Framework.Mapping
     /// </summary>
     internal class DoorCreator
     {
-        private readonly IMonitor monitor;
+        private readonly GeneratedSpriteManager spriteManager;
         private readonly CallbackTimer timer;
-        private readonly DoorSpriteGenerator generator;
+        private readonly IMonitor monitor;
 
-        public DoorCreator(IModHelper helper, IMonitor monitor, CallbackTimer timer)
+        public DoorCreator(GeneratedSpriteManager spriteManager, CallbackTimer timer, IMonitor monitor)
         {
+            this.spriteManager = spriteManager;
             this.monitor = monitor;
             this.timer = timer;
-            this.generator = new DoorSpriteGenerator(helper.Content, this.monitor, Game1.graphics.GraphicsDevice);
         }
 
-        public IDictionary<GameLocation, IList<Door>> FindAndCreateDoors(IList<LoadedContentPackDoorEntry> loadedDoorPacks)
+        public IDictionary<GameLocation, IList<Door>> FindAndCreateDoors()
         {
-            // Generate different door types from the loaded content packs.
-            GeneratedSpriteManager manager = this.generator.GenerateDoorSprites(loadedDoorPacks);
-
             // Search for doors in all maps.
             IDictionary<GameLocation, IList<Door>> foundDoors = new Dictionary<GameLocation, IList<Door>>();
             foreach (GameLocation location in DoorCreator.GetAllLocations())
@@ -65,7 +61,7 @@ namespace BetterDoors.Framework.Mapping
                         }
 
                         // Get the right door type to create.
-                        if (!manager.GetDoorSprite(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection, out error, out GeneratedDoorTileInfo tileInfo))
+                        if (!this.spriteManager.GetDoorSprite(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection, out error, out GeneratedDoorTileInfo tileInfo))
                         {
                             Utils.LogContentPackError(this.monitor, $"The tile property at {x} {y} is invalid. Info: {error}.");
                             continue;

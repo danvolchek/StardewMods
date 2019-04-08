@@ -1,9 +1,6 @@
-﻿using BetterDoors.Framework.ContentPacks;
-using BetterDoors.Framework.Enums;
+﻿using BetterDoors.Framework.Enums;
 using BetterDoors.Framework.Mapping;
-using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
-using StardewModdingAPI;
 using StardewValley;
 using System;
 using System.Collections.Generic;
@@ -15,25 +12,23 @@ namespace BetterDoors.Framework
     /// </summary>
     internal class DoorManager
     {
-        private readonly IList<LoadedContentPackDoorEntry> loadedDoorsPacks;
         private readonly DoorCreator doorCreator;
-        private readonly MapModifier mapTileSheetAdder;
+        private readonly MapModifier mapModifier;
 
         public IDictionary<GameLocation, IList<Door>> Doors { get; private set; }
 
-        public DoorManager(IModHelper helper, IMonitor monitor, CallbackTimer timer)
+        public DoorManager(DoorCreator doorCreator, MapModifier mapModifier)
         {
-            this.doorCreator = new DoorCreator(helper, monitor, timer);
-            this.loadedDoorsPacks = new ContentPackLoader(helper, monitor).LoadContentPacks();
-            this.mapTileSheetAdder = new MapModifier();
+            this.doorCreator = doorCreator;
+            this.mapModifier = mapModifier;
         }
 
         public void Init(IDictionary<string, IDictionary<Point, State>> initialPositions)
         {
             // Load doors based on the provided content packs.
-            this.Doors = this.doorCreator.FindAndCreateDoors(this.loadedDoorsPacks);
+            this.Doors = this.doorCreator.FindAndCreateDoors();
             // Modify the maps that have doors with tile sheets so the doors can be drawn.
-            this.mapTileSheetAdder.AddTileSheetsToMaps(this.Doors);
+            this.mapModifier.AddTileSheetsToMaps(this.Doors);
             // Set the positions of the doors to what they previously were.
             this.InitializeDoorStates(initialPositions);
         }

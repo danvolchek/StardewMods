@@ -23,9 +23,9 @@ namespace BetterDoors.Framework.DoorGeneration
         private readonly DoorAssetLoader assetLoader;
         private readonly GraphicsDevice device;
 
-        public DoorSpriteGenerator(IContentHelper helper, IMonitor monitor, GraphicsDevice device)
+        public DoorSpriteGenerator(DoorAssetLoader assetLoader, IMonitor monitor, GraphicsDevice device)
         {
-            this.assetLoader = new DoorAssetLoader(helper);
+            this.assetLoader = assetLoader;
             this.monitor = monitor;
             this.device = device;
         }

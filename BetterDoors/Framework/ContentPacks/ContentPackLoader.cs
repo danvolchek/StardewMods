@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace BetterDoors.Framework.ContentPacks
 {
     /// <summary>
-    /// Loads and validates content packs.
+    /// Loads and validates content packs. Also loads vanilla doors.
     /// </summary>
     internal class ContentPackLoader
     {
@@ -83,6 +83,8 @@ namespace BetterDoors.Framework.ContentPacks
                     data.Add(new LoadedContentPackDoorEntry(contentPack.Manifest.UniqueID, spriteSheets[doorEntry.ImageFilePath], doorEntry));
                 }
             }
+
+            this.monitor.Log($"Loaded {data.Count} door sprites from content packs.", LogLevel.Trace);
 
             // Also load the vanilla door textures.
             const string vanillaPath = "LooseSprites/Cursors";

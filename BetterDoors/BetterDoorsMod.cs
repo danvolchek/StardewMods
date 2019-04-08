@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using BetterDoors.Framework;
+using BetterDoors.Framework.ContentPacks;
+using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Enums;
+using BetterDoors.Framework.Mapping;
 using BetterDoors.Framework.Serialization;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
@@ -16,6 +19,7 @@ namespace BetterDoors
     // - Vertical doors
     //    - They stop you from walking before you're close enough to them in one direction. Feasible to fix?
     // - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add.
+    // - Multiplayer
 
     /// <summary>
     /// A mod which provides better doors to map makers.
@@ -30,7 +34,13 @@ namespace BetterDoors
         {
             this.serializer = new DoorPositionSerializer(this.Helper.Data);
             this.timer = new CallbackTimer();
-            this.manager = new DoorManager(helper, this.Monitor, this.timer);
+
+            // Load content packs.
+            IList<LoadedContentPackDoorEntry> loadedDoorEntries = new ContentPackLoader(helper, this.Monitor).LoadContentPacks();
+            // Generate sprites.
+            GeneratedSpriteManager spriteManager = new DoorSpriteGenerator(new DoorAssetLoader(helper.Content), this.Monitor, Game1.graphics.GraphicsDevice).GenerateDoorSprites(loadedDoorEntries);
+            // Construct door manager.
+            this.manager = new DoorManager(new DoorCreator(spriteManager, this.timer, this.Monitor), new MapModifier());
 
             helper.Events.Input.ButtonPressed += this.Input_ButtonPressed;
             helper.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
