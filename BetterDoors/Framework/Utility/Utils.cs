@@ -53,5 +53,10 @@ namespace BetterDoors.Framework.Utility
 
             return new Point((index % sheetWidthTiles) * tileSize, (index / sheetWidthTiles) * tileSize);
         }
+
+        public static int CollapseDimension(int width, int x, int y)
+        {
+            return y * width + x;
+        }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using StardewValley;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BetterDoors.Framework
 {
@@ -61,6 +62,11 @@ namespace BetterDoors.Framework
                 if ((distance > 0 || door.State != State.Open) && distance < 2)
                     door.Toggle();
             }
+        }
+
+        public bool IsDoorCollisionAt(GameLocation location, Rectangle position)
+        {
+            return this.Doors.TryGetValue(location, out IList<Door> doors) && doors.Where(door => door.State == State.Closed).Any(door => door.CollisionInfo.Intersects(position));
         }
     }
 }

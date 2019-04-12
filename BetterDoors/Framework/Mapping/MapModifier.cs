@@ -42,8 +42,16 @@ namespace BetterDoors.Framework.Mapping
 
                     if (addedTileInfo.Add(door.DoorTileInfo))
                     {
-                        tileSheet.TileIndexProperties[door.DoorTileInfo.TopLeftTileIndex + 2 + (door.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X) * 2]["Passable"] = "T";
-                        tileSheet.TileIndexProperties[door.DoorTileInfo.TopLeftTileIndex + 3 + (door.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X) * 2]["Passable"] = "T";
+                        // Make the entire tile sheet passable
+                        for (int animationFrame = 0; animationFrame < 4; animationFrame++)
+                        {
+                            for (int doorYTile = 0; doorYTile < 3; doorYTile++)
+                            {
+                                tileSheet.TileIndexProperties[door.DoorTileInfo.TopLeftTileIndex + animationFrame + (door.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X) * doorYTile]["Passable"] = "T";
+                            }
+                        }
+                        //tileSheet.TileIndexProperties[door.DoorTileInfo.TopLeftTileIndex + 2 + (door.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X) * 2]["Passable"] = "T";
+                        //tileSheet.TileIndexProperties[door.DoorTileInfo.TopLeftTileIndex + 3 + (door.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X) * 2]["Passable"] = "T";
                     }
 
                     if(doorsInLocation.Key.Map.GetLayer("AlwaysFront") == null)

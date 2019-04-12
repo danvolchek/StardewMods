@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using BetterDoors.Framework;
 using BetterDoors.Framework.ContentPacks;
 using BetterDoors.Framework.DoorGeneration;
@@ -6,6 +7,7 @@ using BetterDoors.Framework.Enums;
 using BetterDoors.Framework.Mapping;
 using BetterDoors.Framework.Serialization;
 using BetterDoors.Framework.Utility;
+using Harmony;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -14,7 +16,6 @@ using StardewValley;
 namespace BetterDoors
 {
     //TODO:
-    // - Sound when opening/closing
     // - Double doors
     // - Vertical doors
     //    - They stop you from walking before you're close enough to them in one direction. Feasible to fix?
@@ -28,7 +29,9 @@ namespace BetterDoors
     {
         private DoorPositionSerializer serializer;
         private CallbackTimer timer;
-        private DoorManager manager;
+        internal DoorManager Manager { get; private set; }
+
+        internal static BetterDoorsMod Instance { get; private set; }
 
         public override void Entry(IModHelper helper)
         {
@@ -40,7 +43,12 @@ namespace BetterDoors
             // Generate sprites.
             GeneratedSpriteManager spriteManager = new DoorSpriteGenerator(new DoorAssetLoader(helper.Content), this.Monitor, Game1.graphics.GraphicsDevice).GenerateDoorSprites(loadedDoorEntries);
             // Construct door manager.
-            this.manager = new DoorManager(new DoorCreator(spriteManager, this.timer, this.Monitor), new MapModifier());
+            this.Manager = new DoorManager(new DoorCreator(spriteManager, this.timer, this.Monitor), new MapModifier());
+
+            BetterDoorsMod.Instance = this;
+
+            HarmonyInstance harmony = HarmonyInstance.Create(this.Helper.ModRegistry.ModID);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             helper.Events.Input.ButtonPressed += this.Input_ButtonPressed;
             helper.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
@@ -54,7 +62,7 @@ namespace BetterDoors
                 return;
 
             if (e.Button.IsActionButton() || e.Button.IsUseToolButton())
-                this.manager.TryToggleDoor(Game1.currentLocation, new Point(Game1.player.getTileX(), Game1.player.getTileY()));
+                this.Manager.TryToggleDoor(Game1.currentLocation, new Point(Game1.player.getTileX(), Game1.player.getTileY()));
         }
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
@@ -70,13 +78,13 @@ namespace BetterDoors
 
         private void GameLoop_Saving(object sender, SavingEventArgs e)
         {
-            this.serializer.Save(this.manager.Doors);
+            this.serializer.Save(this.Manager.Doors);
         }
 
         private void GameLoop_SaveLoaded(object sender, SaveLoadedEventArgs e)
         {
             //Start the entire door loading process, eventually setting the position of the doors to what they were before.
-            this.manager.Init(this.serializer.Load() ?? new Dictionary<string, IDictionary<Point, State>>());
+            this.Manager.Init(this.serializer.Load() ?? new Dictionary<string, IDictionary<Point, State>>());
         }
     }
 }

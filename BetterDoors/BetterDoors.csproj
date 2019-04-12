@@ -69,6 +69,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lib.Harmony.1.2.0.1\lib\net45\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="StardewModdingAPI.Toolkit">
       <HintPath>D:\Steam\SteamApps\common\Stardew Valley\StardewModdingAPI.Toolkit.dll</HintPath>
     </Reference>
@@ -82,7 +85,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Framework\DoorGeneration\DoorGenerationState.cs" />
     <Compile Include="Framework\Mapping\MapModifier.cs" />
+    <Compile Include="Framework\Patches\DoorCollisionPatch.cs" />
     <Compile Include="Framework\Utility\CallbackTimer.cs" />
     <Compile Include="BetterDoorsMod.cs" />
     <Compile Include="Framework\ContentPacks\ContentPack.cs" />
