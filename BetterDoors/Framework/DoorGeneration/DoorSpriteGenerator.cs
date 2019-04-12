@@ -17,19 +17,18 @@ namespace BetterDoors.Framework.DoorGeneration
         internal const int TileSize = 16;
 
         private readonly IMonitor monitor;
-        private readonly DoorAssetLoader assetLoader;
         private readonly GraphicsDevice device;
+        private readonly GeneratedSpriteManager manager;
 
-        public DoorSpriteGenerator(DoorAssetLoader assetLoader, IMonitor monitor, GraphicsDevice device)
+        public DoorSpriteGenerator(GeneratedSpriteManager manager, IMonitor monitor, GraphicsDevice device)
         {
-            this.assetLoader = assetLoader;
+            this.manager = manager;
             this.monitor = monitor;
             this.device = device;
         }
 
-        public GeneratedSpriteManager GenerateDoorSprites(IList<LoadedContentPackDoorEntry> contentPacks)
+        public IDictionary<string, Texture2D> GenerateDoorSprites(IList<LoadedContentPackDoorEntry> contentPacks)
         {
-            GeneratedSpriteManager manager = new GeneratedSpriteManager();
             IDictionary<string, Texture2D> generatedTextures = new Dictionary<string, Texture2D>();
 
             // Fields needed and modified during generation.
@@ -43,10 +42,11 @@ namespace BetterDoors.Framework.DoorGeneration
                 Color[] spriteData = new Color[info.Texture.Width * info.Texture.Height];
                 info.Texture.GetData(spriteData);
 
+
                 //Copy original sprite        -> Vertical Left
                 Point originalPoint = state.TexturePoint;
                 state.Copy(spriteData, Utils.ConvertTileIndexToPosition(info.Texture.Width, DoorSpriteGenerator.TileSize, info.Entry.TopLeftTileIndex), info.Texture.Width);
-                manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left, state.CreateTileInfo());
+                this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left, state.CreateTileInfo());
 
                 if (state.FinishSprite(out KeyValuePair<string, Texture2D> finishedTexture))
                     generatedTextures.Add(finishedTexture);
@@ -55,7 +55,7 @@ namespace BetterDoors.Framework.DoorGeneration
                 //Reflect + reverse VL sprite -> Vertical Right
                 state.ReflectOverYAxis(originalPoint);
                 state.ReverseAnimationOrder();
-                manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right, state.CreateTileInfo());
+                this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right, state.CreateTileInfo());
 
                 if (state.FinishSprite(out finishedTexture))
                     generatedTextures.Add(finishedTexture);
@@ -65,7 +65,7 @@ namespace BetterDoors.Framework.DoorGeneration
                 Point reOrderedPoint = state.TexturePoint;
                 state.Copy(state.TextureData, originalPoint, state.Width);
                 state.ReverseAnimationOrder();
-                manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right, state.CreateTileInfo());
+                this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right, state.CreateTileInfo());
 
                 if (state.FinishSprite(out finishedTexture))
                     generatedTextures.Add(finishedTexture);
@@ -74,7 +74,7 @@ namespace BetterDoors.Framework.DoorGeneration
                 //Reflect + reverse HR sprite -> Horizontal Left
                 state.ReflectOverYAxis(reOrderedPoint);
                 state.ReverseAnimationOrder();
-                manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo());
+                this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo());
 
                 if (state.FinishSprite(out finishedTexture))
                     generatedTextures.Add(finishedTexture);
@@ -93,9 +93,7 @@ namespace BetterDoors.Framework.DoorGeneration
                 this.monitor.Log("Successfully generated door sprites.", LogLevel.Trace);
             }
 
-            this.assetLoader.SetTextures(generatedTextures);
-
-            return manager;
+            return generatedTextures;
         }
     }
 }

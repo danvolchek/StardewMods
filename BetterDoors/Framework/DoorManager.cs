@@ -11,25 +11,14 @@ namespace BetterDoors.Framework
     /// <summary>
     /// Creates and then manages doors.
     /// </summary>
-    internal class DoorManager
+    internal class DoorManager : IResetable
     {
-        private readonly DoorCreator doorCreator;
-        private readonly MapModifier mapModifier;
-
         public IDictionary<GameLocation, IList<Door>> Doors { get; private set; }
 
-        public DoorManager(DoorCreator doorCreator, MapModifier mapModifier)
-        {
-            this.doorCreator = doorCreator;
-            this.mapModifier = mapModifier;
-        }
-
-        public void Init(IDictionary<string, IDictionary<Point, State>> initialPositions)
+        public void Init(IDictionary<GameLocation, IList<Door>> doors, IDictionary<string, IDictionary<Point, State>> initialPositions)
         {
             // Load doors based on the provided content packs.
-            this.Doors = this.doorCreator.FindAndCreateDoors();
-            // Modify the maps that have doors with tile sheets so the doors can be drawn.
-            this.mapModifier.AddTileSheetsToMaps(this.Doors);
+            this.Doors = doors;
             // Set the positions of the doors to what they previously were.
             this.InitializeDoorStates(initialPositions);
         }
@@ -67,6 +56,12 @@ namespace BetterDoors.Framework
         public bool IsDoorCollisionAt(GameLocation location, Rectangle position)
         {
             return this.Doors.TryGetValue(location, out IList<Door> doors) && doors.Where(door => door.State == State.Closed).Any(door => door.CollisionInfo.Intersects(position));
+        }
+
+        public void Reset()
+        {
+            foreach(Door door in this.Doors.SelectMany(doorsByLoc => doorsByLoc.Value))
+                door.RemoveFromMap();
         }
     }
 }

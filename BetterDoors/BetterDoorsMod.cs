@@ -17,8 +17,6 @@ namespace BetterDoors
 {
     //TODO:
     // - Double doors
-    // - Vertical doors
-    //    - They stop you from walking before you're close enough to them in one direction. Feasible to fix?
     // - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add.
     // - Multiplayer
 
@@ -27,26 +25,33 @@ namespace BetterDoors
     /// </summary>
     public class BetterDoorsMod : Mod
     {
+        private IList<LoadedContentPackDoorEntry> loadedContentPacks;
         private DoorPositionSerializer serializer;
         private CallbackTimer timer;
-        internal DoorManager Manager { get; private set; }
+
+        private GeneratedSpriteManager spriteManager;
+        private DoorSpriteGenerator generator;
+        private DoorAssetLoader assetLoader;
+        private MapModifier mapModifier;
+        private DoorCreator creator;
+        private DoorManager manager;
 
         internal static BetterDoorsMod Instance { get; private set; }
 
         public override void Entry(IModHelper helper)
         {
+            this.loadedContentPacks = new ContentPackLoader(this.Helper, this.Monitor).LoadContentPacks();
             this.serializer = new DoorPositionSerializer(this.Helper.Data);
             this.timer = new CallbackTimer();
 
-            // Load content packs.
-            IList<LoadedContentPackDoorEntry> loadedDoorEntries = new ContentPackLoader(helper, this.Monitor).LoadContentPacks();
-            // Generate sprites.
-            GeneratedSpriteManager spriteManager = new DoorSpriteGenerator(new DoorAssetLoader(helper.Content), this.Monitor, Game1.graphics.GraphicsDevice).GenerateDoorSprites(loadedDoorEntries);
-            // Construct door manager.
-            this.Manager = new DoorManager(new DoorCreator(spriteManager, this.timer, this.Monitor), new MapModifier());
+            this.spriteManager = new GeneratedSpriteManager();
+            this.generator = new DoorSpriteGenerator(this.spriteManager, this.Monitor, Game1.graphics.GraphicsDevice);
+            this.creator = new DoorCreator(this.spriteManager, this.timer, this.Monitor);
+            this.assetLoader = new DoorAssetLoader(this.Helper.Content);
+            this.mapModifier = new MapModifier();
+            this.manager = new DoorManager();
 
             BetterDoorsMod.Instance = this;
-
             HarmonyInstance harmony = HarmonyInstance.Create(this.Helper.ModRegistry.ModID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -54,6 +59,18 @@ namespace BetterDoors
             helper.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
             helper.Events.GameLoop.Saving += this.GameLoop_Saving;
             helper.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
+            helper.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
+        }
+
+        internal bool IsDoorCollisionAt(GameLocation location, Rectangle position)
+        {
+            return this.manager.IsDoorCollisionAt(location, position);
+        }
+
+        private void GameLoop_ReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
+        {
+            this.manager.Reset();
+            this.mapModifier.Reset();
         }
 
         private void Input_ButtonPressed(object sender, ButtonPressedEventArgs e)
@@ -62,7 +79,7 @@ namespace BetterDoors
                 return;
 
             if (e.Button.IsActionButton() || e.Button.IsUseToolButton())
-                this.Manager.TryToggleDoor(Game1.currentLocation, new Point(Game1.player.getTileX(), Game1.player.getTileY()));
+                this.manager.TryToggleDoor(Game1.currentLocation, new Point(Game1.player.getTileX(), Game1.player.getTileY()));
         }
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
@@ -78,13 +95,21 @@ namespace BetterDoors
 
         private void GameLoop_Saving(object sender, SavingEventArgs e)
         {
-            this.serializer.Save(this.Manager.Doors);
+            this.serializer.Save(this.manager.Doors);
         }
 
         private void GameLoop_SaveLoaded(object sender, SaveLoadedEventArgs e)
         {
-            //Start the entire door loading process, eventually setting the position of the doors to what they were before.
-            this.Manager.Init(this.serializer.Load() ?? new Dictionary<string, IDictionary<Point, State>>());
+            if (!this.creator.FindDoors())
+                return;
+
+            this.assetLoader.SetTextures(this.generator.GenerateDoorSprites(this.loadedContentPacks));
+            IDictionary<GameLocation, IList<Door>> doors = this.creator.CreateDoors();
+            this.creator.Reset();
+            this.spriteManager.Reset();
+
+            this.mapModifier.AddTileSheetsToMaps(doors);
+            this.manager.Init(doors, this.serializer.Load() ?? new Dictionary<string, IDictionary<Point, State>>());
         }
     }
 }

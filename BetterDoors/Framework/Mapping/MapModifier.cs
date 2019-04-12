@@ -1,6 +1,8 @@
 ﻿using StardewValley;
 using System.Collections.Generic;
+using System.Linq;
 using BetterDoors.Framework.DoorGeneration;
+using xTile;
 using xTile.Layers;
 using xTile.Tiles;
 
@@ -9,8 +11,10 @@ namespace BetterDoors.Framework.Mapping
     /// <summary>
     /// Modifies map tile sheets and layers so that doors can be drawn on them.
     /// </summary>
-    internal class MapModifier
+    internal class MapModifier : IResetable
     {
+        private readonly IDictionary<Map, IEnumerable<string>> addedSheetsByLocation = new Dictionary<Map, IEnumerable<string>>();
+
         public void AddTileSheetsToMaps(IDictionary<GameLocation, IList<Door>> doorsByLocation)
         {
             foreach (KeyValuePair<GameLocation, IList<Door>> doorsInLocation in doorsByLocation)
@@ -50,8 +54,6 @@ namespace BetterDoors.Framework.Mapping
                                 tileSheet.TileIndexProperties[door.DoorTileInfo.TopLeftTileIndex + animationFrame + (door.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X) * doorYTile]["Passable"] = "T";
                             }
                         }
-                        //tileSheet.TileIndexProperties[door.DoorTileInfo.TopLeftTileIndex + 2 + (door.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X) * 2]["Passable"] = "T";
-                        //tileSheet.TileIndexProperties[door.DoorTileInfo.TopLeftTileIndex + 3 + (door.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X) * 2]["Passable"] = "T";
                     }
 
                     if(doorsInLocation.Key.Map.GetLayer("AlwaysFront") == null)
@@ -61,8 +63,20 @@ namespace BetterDoors.Framework.Mapping
                     }
                 }
 
+                this.addedSheetsByLocation[doorsInLocation.Key.Map] = addedSheets;
+
                 doorsInLocation.Key.Map.LoadTileSheets(Game1.mapDisplayDevice);
             }
+        }
+
+        public void Reset()
+        {
+            foreach (KeyValuePair<Map, IEnumerable<string>> sheetsInMap in this.addedSheetsByLocation)
+            {
+                foreach(string layerId in sheetsInMap.Value)
+                    sheetsInMap.Key.RemoveTileSheet(sheetsInMap.Key.GetTileSheet(layerId));
+            }
+            this.addedSheetsByLocation.Clear();
         }
     }
 }

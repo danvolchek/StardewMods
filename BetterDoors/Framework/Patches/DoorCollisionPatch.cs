@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Harmony;
+﻿using Harmony;
 using Microsoft.Xna.Framework;
 using StardewValley;
+using System.Linq;
+using System.Reflection;
 
 namespace BetterDoors.Framework.Patches
 {
@@ -37,7 +33,7 @@ namespace BetterDoors.Framework.Patches
             if (!isFarmer || __result)
                 return;
 
-            __result = BetterDoorsMod.Instance.Manager.IsDoorCollisionAt(__instance, position);
+            __result = BetterDoorsMod.Instance.IsDoorCollisionAt(__instance, position);
         }
     }
 }

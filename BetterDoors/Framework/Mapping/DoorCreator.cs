@@ -15,8 +15,9 @@ namespace BetterDoors.Framework.Mapping
     /// <summary>
     /// Uses content packs and map data to actually create doors.
     /// </summary>
-    internal class DoorCreator
+    internal class DoorCreator : IResetable
     {
+        private readonly IList<PendingDoor> pendingDoors = new List<PendingDoor>();
         private readonly GeneratedSpriteManager spriteManager;
         private readonly CallbackTimer timer;
         private readonly IMonitor monitor;
@@ -28,10 +29,10 @@ namespace BetterDoors.Framework.Mapping
             this.timer = timer;
         }
 
-        public IDictionary<GameLocation, IList<Door>> FindAndCreateDoors()
+        public bool FindDoors()
         {
+            bool foundDoors = false;
             // Search for doors in all maps.
-            IDictionary<GameLocation, IList<Door>> foundDoors = new Dictionary<GameLocation, IList<Door>>();
             foreach (GameLocation location in DoorCreator.GetAllLocations())
             {
                 Layer backLayer = location?.Map.GetLayer("Back");
@@ -39,8 +40,6 @@ namespace BetterDoors.Framework.Mapping
                 {
                     continue;
                 }
-
-                IList<Door> doorsToAdd = new List<Door>();
 
                 for (int x = 0; x < backLayer.LayerWidth; x++)
                 {
@@ -60,20 +59,37 @@ namespace BetterDoors.Framework.Mapping
                             continue;
                         }
 
-                        // Get the right door type to create.
-                        if (!this.spriteManager.GetDoorSprite(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection, out error, out GeneratedDoorTileInfo tileInfo))
-                        {
-                            Utils.LogContentPackError(this.monitor, $"The tile property at {x} {y} is invalid. Info: {error}.");
-                            continue;
-                        }
+                        foundDoors = true;
 
-                        // Finally, create a door at the given tile.
-                        doorsToAdd.Add(new Door(new Point(x, y), property.Orientation, location.Map, tileInfo, this.timer));
+                        // Record sprite request.
+                        this.spriteManager.RegisterDoorSpriteRequest(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection);
+
+                        // Mark door as pending.
+                        this.pendingDoors.Add(new PendingDoor(location, new Point(x, y), property, this.timer));
                     }
                 }
+            }
 
-                if (doorsToAdd.Count != 0)
-                    foundDoors[location] = doorsToAdd;
+            return foundDoors;
+        }
+
+        public IDictionary<GameLocation, IList<Door>> CreateDoors()
+        {
+            IDictionary<GameLocation, IList<Door>> foundDoors = new Dictionary<GameLocation, IList<Door>>();
+
+            foreach (PendingDoor pendingDoor in this.pendingDoors)
+            {
+                // Get the right door type to create.
+                if (!this.spriteManager.GetDoorSprite(pendingDoor.Property.ModId, pendingDoor.Property.DoorName, pendingDoor.Property.Orientation, pendingDoor.Property.OpeningDirection, out string error, out GeneratedDoorTileInfo tileInfo))
+                {
+                    Utils.LogContentPackError(this.monitor, $"The tile property at {pendingDoor.Position.X} {pendingDoor.Position.Y} is invalid. Info: {error}.");
+                    continue;
+                }
+
+                if(!foundDoors.ContainsKey(pendingDoor.Location))
+                    foundDoors[pendingDoor.Location] = new List<Door>();
+
+                foundDoors[pendingDoor.Location].Add(pendingDoor.ToDoor(tileInfo));
             }
 
             return foundDoors;
@@ -93,6 +109,11 @@ namespace BetterDoors.Framework.Mapping
                 foreach (Building building in bLoc.buildings)
                     yield return building.indoors.Value;
             }
+        }
+
+        public void Reset()
+        {
+            this.pendingDoors.Clear();
         }
     }
 }

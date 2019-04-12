@@ -1,4 +1,5 @@
-﻿using BetterDoors.Framework.Enums;
+﻿using System.Collections.Generic;
+using BetterDoors.Framework.Enums;
 using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
@@ -20,7 +21,7 @@ namespace BetterDoors.Framework
             set
             {
                 this.state = value;
-                this.SetState(value);
+                this.SetState();
             }
         }
 
@@ -57,9 +58,9 @@ namespace BetterDoors.Framework
             this.timer.RegisterCallback(this.ToggleCallback, 0);
         }
 
-        private void SetState(State newState)
+        private void SetState()
         {
-            int topTileIndex = this.DoorTileInfo.TopLeftTileIndex + Door.StateToInt(newState);
+            int topTileIndex = this.DoorTileInfo.TopLeftTileIndex + Door.StateToInt(this.State);
             int middleTileIndex = topTileIndex + this.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X;
             int bottomTileIndex = middleTileIndex + this.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X;
 
@@ -81,10 +82,27 @@ namespace BetterDoors.Framework
                 front.Tiles[this.Position.X, this.Position.Y] = new StaticTile(front, tileSheet, BlendMode.Alpha, bottomTileIndex);
             }
 
-            if (this.orientation == Orientation.Vertical && newState == State.Open)
+            if (this.orientation == Orientation.Vertical && this.State == State.Open)
             {
                 front.Tiles[this.Position.X, this.Position.Y - 1] = null;
                 buildings.Tiles[this.Position.X, this.Position.Y - 1] = new StaticTile(buildings, tileSheet, BlendMode.Alpha, middleTileIndex);
+            }
+        }
+
+        public void RemoveFromMap()
+        {
+            Layer buildings = this.map.GetLayer("Buildings");
+            Layer front = this.map.GetLayer("Front");
+            Layer alwaysFront = this.map.GetLayer("AlwaysFront");
+
+            foreach(Layer layer in new[] { buildings, front, alwaysFront })
+            {
+                for(int i = 0; i < 3; i++)
+                {
+                    Tile tile = layer.Tiles[this.Position.X, this.Position.Y - i];
+                    if (tile != null && tile.DependsOnTileSheet(this.map.GetTileSheet(this.DoorTileInfo.TileSheetInfo.TileSheetId)))
+                        layer.Tiles[this.Position.X, this.Position.Y - i] = null;
+                }
             }
         }
 

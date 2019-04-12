@@ -1,12 +1,14 @@
 ﻿using System;
 using BetterDoors.Framework.Enums;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BetterDoors.Framework.DoorGeneration
 {
-    internal class GeneratedSpriteManager
+    internal class GeneratedSpriteManager : IResetable
     {
         private readonly IDictionary<string, IDictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>> spritesByMod = new Dictionary<string, IDictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly IDictionary<string, IDictionary<string, IDictionary<Orientation, ISet<OpeningDirection>>>> spriteRequests = new Dictionary<string, IDictionary<string, IDictionary<Orientation, ISet<OpeningDirection>>>>(StringComparer.InvariantCultureIgnoreCase);
 
         public bool GetDoorSprite(string modId, string spriteName, Orientation orientation, OpeningDirection openingDirection, out string error, out GeneratedDoorTileInfo generatedDoorTileInfo)
         {
@@ -53,6 +55,36 @@ namespace BetterDoors.Framework.DoorGeneration
 
 
             this.spritesByMod[modId][spriteName][orientation][openingDirection] = generatedDoorTileInfo;
+        }
+
+        public void RegisterDoorSpriteRequest(string modId, string spriteName, Orientation orientation, OpeningDirection openingDirection)
+        {
+            if (!this.spriteRequests.ContainsKey(modId))
+                this.spriteRequests[modId] = new Dictionary<string, IDictionary<Orientation, ISet<OpeningDirection>>>(StringComparer.InvariantCultureIgnoreCase);
+
+            if (!this.spriteRequests[modId].ContainsKey(spriteName))
+                this.spriteRequests[modId][spriteName] = new Dictionary<Orientation, ISet<OpeningDirection>>();
+
+            if (!this.spriteRequests[modId][spriteName].ContainsKey(orientation))
+                this.spriteRequests[modId][spriteName][orientation] = new HashSet<OpeningDirection>();
+
+            this.spriteRequests[modId][spriteName][orientation].Add(openingDirection);
+        }
+
+        public IEnumerable<Tuple<string, string, Orientation, OpeningDirection>> EnumerateRequests()
+        {
+            return
+                from requestsByMod in this.spriteRequests
+                from requestsByName in requestsByMod.Value
+                from requestsByOrientation in requestsByName.Value
+                from direction in requestsByOrientation.Value
+                select new Tuple<string, string, Orientation, OpeningDirection>(requestsByMod.Key, requestsByName.Key, requestsByOrientation.Key, direction);
+        }
+
+        public void Reset()
+        {
+            this.spritesByMod.Clear();
+            this.spriteRequests.Clear();
         }
     }
 }
