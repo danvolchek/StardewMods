@@ -47,15 +47,17 @@ namespace BetterDoors.Framework
             this.CollisionInfo = new Rectangle(this.Position.X * 64 + this.DoorTileInfo.CollisionInfo.X, this.Position.Y * 64 + this.DoorTileInfo.CollisionInfo.Y, this.DoorTileInfo.CollisionInfo.Width, this.DoorTileInfo.CollisionInfo.Height);
         }
 
-        public void Toggle()
+        public bool Toggle(bool force)
         {
-            if (this.timer.IsRegistered(this.ToggleCallback))
-                return;
+            if (!force && this.timer.IsRegistered(this.ToggleCallback))
+                return false;
 
             Game1.currentLocation.playSoundAt(this.State == State.Open ? "doorCreak" : "doorOpen", new Vector2(this.Position.X, this.Position.Y));
 
             this.stateBeforeToggle = this.State;
             this.timer.RegisterCallback(this.ToggleCallback, 0);
+
+            return true;
         }
 
         private void SetState()
@@ -82,7 +84,7 @@ namespace BetterDoors.Framework
                 front.Tiles[this.Position.X, this.Position.Y] = new StaticTile(front, tileSheet, BlendMode.Alpha, bottomTileIndex);
             }
 
-            if (this.orientation == Orientation.Vertical && this.State == State.Open)
+            if (this.orientation == Orientation.Vertical && this.State != State.Closed)
             {
                 front.Tiles[this.Position.X, this.Position.Y - 1] = null;
                 buildings.Tiles[this.Position.X, this.Position.Y - 1] = new StaticTile(buildings, tileSheet, BlendMode.Alpha, middleTileIndex);

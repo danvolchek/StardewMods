@@ -8,30 +8,23 @@ namespace BetterDoors.Framework.DoorGeneration
     /// <summary>
     /// Loads door sprite assets so maps can access them.
     /// </summary>
-    internal class DoorAssetLoader : IAssetLoader
+    internal class DoorAssetLoader : IAssetLoader, IResetable
     {
-        private IDictionary<string, Texture2D> doorTextures;
+        private readonly IDictionary<string, Texture2D> doorTextures = new Dictionary<string, Texture2D>();
         private readonly IContentHelper helper;
-        private bool attachedToSMAPI;
 
         public DoorAssetLoader(IContentHelper helper)
         {
             this.helper = helper;
+            this.helper.AssetLoaders.Add(this);
         }
 
-        public void SetTextures(IDictionary<string, Texture2D> textures)
+        public void AddTextures(IDictionary<string, Texture2D> textures)
         {
-            this.doorTextures = textures;
+            foreach (KeyValuePair<string, Texture2D> texture in textures)
+                this.doorTextures[texture.Key] = texture.Value;
 
-            if (!this.attachedToSMAPI)
-            {
-                this.helper.AssetLoaders.Add(this);
-                this.attachedToSMAPI = true;
-            }
-            else
-            {
-                this.helper.InvalidateCache(asset => asset.DataType == typeof(Texture2D) && this.doorTextures.Keys.Any(asset.AssetNameEquals));
-            }
+            this.helper.InvalidateCache(asset => asset.DataType == typeof(Texture2D) && textures.Keys.Any(asset.AssetNameEquals));
         }
 
         public bool CanLoad<T>(IAssetInfo asset)
@@ -42,6 +35,11 @@ namespace BetterDoors.Framework.DoorGeneration
         public T Load<T>(IAssetInfo asset)
         {
             return (T) (object) this.doorTextures[asset.AssetName];
+        }
+
+        public void Reset()
+        {
+            this.doorTextures.Clear();
         }
     }
 }

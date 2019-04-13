@@ -10,7 +10,7 @@ namespace BetterDoors.Framework.Mapping
         public GameLocation Location { get; }
         public Point Position { get; }
         public MapDoorProperty Property { get; }
-        private CallbackTimer callbackTimer;
+        private readonly CallbackTimer callbackTimer;
 
         public PendingDoor(GameLocation location, Point position, MapDoorProperty property, CallbackTimer timer)
         {

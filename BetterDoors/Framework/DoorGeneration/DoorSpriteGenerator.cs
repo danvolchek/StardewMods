@@ -18,26 +18,28 @@ namespace BetterDoors.Framework.DoorGeneration
 
         private readonly IMonitor monitor;
         private readonly GraphicsDevice device;
+        private readonly string modId;
         private readonly GeneratedSpriteManager manager;
+        private readonly IList<LoadedContentPackDoorEntry> contentPacks;
 
-        public DoorSpriteGenerator(GeneratedSpriteManager manager, IMonitor monitor, GraphicsDevice device)
+        public DoorSpriteGenerator(GeneratedSpriteManager manager, string modId, IMonitor monitor, GraphicsDevice device, IList<LoadedContentPackDoorEntry> contentPacks)
         {
             this.manager = manager;
+            this.modId = modId;
             this.monitor = monitor;
             this.device = device;
+            this.contentPacks = contentPacks;
         }
 
-        public IDictionary<string, Texture2D> GenerateDoorSprites(IList<LoadedContentPackDoorEntry> contentPacks)
+        public IDictionary<string, Texture2D> GenerateDoorSprites(string locationName)
         {
             IDictionary<string, Texture2D> generatedTextures = new Dictionary<string, Texture2D>();
 
             // Fields needed and modified during generation.
-            DoorGenerationState state = new DoorGenerationState(this.device, contentPacks.Count * 2);
+            DoorGenerationState state = new DoorGenerationState(locationName, this.modId, this.device, this.contentPacks.Count * 2);
             generatedTextures.Add(state.CreateNewTexture());
 
-            this.monitor.Log($"Generating {state.NumberOfDoorsLeft / 2} door sprites.", LogLevel.Trace);
-
-            foreach (LoadedContentPackDoorEntry info in contentPacks)
+            foreach (LoadedContentPackDoorEntry info in this.contentPacks)
             {
                 Color[] spriteData = new Color[info.Texture.Width * info.Texture.Height];
                 info.Texture.GetData(spriteData);
@@ -79,15 +81,11 @@ namespace BetterDoors.Framework.DoorGeneration
             state.Texture.SetData(state.TextureData);
 
             //TODO: remove
-            state.Texture.SaveAsPng(File.Create($"{state.TileSheetInfo.TileSheetId}.png"), state.Width, state.Texture.Height);
+            //state.Texture.SaveAsPng(File.Create($"{state.TileSheetInfo.TileSheetId}.png"), state.Width, state.Texture.Height);
 
             if (state.NumberOfDoorsLeft != 0)
             {
                 this.monitor.Log($"Something went wrong when generating door sprites - there are {state.NumberOfDoorsLeft} remaining but all content packs have been used. Please let the Better Doors author know!", LogLevel.Error);
-            }
-            else
-            {
-                this.monitor.Log("Successfully generated door sprites.", LogLevel.Trace);
             }
 
             return generatedTextures;

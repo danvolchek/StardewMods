@@ -29,53 +29,51 @@ namespace BetterDoors.Framework.Mapping
             this.timer = timer;
         }
 
-        public bool FindDoors()
+        public bool FindDoorsInLocation(GameLocation location)
         {
-            bool foundDoors = false;
-            // Search for doors in all maps.
-            foreach (GameLocation location in DoorCreator.GetAllLocations())
+            Layer backLayer = location?.Map.GetLayer("Back");
+            if (backLayer == null)
             {
-                Layer backLayer = location?.Map.GetLayer("Back");
-                if (backLayer == null)
-                {
-                    continue;
-                }
+                return false;
+            }
 
-                for (int x = 0; x < backLayer.LayerWidth; x++)
+            // Search for doors in the provided location.
+            bool foundDoors = false;
+
+            for (int x = 0; x < backLayer.LayerWidth; x++)
+            {
+                for (int y = 0; y < backLayer.LayerHeight; y++)
                 {
-                    for (int y = 0; y < backLayer.LayerHeight; y++)
+                    Tile tile = backLayer.Tiles[x, y];
+
+                    if (tile == null || !tile.Properties.TryGetValue("Door", out PropertyValue value))
                     {
-                        Tile tile = backLayer.Tiles[x, y];
-
-                        if (tile == null || !tile.Properties.TryGetValue("Door", out PropertyValue value))
-                        {
-                            continue;
-                        }
-
-                        // Parse and validate the door property.
-                        if (!MapDoorProperty.TryParseString(value, out string error, out MapDoorProperty property))
-                        {
-                            Utils.LogContentPackError(this.monitor, $"The tile property at {x} {y} is malformed. Info: {error}.");
-                            continue;
-                        }
-
-                        foundDoors = true;
-
-                        // Record sprite request.
-                        this.spriteManager.RegisterDoorSpriteRequest(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection);
-
-                        // Mark door as pending.
-                        this.pendingDoors.Add(new PendingDoor(location, new Point(x, y), property, this.timer));
+                        continue;
                     }
+
+                    // Parse and validate the door property.
+                    if (!MapDoorProperty.TryParseString(value, out string error, out MapDoorProperty property))
+                    {
+                        Utils.LogContentPackError(this.monitor, $"The tile property at {x} {y} is malformed. Info: {error}.");
+                        continue;
+                    }
+
+                    foundDoors = true;
+
+                    // Record sprite request.
+                    this.spriteManager.RegisterDoorSpriteRequest(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection);
+
+                    // Mark door as pending.
+                    this.pendingDoors.Add(new PendingDoor(location, new Point(x, y), property, this.timer));
                 }
             }
 
             return foundDoors;
         }
 
-        public IDictionary<GameLocation, IList<Door>> CreateDoors()
+        public IList<Door> CreateDoors()
         {
-            IDictionary<GameLocation, IList<Door>> foundDoors = new Dictionary<GameLocation, IList<Door>>();
+            IList<Door> foundDoors = new List<Door>();
 
             foreach (PendingDoor pendingDoor in this.pendingDoors)
             {
@@ -86,29 +84,10 @@ namespace BetterDoors.Framework.Mapping
                     continue;
                 }
 
-                if(!foundDoors.ContainsKey(pendingDoor.Location))
-                    foundDoors[pendingDoor.Location] = new List<Door>();
-
-                foundDoors[pendingDoor.Location].Add(pendingDoor.ToDoor(tileInfo));
+                foundDoors.Add(pendingDoor.ToDoor(tileInfo));
             }
 
             return foundDoors;
-        }
-
-        private static IEnumerable<GameLocation> GetAllLocations()
-        {
-            foreach (GameLocation location in Game1.locations)
-            {
-                yield return location;
-
-                if (!(location is BuildableGameLocation bLoc))
-                {
-                    continue;
-                }
-
-                foreach (Building building in bLoc.buildings)
-                    yield return building.indoors.Value;
-            }
         }
 
         public void Reset()

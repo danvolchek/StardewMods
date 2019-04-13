@@ -1,6 +1,7 @@
 ﻿using BetterDoors.Framework.Enums;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
+using StardewValley;
 
 namespace BetterDoors.Framework.Utility
 {
@@ -60,7 +61,17 @@ namespace BetterDoors.Framework.Utility
             return y * width + x;
         }
 
-        public static int StateToIntUnaware(State state)
+        public static int StateToXIndexOffset(State state, bool isFirstFrameClosed)
+        {
+            return isFirstFrameClosed ? Utils.StateToIntUnaware(state) : 3 - Utils.StateToIntUnaware(state);
+        }
+
+        public static string GetLocationName(GameLocation location)
+        {
+            return location.uniqueName.Value ?? location.Name;
+        }
+
+        private static int StateToIntUnaware(State state)
         {
             switch (state)
             {
@@ -74,11 +85,6 @@ namespace BetterDoors.Framework.Utility
                 case State.Open:
                     return 3;
             }
-        }
-
-        public static int StateToXIndexOffset(State state, bool isFirstFrameClosed)
-        {
-            return isFirstFrameClosed ? Utils.StateToIntUnaware(state) : 3 - Utils.StateToIntUnaware(state);
         }
     }
 }

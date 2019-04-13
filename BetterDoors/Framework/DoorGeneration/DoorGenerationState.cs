@@ -21,10 +21,14 @@ namespace BetterDoors.Framework.DoorGeneration
         public GeneratedTileSheetInfo TileSheetInfo { get; private set; }
         public int Width => this.Texture.Width;
 
+        private readonly string locationName;
+        private readonly string modId;
         private readonly GraphicsDevice graphicsDevice;
 
-        public DoorGenerationState(GraphicsDevice device, int numberOfDoorsLeft)
+        public DoorGenerationState(string locationName, string modId, GraphicsDevice device, int numberOfDoorsLeft)
         {
+            this.locationName = locationName;
+            this.modId = modId;
             this.graphicsDevice = device;
             this.NumberOfDoorsLeft = numberOfDoorsLeft;
         }
@@ -40,7 +44,7 @@ namespace BetterDoors.Framework.DoorGeneration
 
             this.NumberOfDoorsLeft -= doorsThatCanFit;
 
-            string id = $"z_door_sprites_{this.GeneratedTextureCount}";
+            string id = $"z_{this.modId}_{this.locationName}_{this.GeneratedTextureCount}";
             this.GeneratedTextureCount++;
             this.TileSheetInfo = new GeneratedTileSheetInfo(new Point(this.Width / 16, this.Texture.Height / 16), id, id);
 
