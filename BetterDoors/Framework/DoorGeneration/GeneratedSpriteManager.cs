@@ -1,7 +1,6 @@
-﻿using System;
-using BetterDoors.Framework.Enums;
+﻿using BetterDoors.Framework.Enums;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BetterDoors.Framework.DoorGeneration
 {

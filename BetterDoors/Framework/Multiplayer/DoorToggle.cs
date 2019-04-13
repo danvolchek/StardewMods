@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace BetterDoors.Framework.Multiplayer.Messages
+namespace BetterDoors.Framework.Multiplayer
 {
     internal class DoorToggle
     {

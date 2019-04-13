@@ -1,6 +1,6 @@
-﻿using System;
-using BetterDoors.Framework.Enums;
+﻿using BetterDoors.Framework.Enums;
 using StardewModdingAPI;
+using System;
 using SemanticVersion = StardewModdingAPI.Toolkit.SemanticVersion;
 
 namespace BetterDoors.Framework.Mapping

@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Enums;
-using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using StardewValley;

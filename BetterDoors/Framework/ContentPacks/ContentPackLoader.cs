@@ -1,8 +1,8 @@
-﻿using System;
-using BetterDoors.Framework.Utility;
+﻿using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
+using System;
 using System.Collections.Generic;
 
 namespace BetterDoors.Framework.ContentPacks

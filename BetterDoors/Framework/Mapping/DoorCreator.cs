@@ -3,8 +3,6 @@ using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.Buildings;
-using StardewValley.Locations;
 using System.Collections.Generic;
 using xTile.Layers;
 using xTile.ObjectModel;

@@ -1,9 +1,9 @@
-﻿using BetterDoors.Framework.Utility;
+﻿using BetterDoors.Framework.Enums;
+using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using BetterDoors.Framework.Enums;
 
 namespace BetterDoors.Framework.DoorGeneration
 {

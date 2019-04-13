@@ -3,6 +3,7 @@ using BetterDoors.Framework.ContentPacks;
 using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Enums;
 using BetterDoors.Framework.Mapping;
+using BetterDoors.Framework.Multiplayer;
 using BetterDoors.Framework.Serialization;
 using BetterDoors.Framework.Utility;
 using Harmony;
@@ -10,12 +11,10 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Locations;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BetterDoors.Framework.Multiplayer.Messages;
-using StardewValley.Buildings;
-using StardewValley.Locations;
 
 namespace BetterDoors
 {

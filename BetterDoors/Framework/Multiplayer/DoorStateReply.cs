@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
-namespace BetterDoors.Framework.Multiplayer.Messages
+namespace BetterDoors.Framework.Multiplayer
 {
     internal class DoorStateReply
     {
