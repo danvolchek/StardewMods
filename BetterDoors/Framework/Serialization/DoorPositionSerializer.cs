@@ -1,4 +1,5 @@
-﻿using BetterDoors.Framework.Enums;
+﻿using System;
+using BetterDoors.Framework.Enums;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
@@ -11,8 +12,10 @@ namespace BetterDoors.Framework.Serialization
     /// </summary>
     internal class DoorPositionSerializer
     {
-        private const string DoorPositionKey = "door-positions";
+        internal const string DoorPositionKey = "door-positions";
         private readonly IDataHelper dataHelper;
+
+        private Action<IDictionary<string, IDictionary<Point, State>>> pendingAction;
 
         public DoorPositionSerializer(IDataHelper dataHelper)
         {
@@ -21,6 +24,8 @@ namespace BetterDoors.Framework.Serialization
 
         public void Save(IDictionary<GameLocation, IList<Door>> doorsByLocation)
         {
+            if (!Context.IsMainPlayer)
+                return;
             IDictionary<string, IDictionary<Point, State>> doorPositions = new Dictionary<string, IDictionary<Point, State>>();
 
             foreach (KeyValuePair<GameLocation, IList<Door>> doorsInLocation in doorsByLocation)
@@ -33,9 +38,21 @@ namespace BetterDoors.Framework.Serialization
             this.dataHelper.WriteSaveData(DoorPositionSerializer.DoorPositionKey, doorPositions);
         }
 
-        public IDictionary<string, IDictionary<Point, State>> Load()
+        public void OnLoad(Action<IDictionary<string, IDictionary<Point, State>>> action)
         {
-            return this.dataHelper.ReadSaveData<IDictionary<string, IDictionary<Point, State>>>(DoorPositionSerializer.DoorPositionKey);
+            if (Context.IsMainPlayer)
+            {
+                action(this.dataHelper.ReadSaveData<IDictionary<string, IDictionary<Point, State>>>(DoorPositionSerializer.DoorPositionKey));
+            }
+            else
+            {
+                this.pendingAction = action;
+            }
+        }
+
+        public void ReceivedSaveData(IDictionary<string, IDictionary<Point, State>> data)
+        {
+            this.pendingAction?.Invoke(data);
         }
     }
 }

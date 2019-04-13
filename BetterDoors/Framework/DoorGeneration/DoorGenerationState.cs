@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using BetterDoors.Framework.Enums;
 
 namespace BetterDoors.Framework.DoorGeneration
 {
@@ -59,9 +60,9 @@ namespace BetterDoors.Framework.DoorGeneration
             return false;
         }
 
-        public GeneratedDoorTileInfo CreateTileInfo()
+        public GeneratedDoorTileInfo CreateTileInfo(bool firstFrameIsClosed)
         {
-            return new GeneratedDoorTileInfo(this.TileSheetInfo, this.CreateCollisionInfo(), this.GetTileIndex());
+            return new GeneratedDoorTileInfo(this.TileSheetInfo, this.CreateCollisionInfo(Utils.StateToXIndexOffset(State.Closed, firstFrameIsClosed)), this.GetTileIndex(), firstFrameIsClosed);
         }
 
         public void ReverseAnimationOrder()
@@ -70,11 +71,11 @@ namespace BetterDoors.Framework.DoorGeneration
             this.SwapFrame(new Point(this.TexturePoint.X + (DoorSize.X * 1) / 4, this.TexturePoint.Y), new Point(this.TexturePoint.X + (DoorSize.X * 2) / 4, this.TexturePoint.Y));
         }
 
-        public void ReflectOverYAxis(Point source)
+        public void ReflectOverYAxis(IList<Color> source, Point sourcePosition, int sourceWidth)
         {
-            foreach (Tuple<int, int> indices in EnumerateOver(DoorSize.X, DoorSize.Y, this.Width, this.Width, source, this.TexturePoint, x => DoorSize.X - x - 1))
+            foreach (Tuple<int, int> indices in EnumerateOver(DoorSize.X, DoorSize.Y, sourceWidth, this.Width, sourcePosition, this.TexturePoint, x => DoorSize.X - x - 1))
             {
-                this.TextureData[indices.Item2] = this.TextureData[indices.Item1];
+                this.TextureData[indices.Item2] = source[indices.Item1];
             }
         }
 
@@ -102,14 +103,14 @@ namespace BetterDoors.Framework.DoorGeneration
             return true;
         }
 
-        private Rectangle CreateCollisionInfo()
+        private Rectangle CreateCollisionInfo(int closedTileOffset)
         {
             int left = DoorSpriteGenerator.TileSize;
             int top = DoorSpriteGenerator.TileSize;
             int right = 0;
             int bottom = 0;
 
-            int xOffset = this.TexturePoint.X;
+            int xOffset = this.TexturePoint.X + DoorSpriteGenerator.TileSize * closedTileOffset;
             int yOffset = this.TexturePoint.Y + DoorSpriteGenerator.TileSize * 2;
 
             Color blank = new Color(0, 0, 0, 0);

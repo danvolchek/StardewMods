@@ -89,6 +89,8 @@
     <Compile Include="Framework\IResetable.cs" />
     <Compile Include="Framework\Mapping\MapModifier.cs" />
     <Compile Include="Framework\Mapping\PendingDoor.cs" />
+    <Compile Include="Framework\Multiplayer\Messages\DoorStateReply.cs" />
+    <Compile Include="Framework\Multiplayer\Messages\DoorStateRequest.cs" />
     <Compile Include="Framework\Patches\DoorCollisionPatch.cs" />
     <Compile Include="Framework\Utility\CallbackTimer.cs" />
     <Compile Include="BetterDoorsMod.cs" />

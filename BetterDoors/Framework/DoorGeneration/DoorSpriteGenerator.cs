@@ -32,56 +32,53 @@ namespace BetterDoors.Framework.DoorGeneration
             IDictionary<string, Texture2D> generatedTextures = new Dictionary<string, Texture2D>();
 
             // Fields needed and modified during generation.
-            DoorGenerationState state = new DoorGenerationState(this.device, contentPacks.Count * 4);
+            DoorGenerationState state = new DoorGenerationState(this.device, contentPacks.Count * 2);
             generatedTextures.Add(state.CreateNewTexture());
 
-            this.monitor.Log($"Generating {state.NumberOfDoorsLeft - state.NumberOfDoorsLeft / 4} door sprites.", LogLevel.Trace);
+            this.monitor.Log($"Generating {state.NumberOfDoorsLeft / 2} door sprites.", LogLevel.Trace);
 
             foreach (LoadedContentPackDoorEntry info in contentPacks)
             {
                 Color[] spriteData = new Color[info.Texture.Width * info.Texture.Height];
                 info.Texture.GetData(spriteData);
 
+                Point infoTileIndex = Utils.ConvertTileIndexToPosition(info.Texture.Width, DoorSpriteGenerator.TileSize, info.Entry.TopLeftTileIndex);
 
-                //Copy original sprite        -> Vertical Left
-                Point originalPoint = state.TexturePoint;
-                state.Copy(spriteData, Utils.ConvertTileIndexToPosition(info.Texture.Width, DoorSpriteGenerator.TileSize, info.Entry.TopLeftTileIndex), info.Texture.Width);
-                this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left, state.CreateTileInfo());
+                bool vlRequested = this.manager.IsSpriteRequested(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left);
+                bool hrRequested = this.manager.IsSpriteRequested(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right);
+                bool vrRequested = this.manager.IsSpriteRequested(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right);
+                bool hlRequested = this.manager.IsSpriteRequested(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left);
 
-                if (state.FinishSprite(out KeyValuePair<string, Texture2D> finishedTexture))
-                    generatedTextures.Add(finishedTexture);
+                if (vlRequested || hrRequested)
+                {
+                    //Copy original sprite        -> Vertical Left + Horizontal Right
+                    state.Copy(spriteData, infoTileIndex, info.Texture.Width);
+                    if (vlRequested)
+                        this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left, state.CreateTileInfo(true));
+                    if (hrRequested)
+                        this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right, state.CreateTileInfo(false));
 
+                    if (state.FinishSprite(out KeyValuePair<string, Texture2D> finishedTexture))
+                        generatedTextures.Add(finishedTexture);
+                }
 
-                //Reflect + reverse VL sprite -> Vertical Right
-                state.ReflectOverYAxis(originalPoint);
-                state.ReverseAnimationOrder();
-                this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right, state.CreateTileInfo());
+                if (vrRequested || hlRequested)
+                {
+                    //Reflect + reverse VL sprite -> Vertical Right
+                    state.ReflectOverYAxis(spriteData, infoTileIndex, info.Texture.Width);
+                    if (vrRequested)
+                        this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right, state.CreateTileInfo(false));
+                    if (hlRequested)
+                        this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo(true));
 
-                if (state.FinishSprite(out finishedTexture))
-                    generatedTextures.Add(finishedTexture);
-
-
-                //Copy    + reverse VL sprite -> Horizontal Right
-                Point reOrderedPoint = state.TexturePoint;
-                state.Copy(state.TextureData, originalPoint, state.Width);
-                state.ReverseAnimationOrder();
-                this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right, state.CreateTileInfo());
-
-                if (state.FinishSprite(out finishedTexture))
-                    generatedTextures.Add(finishedTexture);
-
-
-                //Reflect + reverse HR sprite -> Horizontal Left
-                state.ReflectOverYAxis(reOrderedPoint);
-                state.ReverseAnimationOrder();
-                this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo());
-
-                if (state.FinishSprite(out finishedTexture))
-                    generatedTextures.Add(finishedTexture);
+                    if (state.FinishSprite(out KeyValuePair<string, Texture2D>  finishedTexture))
+                        generatedTextures.Add(finishedTexture);
+                }
             }
 
             state.Texture.SetData(state.TextureData);
 
+            //TODO: remove
             state.Texture.SaveAsPng(File.Create($"{state.TileSheetInfo.TileSheetId}.png"), state.Width, state.Texture.Height);
 
             if (state.NumberOfDoorsLeft != 0)

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BetterDoors.Framework.Enums;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 
 namespace BetterDoors.Framework.Utility
@@ -57,6 +58,27 @@ namespace BetterDoors.Framework.Utility
         public static int CollapseDimension(int width, int x, int y)
         {
             return y * width + x;
+        }
+
+        public static int StateToIntUnaware(State state)
+        {
+            switch (state)
+            {
+                case State.Closed:
+                    return 0;
+                case State.SlightlyOpen:
+                    return 1;
+                case State.MostlyOpen:
+                    return 2;
+                default:
+                case State.Open:
+                    return 3;
+            }
+        }
+
+        public static int StateToXIndexOffset(State state, bool isFirstFrameClosed)
+        {
+            return isFirstFrameClosed ? Utils.StateToIntUnaware(state) : 3 - Utils.StateToIntUnaware(state);
         }
     }
 }

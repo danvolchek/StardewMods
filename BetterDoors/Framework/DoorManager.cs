@@ -49,9 +49,12 @@ namespace BetterDoors.Framework
             {
                 double distance = Math.Sqrt(Math.Pow(door.Position.X - farmerPos.X, 2) + Math.Pow(door.Position.Y - farmerPos.Y, 2));
                 if ((distance > 0 || door.State != State.Open) && distance < 2)
+                {
                     door.Toggle();
+                }
             }
         }
+
 
         public bool IsDoorCollisionAt(GameLocation location, Rectangle position)
         {

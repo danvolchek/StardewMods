@@ -60,7 +60,7 @@ namespace BetterDoors.Framework
 
         private void SetState()
         {
-            int topTileIndex = this.DoorTileInfo.TopLeftTileIndex + Door.StateToInt(this.State);
+            int topTileIndex = this.DoorTileInfo.TopLeftTileIndex + this.DoorTileInfo.GetTileIndex(this.State);
             int middleTileIndex = topTileIndex + this.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X;
             int bottomTileIndex = middleTileIndex + this.DoorTileInfo.TileSheetInfo.TileSheetDimensions.X;
 
@@ -134,22 +134,6 @@ namespace BetterDoors.Framework
                     return opening ? State.Open : State.MostlyOpen;
                 default:
                     return State.Open;
-            }
-        }
-
-        private static int StateToInt(State position)
-        {
-            switch (position)
-            {
-                default:
-                case State.Closed:
-                    return 0;
-                case State.SlightlyOpen:
-                    return 1;
-                case State.MostlyOpen:
-                    return 2;
-                case State.Open:
-                    return 3;
             }
         }
     }

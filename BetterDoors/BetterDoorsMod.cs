@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
-using BetterDoors.Framework;
+﻿using BetterDoors.Framework;
 using BetterDoors.Framework.ContentPacks;
 using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Enums;
@@ -12,13 +10,27 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace BetterDoors
 {
-    //TODO:
-    // - Double doors
-    // - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add.
-    // - Multiplayer
+    /*TODO:
+     - Double doors
+     - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add.
+     - Multiplayer
+        On a warp:
+            - Look for doors, generate a tilesheet, attach the sheet, create doors, init positions
+
+            - If the doors/tilesheet are already there or attached, skip all that and just init positions. (except for the main player)
+
+            - Questions:
+                - Do tiles stick around for farmhands after they leave the location or are they reset
+                - Do tilesheets stick around for farmhands after they leave the location or are they reset
+
+            - Downsides:
+                - New tilesheet generation per location load. Perhaps do everything in advance for the main player, and only over complicate for farmhands.
+    */
 
     /// <summary>
     /// A mod which provides better doors to map makers.
@@ -60,6 +72,7 @@ namespace BetterDoors
             helper.Events.GameLoop.Saving += this.GameLoop_Saving;
             helper.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
             helper.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
+            helper.Events.Multiplayer.ModMessageReceived += this.Multiplayer_ModMessageReceived;
         }
 
         internal bool IsDoorCollisionAt(GameLocation location, Rectangle position)
@@ -78,8 +91,10 @@ namespace BetterDoors
             if (!Context.IsWorldReady)
                 return;
 
+            Point playerPos = new Point(Game1.player.getTileX(), Game1.player.getTileY());
+
             if (e.Button.IsActionButton() || e.Button.IsUseToolButton())
-                this.manager.TryToggleDoor(Game1.currentLocation, new Point(Game1.player.getTileX(), Game1.player.getTileY()));
+                this.manager.TryToggleDoor(Game1.currentLocation, playerPos);
         }
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
@@ -109,7 +124,22 @@ namespace BetterDoors
             this.spriteManager.Reset();
 
             this.mapModifier.AddTileSheetsToMaps(doors);
-            this.manager.Init(doors, this.serializer.Load() ?? new Dictionary<string, IDictionary<Point, State>>());
+            this.serializer.OnLoad(data =>
+            {
+                if(Context.IsMainPlayer)
+                    this.Helper.Multiplayer.SendMessage(data, DoorPositionSerializer.DoorPositionKey, new []{this.Helper.Multiplayer.ModID});
+
+                this.manager.Init(doors, data ?? new Dictionary<string, IDictionary<Point, State>>());
+            });
+        }
+
+        private void Multiplayer_ModMessageReceived(object sender, ModMessageReceivedEventArgs e)
+        {
+            if(e.FromModID != this.Helper.Multiplayer.ModID)
+                return;
+
+            if(e.Type == DoorPositionSerializer.DoorPositionKey)
+                this.serializer.ReceivedSaveData(e.ReadAs<IDictionary<string, IDictionary<Point, State>>>());
         }
     }
 }

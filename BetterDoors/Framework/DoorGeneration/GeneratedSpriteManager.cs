@@ -71,14 +71,12 @@ namespace BetterDoors.Framework.DoorGeneration
             this.spriteRequests[modId][spriteName][orientation].Add(openingDirection);
         }
 
-        public IEnumerable<Tuple<string, string, Orientation, OpeningDirection>> EnumerateRequests()
+        public bool IsSpriteRequested(string modId, string spriteName, Orientation orientation, OpeningDirection openingDirection)
         {
-            return
-                from requestsByMod in this.spriteRequests
-                from requestsByName in requestsByMod.Value
-                from requestsByOrientation in requestsByName.Value
-                from direction in requestsByOrientation.Value
-                select new Tuple<string, string, Orientation, OpeningDirection>(requestsByMod.Key, requestsByName.Key, requestsByOrientation.Key, direction);
+            return this.spriteRequests.TryGetValue(modId, out IDictionary<string, IDictionary<Orientation, ISet<OpeningDirection>>> requestsByName) &&
+                   requestsByName.TryGetValue(spriteName, out IDictionary<Orientation, ISet<OpeningDirection>> requestsByOrientation) &&
+                   requestsByOrientation.TryGetValue(orientation, out ISet<OpeningDirection> requestsByOpeningDirection) &&
+                   requestsByOpeningDirection.Contains(openingDirection);
         }
 
         public void Reset()

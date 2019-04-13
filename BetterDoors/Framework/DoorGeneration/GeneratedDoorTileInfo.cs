@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BetterDoors.Framework.Enums;
+using BetterDoors.Framework.Utility;
+using Microsoft.Xna.Framework;
 
 namespace BetterDoors.Framework.DoorGeneration
 {
@@ -11,11 +13,19 @@ namespace BetterDoors.Framework.DoorGeneration
         public Rectangle CollisionInfo { get; }
         public int TopLeftTileIndex { get; }
 
-        public GeneratedDoorTileInfo(GeneratedTileSheetInfo info, Rectangle collisionInfo, int topLeftTileIndex)
+        private readonly bool isFirstFrameIsClosed;
+
+        public GeneratedDoorTileInfo(GeneratedTileSheetInfo info, Rectangle collisionInfo, int topLeftTileIndex, bool isFirstFrameIsClosed)
         {
             this.TileSheetInfo = info;
             this.CollisionInfo = collisionInfo;
             this.TopLeftTileIndex = topLeftTileIndex;
+            this.isFirstFrameIsClosed = isFirstFrameIsClosed;
+        }
+
+        public int GetTileIndex(State state)
+        {
+            return Utils.StateToXIndexOffset(state, this.isFirstFrameIsClosed);
         }
     }
 }
