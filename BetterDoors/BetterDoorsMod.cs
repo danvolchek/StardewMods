@@ -59,7 +59,7 @@ namespace BetterDoors
             this.creator = new DoorCreator(this.spriteManager, this.timer, errorManager);
             this.assetLoader = new DoorAssetLoader(this.Helper.Content);
             this.mapModifier = new MapModifier();
-            this.manager = new DoorManager();
+            this.manager = new DoorManager(this.OnDoorToggled);
 
             BetterDoorsMod.Instance = this;
             HarmonyInstance harmony = HarmonyInstance.Create(this.Helper.ModRegistry.ModID);
@@ -96,6 +96,11 @@ namespace BetterDoors
             this.Helper.Events.GameLoop.SaveLoaded -= this.GameLoop_SaveLoaded;
             this.Helper.Events.Multiplayer.ModMessageReceived -= this.Multiplayer_ModMessageReceived;
             this.Helper.Events.Player.Warped -= this.Player_Warped;
+        }
+
+        private void OnDoorToggled(Door door)
+        {
+            this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
         }
 
         private bool InitializeLocation(GameLocation location)
@@ -137,10 +142,7 @@ namespace BetterDoors
             if (!Context.IsWorldReady || (!e.Button.IsActionButton() && !e.Button.IsUseToolButton()))
                 return;
 
-            Point position = new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y);
-
-            foreach(Door door in this.manager.UserClicked(Utils.GetLocationName(Game1.currentLocation), position))
-                this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
+            this.manager.UserClicked(Utils.GetLocationName(Game1.currentLocation), new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y));
         }
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
@@ -155,8 +157,7 @@ namespace BetterDoors
 
             if (e.IsMultipleOf(10))
             {
-                foreach(Door door in this.manager.ToggleAutomaticDoors(Game1.currentLocation))
-                    this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
+                this.manager.ToggleAutomaticDoors(Game1.currentLocation);
             }
         }
 

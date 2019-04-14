@@ -1,4 +1,5 @@
-﻿using BetterDoors.Framework.Enums;
+﻿using System;
+using BetterDoors.Framework.Enums;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,14 @@ namespace BetterDoors.Framework
     /// </summary>
     internal class DoorManager : IResetable
     {
+        private readonly Action<Door> onToggledDoor;
         private readonly IDictionary<string, IDictionary<Point, Door>> doors = new Dictionary<string, IDictionary<Point, Door>>();
         private ISet<Door> doorsNearPlayers = new HashSet<Door>();
+
+        public DoorManager(Action<Door> onToggledDoor)
+        {
+            this.onToggledDoor = onToggledDoor;
+        }
 
         public void AddDoorsToLocation(string locationName, IList<Door> doorsInLocation)
         {
@@ -56,10 +63,10 @@ namespace BetterDoors.Framework
                 door.Toggle(true);
         }
 
-        public IEnumerable<Door> UserClicked(string locationName, Point position)
+        public void UserClicked(string locationName, Point position)
         {
             if (!this.doors.TryGetValue(locationName, out IDictionary<Point, Door> doorsInLocation))
-                yield break;
+                return;
 
 
             for (int y = 0; y < 2; y++)
@@ -67,15 +74,15 @@ namespace BetterDoors.Framework
                 if (doorsInLocation.TryGetValue(new Point(position.X, position.Y + y), out Door door))
                 {
                     foreach (Door toggleDoor in this.TryToggleDoor(door, doorsInLocation, false))
-                        yield return toggleDoor;
+                        this.onToggledDoor(toggleDoor);
                 }
             }
         }
 
-        public IEnumerable<Door> ToggleAutomaticDoors(GameLocation location)
+        public void ToggleAutomaticDoors(GameLocation location)
         {
             if (!this.doors.ContainsKey(Utils.GetLocationName(location)))
-                yield break;
+                return;
 
             ISet<Door> nearDoors = new HashSet<Door>(this.GetDoorsNearPlayers(location));
 
@@ -89,10 +96,10 @@ namespace BetterDoors.Framework
             HashSet<Door> doorsToToggle = new HashSet<Door>(newInRangeDoors.Where(door => door.State != State.Open));
             doorsToToggle.SymmetricExceptWith(newOutOfRangeDoors.Where(door => door.State != State.Closed));
 
-            foreach (Door toggleDoor in doorsToToggle.Where(door => door.Toggle(true)))
-                yield return toggleDoor;
-
             this.doorsNearPlayers = nearDoors;
+
+            foreach (Door toggleDoor in doorsToToggle.Where(door => door.Toggle(true)))
+                this.onToggledDoor(toggleDoor);
         }
 
         private IEnumerable<Door> GetDoorsNearPlayers(GameLocation location)
