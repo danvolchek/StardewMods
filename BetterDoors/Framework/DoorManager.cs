@@ -115,7 +115,7 @@ namespace BetterDoors.Framework
                     {
                         yield return door;
 
-                        if (door.Extras.IsDoubleDoor && DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
+                        if (DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
                             yield return doubleDoor;
                     }
 
@@ -123,7 +123,7 @@ namespace BetterDoors.Framework
                     {
                         yield return door;
 
-                        if (door.Extras.IsDoubleDoor && DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
+                        if (DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
                             yield return doubleDoor;
                     }
                 }
@@ -140,11 +140,8 @@ namespace BetterDoors.Framework
             if (door.Toggle(force))
             {
                 yield return door;
-                if (door.Extras.IsDoubleDoor)
-                {
-                    if (DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor) && doubleDoor.Toggle(force))
-                        yield return doubleDoor;
-                }
+                if (DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor) && doubleDoor.Toggle(force))
+                    yield return doubleDoor;
             }
         }
 
@@ -164,10 +161,13 @@ namespace BetterDoors.Framework
         {
             doubleDoor = null;
 
+            if (!door.Extras.IsDoubleDoor)
+                return false;
+
             for (int i = -1; i < 2; i += 2)
             {
                 Point adjacentPoint = new Point(door.Position.X + (door.Orientation == Orientation.Vertical ? i : 0), door.Position.Y + (door.Orientation == Orientation.Horizontal ? i : 0));
-                if (doorsInLocation.TryGetValue(adjacentPoint, out doubleDoor))
+                if (doorsInLocation.TryGetValue(adjacentPoint, out doubleDoor) && doubleDoor.Extras.IsDoubleDoor)
                     return true;
             }
 
