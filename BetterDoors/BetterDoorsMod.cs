@@ -21,10 +21,8 @@ namespace BetterDoors
     /*TODO:
      - Programming:
          - Features:
-             - Automatic doors
              - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
          - Code Review:
-             - Think about how map door properties are parsed and if it could be done better.
              - Think about how door states are synced in multiplayer and whether a desync could happen.
      - UX:
          - Go through all of the user input validation and make sure the errors are helpful.
@@ -52,15 +50,16 @@ namespace BetterDoors
 
         public override void Entry(IModHelper helper)
         {
+            ContentPackErrorManager errorManager = new ContentPackErrorManager(this.Monitor);
             this.serializer = new DoorPositionSerializer(this.Helper.Data);
             this.timer = new CallbackTimer();
 
             this.spriteManager = new GeneratedSpriteManager();
-            this.generator = new DoorSpriteGenerator(this.spriteManager, this.Helper.Multiplayer.ModID, this.Monitor, Game1.graphics.GraphicsDevice, new ContentPackLoader(this.Helper, this.Monitor).LoadContentPacks());
-            this.creator = new DoorCreator(this.spriteManager, this.timer, this.Monitor);
+            this.generator = new DoorSpriteGenerator(this.spriteManager, this.Helper.Multiplayer.ModID, this.Monitor, Game1.graphics.GraphicsDevice, new ContentPackLoader(this.Helper, this.Monitor, errorManager).LoadContentPacks());
+            this.creator = new DoorCreator(this.spriteManager, this.timer, errorManager);
             this.assetLoader = new DoorAssetLoader(this.Helper.Content);
             this.mapModifier = new MapModifier();
-            this.manager = new DoorManager(this.Monitor);
+            this.manager = new DoorManager();
 
             BetterDoorsMod.Instance = this;
             HarmonyInstance harmony = HarmonyInstance.Create(this.Helper.ModRegistry.ModID);
@@ -95,7 +94,6 @@ namespace BetterDoors
             this.Helper.Events.GameLoop.UpdateTicked -= this.GameLoop_UpdateTicked;
             this.Helper.Events.GameLoop.Saving -= this.GameLoop_Saving;
             this.Helper.Events.GameLoop.SaveLoaded -= this.GameLoop_SaveLoaded;
-            this.Helper.Events.GameLoop.ReturnedToTitle -= this.GameLoop_ReturnedToTitle;
             this.Helper.Events.Multiplayer.ModMessageReceived -= this.Multiplayer_ModMessageReceived;
             this.Helper.Events.Player.Warped -= this.Player_Warped;
         }
@@ -140,11 +138,9 @@ namespace BetterDoors
                 return;
 
             Point position = new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y);
-            if (this.manager.TryToggleDoor(Utils.GetLocationName(Game1.currentLocation), position, out IList<Door> doors))
-            {
-                foreach(Door door in doors)
-                    this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
-            }
+
+            foreach(Door door in this.manager.UserClicked(Utils.GetLocationName(Game1.currentLocation), position))
+                this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
         }
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
@@ -156,11 +152,20 @@ namespace BetterDoors
             {
                 this.timer.TimeElapsed(50);
             }
+
+            if (e.IsMultipleOf(10))
+            {
+                foreach(Door door in this.manager.ToggleAutomaticDoors(Game1.currentLocation))
+                    this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
+            }
         }
 
         private void GameLoop_Saving(object sender, SavingEventArgs e)
         {
-            this.serializer.Save(this.manager.GetDoors());
+            if (!Context.IsMainPlayer)
+                return;
+
+            this.serializer.Save(this.manager.GetDoorStates());
         }
 
         private void GameLoop_SaveLoaded(object sender, SaveLoadedEventArgs e)
@@ -191,6 +196,8 @@ namespace BetterDoors
                 this.InitializeLocation(e.NewLocation);
                 this.Helper.Multiplayer.SendMessage(new DoorStateRequest(Utils.GetLocationName(e.NewLocation)), nameof(DoorStateRequest), new[] { this.Helper.Multiplayer.ModID });
             }
+
+            this.manager.ResetDoorsNearPlayers();
         }
 
         private void Multiplayer_ModMessageReceived(object sender, ModMessageReceivedEventArgs e)

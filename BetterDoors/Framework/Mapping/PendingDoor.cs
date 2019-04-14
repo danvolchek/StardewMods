@@ -1,4 +1,5 @@
 ﻿using BetterDoors.Framework.DoorGeneration;
+using BetterDoors.Framework.Mapping.Properties;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using xTile;

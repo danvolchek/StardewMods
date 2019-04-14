@@ -1,9 +1,9 @@
 ﻿using BetterDoors.Framework.Enums;
 using Microsoft.Xna.Framework;
-using StardewModdingAPI;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterDoors.Framework.Utility;
+using StardewValley;
 
 namespace BetterDoors.Framework
 {
@@ -13,12 +13,7 @@ namespace BetterDoors.Framework
     internal class DoorManager : IResetable
     {
         private readonly IDictionary<string, IDictionary<Point, Door>> doors = new Dictionary<string, IDictionary<Point, Door>>();
-
-        private readonly IMonitor monitor;
-        public DoorManager(IMonitor monitor)
-        {
-            this.monitor = monitor;
-        }
+        private ISet<Door> doorsNearPlayers = new HashSet<Door>();
 
         public void AddDoorsToLocation(string locationName, IList<Door> doorsInLocation)
         {
@@ -42,9 +37,9 @@ namespace BetterDoors.Framework
             }
         }
 
-        public IDictionary<string, IDictionary<Point, Door>> GetDoors()
+        public Dictionary<string, Dictionary<Point, State>> GetDoorStates()
         {
-            return this.doors;
+            return this.doors.ToDictionary(item => item.Key, item => item.Value.ToDictionary(item2 => item2.Key, item2 => item2.Value.State));
         }
 
         public IDictionary<Point, State> GetStates(string locationName)
@@ -61,31 +56,89 @@ namespace BetterDoors.Framework
                 door.Toggle(true);
         }
 
-        public bool TryToggleDoor(string locationName, Point position, out IList<Door> toggledDoors)
+        public IEnumerable<Door> UserClicked(string locationName, Point position)
         {
-            toggledDoors = new List<Door>();
-
             if (!this.doors.TryGetValue(locationName, out IDictionary<Point, Door> doorsInLocation))
-                return false;
+                yield break;
 
 
             for (int y = 0; y < 2; y++)
             {
-                if (doorsInLocation.TryGetValue(new Point(position.X, position.Y + y), out Door door) && door.Toggle(false))
+                if (doorsInLocation.TryGetValue(new Point(position.X, position.Y + y), out Door door))
                 {
-                    toggledDoors.Add(door);
+                    foreach (Door toggleDoor in this.TryToggleDoor(door, doorsInLocation, false))
+                        yield return toggleDoor;
+                }
+            }
+        }
 
-                    if (door.Extras.IsDoubleDoor)
+        public IEnumerable<Door> ToggleAutomaticDoors(GameLocation location)
+        {
+            if (!this.doors.ContainsKey(Utils.GetLocationName(location)))
+                yield break;
+
+            ISet<Door> nearDoors = new HashSet<Door>(this.GetDoorsNearPlayers(location));
+
+            ISet<Door> newInRangeDoors = new HashSet<Door>(nearDoors);
+            ISet<Door> newOutOfRangeDoors = new HashSet<Door>(this.doorsNearPlayers);
+
+            newInRangeDoors.ExceptWith(this.doorsNearPlayers); // Now only has doors that just entered in range
+            newOutOfRangeDoors.ExceptWith(nearDoors); // Now only has doors that just exited the range
+
+            // Only toggle door that should be open that aren't open, doors that should be closed and aren't closed, and doors that aren't both pending for opening and closing.
+            HashSet<Door> doorsToToggle = new HashSet<Door>(newInRangeDoors.Where(door => door.State != State.Open));
+            doorsToToggle.SymmetricExceptWith(newOutOfRangeDoors.Where(door => door.State != State.Closed));
+
+            foreach (Door toggleDoor in doorsToToggle.Where(door => door.Toggle(true)))
+                yield return toggleDoor;
+
+            this.doorsNearPlayers = nearDoors;
+        }
+
+        private IEnumerable<Door> GetDoorsNearPlayers(GameLocation location)
+        {
+            if (!this.doors.TryGetValue(Utils.GetLocationName(location), out IDictionary<Point, Door> doorsInLocation))
+                yield break;
+
+            foreach (Farmer farmer in location.farmers)
+            {
+                for (int i = -2; i < 3; i ++)
+                {
+                    if (doorsInLocation.TryGetValue(new Point(farmer.getTileX() + i, farmer.getTileY()), out Door door) && door.Extras.IsAutomaticDoor && door.Orientation == Orientation.Horizontal)
                     {
-                        foreach(Door adjacentDoor in DoorManager.GetAdjacentDoors(door, doorsInLocation))
-                            if(adjacentDoor.Toggle(false))
-                                toggledDoors.Add(adjacentDoor);
+                        yield return door;
+
+                        if (door.Extras.IsDoubleDoor && DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
+                            yield return doubleDoor;
+                    }
+
+                    if (doorsInLocation.TryGetValue(new Point(farmer.getTileX(), farmer.getTileY() + i), out door) && door.Extras.IsAutomaticDoor && door.Orientation == Orientation.Vertical)
+                    {
+                        yield return door;
+
+                        if (door.Extras.IsDoubleDoor && DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
+                            yield return doubleDoor;
                     }
                 }
             }
+        }
 
+        public void ResetDoorsNearPlayers()
+        {
+            this.doorsNearPlayers.Clear();
+        }
 
-            return false;
+        private IEnumerable<Door> TryToggleDoor(Door door, IDictionary<Point, Door> doorsInLocation, bool force)
+        {
+            if (door.Toggle(force))
+            {
+                yield return door;
+                if (door.Extras.IsDoubleDoor)
+                {
+                    if (DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor) && doubleDoor.Toggle(force))
+                        yield return doubleDoor;
+                }
+            }
         }
 
         public bool IsDoorCollisionAt(string locationName, Rectangle position)
@@ -100,14 +153,18 @@ namespace BetterDoors.Framework
             this.doors.Clear();
         }
 
-        private static IEnumerable<Door> GetAdjacentDoors(Door door, IDictionary<Point, Door> doorsInLocation)
+        private static bool GetDoubleDoor(Door door, IDictionary<Point, Door> doorsInLocation, out Door doubleDoor)
         {
+            doubleDoor = null;
+
             for (int i = -1; i < 2; i += 2)
             {
                 Point adjacentPoint = new Point(door.Position.X + (door.Orientation == Orientation.Vertical ? i : 0), door.Position.Y + (door.Orientation == Orientation.Horizontal ? i : 0));
-                if (doorsInLocation.TryGetValue(adjacentPoint, out Door adjacentDoor))
-                    yield return adjacentDoor;
+                if (doorsInLocation.TryGetValue(adjacentPoint, out doubleDoor))
+                    return true;
             }
+
+            return false;
         }
     }
 }

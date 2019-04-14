@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BetterDoors.Framework.Serialization
 {
@@ -19,12 +18,9 @@ namespace BetterDoors.Framework.Serialization
             this.dataHelper = dataHelper;
         }
 
-        public void Save(IDictionary<string, IDictionary<Point, Door>> doorsByLocation)
+        public void Save(Dictionary<string, Dictionary<Point, State>> doorsByLocation)
         {
-            if (!Context.IsMainPlayer)
-                return;
-
-            this.dataHelper.WriteSaveData(DoorPositionSerializer.DoorPositionKey, doorsByLocation.ToDictionary(item => item.Key, item => item.Value.ToDictionary(item2 => item2.Key, item2 => item2.Value.State)));
+            this.dataHelper.WriteSaveData(DoorPositionSerializer.DoorPositionKey, doorsByLocation);
         }
 
         public IDictionary<string, IDictionary<Point, State>> Load()

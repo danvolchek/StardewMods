@@ -87,8 +87,8 @@
   <ItemGroup>
     <Compile Include="Framework\DoorGeneration\DoorGenerationState.cs" />
     <Compile Include="Framework\IResetable.cs" />
-    <Compile Include="Framework\Mapping\MapDoorExtraProperty.cs" />
-    <Compile Include="Framework\Mapping\MapDoorVersion.cs" />
+    <Compile Include="Framework\Mapping\Properties\MapDoorExtra.cs" />
+    <Compile Include="Framework\Mapping\Properties\MapDoorVersion.cs" />
     <Compile Include="Framework\Mapping\MapModifier.cs" />
     <Compile Include="Framework\Mapping\PendingDoor.cs" />
     <Compile Include="Framework\Multiplayer\DoorStateReply.cs" />
@@ -111,9 +111,10 @@
     <Compile Include="Framework\Enums\Orientation.cs" />
     <Compile Include="Framework\Enums\State.cs" />
     <Compile Include="Framework\Serialization\DoorPositionSerializer.cs" />
-    <Compile Include="Framework\Mapping\MapDoorProperty.cs" />
+    <Compile Include="Framework\Mapping\Properties\MapDoor.cs" />
     <Compile Include="Framework\DoorGeneration\GeneratedSpriteManager.cs" />
     <Compile Include="Framework\DoorGeneration\GeneratedTileSheetInfo.cs" />
+    <Compile Include="Framework\Utility\ContentPackErrorManager.cs" />
     <Compile Include="Framework\Utility\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

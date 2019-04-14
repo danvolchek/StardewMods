@@ -1,6 +1,7 @@
 ﻿using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Enums;
 using BetterDoors.Framework.Mapping;
+using BetterDoors.Framework.Mapping.Properties;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using StardewValley;
