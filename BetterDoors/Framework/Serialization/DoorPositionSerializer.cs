@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BetterDoors.Framework.Serialization
 {
@@ -18,21 +19,12 @@ namespace BetterDoors.Framework.Serialization
             this.dataHelper = dataHelper;
         }
 
-        public void Save(IDictionary<string, IList<Door>> doorsByLocation)
+        public void Save(IDictionary<string, IDictionary<Point, Door>> doorsByLocation)
         {
             if (!Context.IsMainPlayer)
                 return;
 
-            IDictionary<string, IDictionary<Point, State>> doorPositions = new Dictionary<string, IDictionary<Point, State>>();
-
-            foreach (KeyValuePair<string, IList<Door>> doorsInLocation in doorsByLocation)
-            {
-                doorPositions[doorsInLocation.Key] = new Dictionary<Point, State>();
-                foreach (Door door in doorsInLocation.Value)
-                    doorPositions[doorsInLocation.Key][door.Position] = door.State;
-            }
-
-            this.dataHelper.WriteSaveData(DoorPositionSerializer.DoorPositionKey, doorPositions);
+            this.dataHelper.WriteSaveData(DoorPositionSerializer.DoorPositionKey, doorsByLocation.ToDictionary(item => item.Key, item => item.Value.ToDictionary(item2 => item2.Key, item2 => item2.Value.State)));
         }
 
         public IDictionary<string, IDictionary<Point, State>> Load()

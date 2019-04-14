@@ -87,6 +87,8 @@
   <ItemGroup>
     <Compile Include="Framework\DoorGeneration\DoorGenerationState.cs" />
     <Compile Include="Framework\IResetable.cs" />
+    <Compile Include="Framework\Mapping\MapDoorExtraProperty.cs" />
+    <Compile Include="Framework\Mapping\MapDoorVersion.cs" />
     <Compile Include="Framework\Mapping\MapModifier.cs" />
     <Compile Include="Framework\Mapping\PendingDoor.cs" />
     <Compile Include="Framework\Multiplayer\DoorStateReply.cs" />

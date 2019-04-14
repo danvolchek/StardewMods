@@ -28,11 +28,17 @@ namespace BetterDoors.Framework.ContentPacks
             // Validate each pack and load the tile sheets referenced in the process.
             foreach (IContentPack contentPack in this.helper.ContentPacks.GetOwned())
             {
+                if (contentPack.Manifest.UniqueID.Equals("vanilla", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    Utils.LogContentPackError(this.monitor, $"A content pack's unique id can't be {contentPack.Manifest.UniqueID}. {contentPack.Manifest.UniqueID} won't be loaded.");
+                    continue;
+                }
+
                 ContentPack loadedPack = contentPack.ReadJsonFile<ContentPack>("content.json");
 
                 if (loadedPack.Version != new SemanticVersion(1, 0, 0))
                 {
-                    Utils.LogContentPackError(this.monitor, $"Unrecognized content pack version: {loadedPack.Version}. {contentPack.Manifest.UniqueID} won't be loaded. Please re-read the instructions and try again.");
+                    Utils.LogContentPackError(this.monitor, $"Unrecognized content pack version: {loadedPack.Version}. {contentPack.Manifest.UniqueID} won't be loaded.");
                     continue;
                 }
 

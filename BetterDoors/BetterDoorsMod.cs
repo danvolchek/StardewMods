@@ -19,8 +19,16 @@ using System.Reflection;
 namespace BetterDoors
 {
     /*TODO:
-     - Double doors
-     - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add.
+     - Programming:
+         - Features:
+             - Automatic doors
+             - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
+         - Code Review:
+             - Think about how map door properties are parsed and if it could be done better.
+             - Think about how door states are synced in multiplayer and whether a desync could happen.
+     - UX:
+         - Go through all of the user input validation and make sure the errors are helpful.
+         - Write up documentation.
     */
 
     /// <summary>
@@ -63,12 +71,6 @@ namespace BetterDoors
             this.Helper.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
         }
 
-        private void Multiplayer_PeerContextReceived(object sender, PeerContextReceivedEventArgs e)
-        {
-            if(e.Peer.IsHost && (!e.Peer.HasSmapi || e.Peer.GetMod(this.Helper.Multiplayer.ModID)?.Version != this.Helper.ModRegistry.Get(this.Helper.Multiplayer.ModID).Manifest.Version))
-                this.Disable();
-        }
-
         private void Enable()
         {
             if (this.enabled)
@@ -98,9 +100,32 @@ namespace BetterDoors
             this.Helper.Events.Player.Warped -= this.Player_Warped;
         }
 
-        internal bool IsDoorCollisionAt(GameLocation location, Rectangle position)
+        private bool InitializeLocation(GameLocation location)
         {
-            return this.manager.IsDoorCollisionAt(Utils.GetLocationName(location), position);
+            if (this.manager.WasProcessed(Utils.GetLocationName(location)))
+                return false;
+
+            IList<Door> doors = new List<Door>();
+
+            if (this.creator.FindDoorsInLocation(location))
+            {
+                this.assetLoader.AddTextures(this.generator.GenerateDoorSprites(Utils.GetLocationName(location)));
+                doors = this.creator.CreateDoors();
+                this.creator.Reset();
+                this.spriteManager.Reset();
+
+                this.mapModifier.AddTileSheetsToLocation(location.Map, doors);
+            }
+
+            this.manager.AddDoorsToLocation(Utils.GetLocationName(location), doors);
+
+            return doors.Count != 0;
+        }
+
+        private void Multiplayer_PeerContextReceived(object sender, PeerContextReceivedEventArgs e)
+        {
+            if (e.Peer.IsHost && (!e.Peer.HasSmapi || e.Peer.GetMod(this.Helper.Multiplayer.ModID)?.Version != this.Helper.ModRegistry.Get(this.Helper.Multiplayer.ModID).Manifest.Version))
+                this.Disable();
         }
 
         private void GameLoop_ReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
@@ -114,10 +139,11 @@ namespace BetterDoors
             if (!Context.IsWorldReady || (!e.Button.IsActionButton() && !e.Button.IsUseToolButton()))
                 return;
 
-            Point playerPos = new Point(Game1.player.getTileX(), Game1.player.getTileY());
-            if (this.manager.TryToggleDoor(Utils.GetLocationName(Game1.currentLocation), playerPos, out Door door))
+            Point position = new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y);
+            if (this.manager.TryToggleDoor(Utils.GetLocationName(Game1.currentLocation), position, out IList<Door> doors))
             {
-                this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
+                foreach(Door door in doors)
+                    this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
             }
         }
 
@@ -153,28 +179,6 @@ namespace BetterDoors
                 this.InitializeLocation(Game1.currentLocation);
                 this.Helper.Multiplayer.SendMessage(new DoorStateRequest(Utils.GetLocationName(Game1.currentLocation)), nameof(DoorStateRequest), new[] { this.Helper.Multiplayer.ModID });
             }
-        }
-
-        private bool InitializeLocation(GameLocation location)
-        {
-            if (this.manager.WasProcessed(Utils.GetLocationName(location)))
-                return false;
-
-            IList<Door> doors = new List<Door>();
-
-            if (this.creator.FindDoorsInLocation(location))
-            {
-                this.assetLoader.AddTextures(this.generator.GenerateDoorSprites(Utils.GetLocationName(location)));
-                doors = this.creator.CreateDoors();
-                this.creator.Reset();
-                this.spriteManager.Reset();
-
-                this.mapModifier.AddTileSheetsToLocation(location.Map, doors);
-            }
-
-            this.manager.AddDoorsToLocation(Utils.GetLocationName(location), doors);
-
-            return doors.Count != 0;
         }
 
         private void Player_Warped(object sender, WarpedEventArgs e)
@@ -235,6 +239,11 @@ namespace BetterDoors
                 foreach (GameLocation buildingLoc in bLoc.buildings.Select(building => building.indoors.Value).Where(buildingLoc => buildingLoc != null))
                     yield return buildingLoc;
             }
+        }
+
+        internal bool IsDoorCollisionAt(GameLocation location, Rectangle position)
+        {
+            return this.manager.IsDoorCollisionAt(Utils.GetLocationName(location), position);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Enums;
+using BetterDoors.Framework.Mapping;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using StardewValley;
@@ -27,18 +28,20 @@ namespace BetterDoors.Framework
         public Point Position { get; }
         public GeneratedDoorTileInfo DoorTileInfo { get; }
         public Rectangle CollisionInfo { get; }
+        public MapDoorExtraProperty Extras { get; }
 
         private readonly Map map;
         private readonly CallbackTimer timer;
-        private readonly Orientation orientation;
+        public Orientation Orientation { get; }
 
         private State stateBeforeToggle;
         private State state;
 
-        public Door(Point position, Orientation orientation, Map map, GeneratedDoorTileInfo doorTileInfo, CallbackTimer timer)
+        public Door(Point position, Orientation orientation, MapDoorExtraProperty extras, Map map, GeneratedDoorTileInfo doorTileInfo, CallbackTimer timer)
         {
             this.Position = position;
-            this.orientation = orientation;
+            this.Orientation = orientation;
+            this.Extras = extras;
             this.map = map;
             this.DoorTileInfo = doorTileInfo;
             this.timer = timer;
@@ -74,7 +77,7 @@ namespace BetterDoors.Framework
             front.Tiles[this.Position.X, this.Position.Y - 2] = new StaticTile(front, tileSheet, BlendMode.Alpha, topTileIndex);
 
             // Display fixes for horizontal doors
-            if (this.orientation == Orientation.Horizontal)
+            if (this.Orientation == Orientation.Horizontal)
             {
                 Layer alwaysFront = this.map.GetLayer("AlwaysFront");
                 // Fix the player occluding the top tile when they walk by the door. There (should) be a wall there anyway? Perhaps make a config option.
@@ -83,7 +86,7 @@ namespace BetterDoors.Framework
                 front.Tiles[this.Position.X, this.Position.Y] = new StaticTile(front, tileSheet, BlendMode.Alpha, bottomTileIndex);
             }
 
-            if (this.orientation == Orientation.Vertical && this.State != State.Closed)
+            if (this.Orientation == Orientation.Vertical && this.State != State.Closed)
             {
                 front.Tiles[this.Position.X, this.Position.Y - 1] = null;
                 buildings.Tiles[this.Position.X, this.Position.Y - 1] = new StaticTile(buildings, tileSheet, BlendMode.Alpha, middleTileIndex);

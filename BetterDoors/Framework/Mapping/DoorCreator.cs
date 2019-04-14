@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
 using System.Collections.Generic;
+using BetterDoors.Framework.Enums;
+using BetterDoors.Framework.Mapping.Properties;
 using xTile.Layers;
 using xTile.ObjectModel;
 using xTile.Tiles;
@@ -44,15 +46,45 @@ namespace BetterDoors.Framework.Mapping
                 {
                     Tile tile = backLayer.Tiles[x, y];
 
-                    if (tile == null || !tile.Properties.TryGetValue("Door", out PropertyValue value))
+                    if (tile == null)
                     {
                         continue;
                     }
 
-                    // Parse and validate the door property.
-                    if (!MapDoorProperty.TryParseString(value, out string error, out MapDoorProperty property))
+                    if (!tile.Properties.TryGetValue(MapDoorVersion.PropertyKey, out PropertyValue doorVersionValue))
                     {
-                        Utils.LogContentPackError(this.monitor, $"The tile property at {x} {y} is malformed. Info: {error}.");
+                        if (tile.Properties.ContainsKey(MapDoorProperty.PropertyKey) || tile.Properties.ContainsKey(MapDoorExtraProperty.PropertyKey))
+                        {
+                            Utils.LogContentPackError(this.monitor, $"The door at ({x},{y}) is malformed. Info: Missing a {MapDoorVersion.PropertyKey} property.");
+                        }
+
+                        continue;
+                    }
+
+                    if(!MapDoorVersion.TryParseString(doorVersionValue.ToString(), out string error, out MapDoorVersion version))
+                    {
+                        Utils.LogContentPackError(this.monitor, $"The {MapDoorVersion.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
+                        continue;
+                    }
+
+                    // Parse and validate the door property.
+                    if (!tile.Properties.TryGetValue(MapDoorProperty.PropertyKey, out PropertyValue doorValue) || !MapDoorProperty.TryParseString(doorValue.ToString(), version.PropertyVersion, out error, out MapDoorProperty property))
+                    {
+                        Utils.LogContentPackError(this.monitor, $"The {MapDoorProperty.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
+                        continue;
+                    }
+
+                    MapDoorExtraProperty extras = new MapDoorExtraProperty();
+
+                    if (tile.Properties.TryGetValue(MapDoorExtraProperty.PropertyKey, out PropertyValue doorExtraValue) && !MapDoorExtraProperty.TryParseString(doorExtraValue.ToString(), version.PropertyVersion, out error, out extras))
+                    {
+                        Utils.LogContentPackError(this.monitor, $"The {MapDoorExtraProperty.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
+                        continue;
+                    }
+
+                    if (property.Orientation == Orientation.Horizontal && extras.IsDoubleDoor)
+                    {
+                        Utils.LogContentPackError(this.monitor, $"The door at ({x},{y}) is invalid. Info: Horizontal doors can't be double doors.");
                         continue;
                     }
 
@@ -62,7 +94,7 @@ namespace BetterDoors.Framework.Mapping
                     this.spriteManager.RegisterDoorSpriteRequest(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection);
 
                     // Mark door as pending.
-                    this.pendingDoors.Add(new PendingDoor(location, new Point(x, y), property, this.timer));
+                    this.pendingDoors.Add(new PendingDoor(location.Map, new Point(x, y), property, extras, this.timer));
                 }
             }
 
