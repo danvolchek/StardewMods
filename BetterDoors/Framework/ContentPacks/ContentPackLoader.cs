@@ -4,25 +4,39 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace BetterDoors.Framework.ContentPacks
 {
-    /// <summary>
-    /// Loads and validates content packs. Also loads vanilla doors.
-    /// </summary>
+    /// <summary>Loads and validates content packs. Also loads vanilla doors.</summary>
     internal class ContentPackLoader
     {
+        /*********
+        ** Fields
+        *********/
+        /// <summary>Provides simplified APIs for writing mods.</summary>
         private readonly IModHelper helper;
+        /// <summary>Encapsulates monitoring and logging for a given module.</summary>
         private readonly IMonitor monitor;
-        private readonly ContentPackErrorManager errorManager;
+        /// <summary>Queues content pack loading errors.</summary>
+        private readonly ErrorQueue errorQueue;
 
-        public ContentPackLoader(IModHelper helper, IMonitor monitor, ContentPackErrorManager errorManager)
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>Construct an instance.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
+        /// <param name="monitor">Encapsulates monitoring and logging for a given module.</param>
+        /// <param name="errorQueue">Queues content pack loading errors.</param>
+        public ContentPackLoader(IModHelper helper, IMonitor monitor, ErrorQueue errorQueue)
         {
             this.helper = helper;
             this.monitor = monitor;
-            this.errorManager = errorManager;
+            this.errorQueue = errorQueue;
         }
 
+        /// <summary>Loads content packs and vanilla doors.</summary>
+        /// <returns>The loaded doors.</returns>
         public IList<LoadedContentPackDoorEntry> LoadContentPacks()
         {
             IList<LoadedContentPackDoorEntry> data = new List<LoadedContentPackDoorEntry>();
@@ -32,7 +46,7 @@ namespace BetterDoors.Framework.ContentPacks
             {
                 if (contentPack.Manifest.UniqueID.Equals("vanilla", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    this.errorManager.AddError($"{contentPack.Manifest.UniqueID} - A content pack's unique id can't be {contentPack.Manifest.UniqueID}. This pack won't be loaded.");
+                    this.errorQueue.AddError($"{contentPack.Manifest.UniqueID} - A content pack's unique id can't be {contentPack.Manifest.UniqueID}. This pack won't be loaded.");
                     continue;
                 }
 
@@ -40,7 +54,7 @@ namespace BetterDoors.Framework.ContentPacks
 
                 if (loadedPack.Version != new SemanticVersion(1, 0, 0))
                 {
-                    this.errorManager.AddError($"{contentPack.Manifest.UniqueID} - Unrecognized content pack version: {loadedPack.Version}.  This pack won't be loaded. ");
+                    this.errorQueue.AddError($"{contentPack.Manifest.UniqueID} - Unrecognized content pack version: {loadedPack.Version}.  This pack won't be loaded. ");
                     continue;
                 }
 
@@ -49,7 +63,7 @@ namespace BetterDoors.Framework.ContentPacks
                 ISet<string> spriteNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
                 foreach (ContentPackDoorEntry doorEntry in loadedPack.Doors)
                 {
-                    if (!contentPack.HasFile(doorEntry.ImageFilePath))
+                    if (!File.Exists(Path.Combine(contentPack.DirectoryPath, doorEntry.ImageFilePath)))
                     {
                         error = $"{doorEntry.ImageFilePath} doesn't exist";
                     }
@@ -84,7 +98,7 @@ namespace BetterDoors.Framework.ContentPacks
 
                     if (error != null)
                     {
-                        this.errorManager.AddError($"{contentPack.Manifest.UniqueID} - {doorEntry.Name} - This entry is invalid. It won't be loaded. Info: {error}.");
+                        this.errorQueue.AddError($"{contentPack.Manifest.UniqueID} - {doorEntry.Name} - This entry is invalid. It won't be loaded. Info: {error}.");
                         continue;
                     }
 
@@ -94,7 +108,7 @@ namespace BetterDoors.Framework.ContentPacks
 
             this.monitor.Log($"Loaded {data.Count} door sprites from content packs.", LogLevel.Trace);
 
-            this.errorManager.PrintErrors("Found some errors when loading door sprites from content packs:");
+            this.errorQueue.PrintErrors("Found some errors when loading door sprites from content packs:");
 
             // Also load the vanilla door textures.
             const string vanillaPath = "LooseSprites/Cursors";

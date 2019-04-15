@@ -1,37 +1,54 @@
 ﻿using BetterDoors.Framework.DoorGeneration;
-using BetterDoors.Framework.Utility;
-using Microsoft.Xna.Framework;
-using StardewModdingAPI;
-using StardewValley;
-using System.Collections.Generic;
 using BetterDoors.Framework.Enums;
 using BetterDoors.Framework.Mapping.Properties;
+using BetterDoors.Framework.Utility;
+using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using xTile;
 using xTile.Layers;
 using xTile.ObjectModel;
 using xTile.Tiles;
 
 namespace BetterDoors.Framework.Mapping
 {
-    /// <summary>
-    /// Uses content packs and map data to actually create doors.
-    /// </summary>
-    internal class DoorCreator : IResetable
+    /// <summary>Creates doors out of door definitions in maps.</summary>
+    internal class DoorCreator
     {
-        private readonly IList<PendingDoor> pendingDoors = new List<PendingDoor>();
-        private readonly GeneratedSpriteManager spriteManager;
-        private readonly CallbackTimer timer;
-        private readonly ContentPackErrorManager errorManager;
+        /*********
+        ** Fields
+        *********/
+        /// <summary>Manages information about the tiles needed to draw doors.</summary>
+        private readonly GeneratedDoorTileInfoManager doorTileInfoManager;
 
-        public DoorCreator(GeneratedSpriteManager spriteManager, CallbackTimer timer, ContentPackErrorManager errorManager)
+        /// <summary>Callback timer for door animations.</summary>
+        private readonly CallbackTimer timer;
+
+        /// <summary>Queues door definitions errors.</summary>
+        private readonly ErrorQueue errorQueue;
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>Construct an instance.</summary>
+        /// <param name="doorTileInfoManager">Manages information about the tiles needed to draw doors.</param>
+        /// <param name="timer">Callback timer for door animations.</param>
+        /// <param name="errorQueue">Error manager for reading door definitions from map files.</param>
+        public DoorCreator(GeneratedDoorTileInfoManager doorTileInfoManager, CallbackTimer timer, ErrorQueue errorQueue)
         {
-            this.spriteManager = spriteManager;
-            this.errorManager = errorManager;
+            this.doorTileInfoManager = doorTileInfoManager;
+            this.errorQueue = errorQueue;
             this.timer = timer;
         }
 
-        public bool FindDoorsInLocation(GameLocation location)
+        /// <summary>Finds every door in a map.</summary>
+        /// <param name="map">The map to look in.</param>
+        /// <param name="pendingDoors">The doors that were found.</param>
+        /// <returns>Whether any doors were found.</returns>
+        public bool FindDoorsInLocation(Map map, out IList<PendingDoor> pendingDoors)
         {
-            Layer backLayer = location?.Map.GetLayer("Back");
+            pendingDoors = new List<PendingDoor>();
+
+            Layer backLayer = map?.GetLayer("Back");
             if (backLayer == null)
             {
                 return false;
@@ -54,9 +71,9 @@ namespace BetterDoors.Framework.Mapping
                     // If there's no version property log an error if other properties are present.
                     if (!tile.Properties.TryGetValue(MapDoorVersion.PropertyKey, out PropertyValue doorVersionValue))
                     {
-                        if (tile.Properties.ContainsKey(MapDoorProperty.PropertyKey) || tile.Properties.ContainsKey(MapDoorExtraProperty.PropertyKey))
+                        if (tile.Properties.ContainsKey(MapDoor.PropertyKey) || tile.Properties.ContainsKey(MapDoorExtras.PropertyKey))
                         {
-                            this.errorManager.AddError($"The door at ({x},{y}) is malformed. Info: Missing a {MapDoorVersion.PropertyKey} property.");
+                            this.errorQueue.AddError($"The door at ({x},{y}) is malformed. Info: Missing a {MapDoorVersion.PropertyKey} property.");
                         }
 
                         continue;
@@ -65,78 +82,76 @@ namespace BetterDoors.Framework.Mapping
                     // Log an error if the version is invalid.
                     if(!MapDoorVersion.TryParseString(doorVersionValue.ToString(), out string error, out MapDoorVersion version))
                     {
-                        this.errorManager.AddError($"The {MapDoorVersion.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
+                        this.errorQueue.AddError($"The {MapDoorVersion.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
                         continue;
                     }
 
                     // Log an error if the door property is missing.
-                    if (!tile.Properties.TryGetValue(MapDoorProperty.PropertyKey, out PropertyValue doorValue))
+                    if (!tile.Properties.TryGetValue(MapDoor.PropertyKey, out PropertyValue doorValue))
                     {
-                        this.errorManager.AddError($"The door at ({x},{y}) is malformed. Info: No {MapDoorProperty.PropertyKey} property was found.");
+                        this.errorQueue.AddError($"The door at ({x},{y}) is malformed. Info: No {MapDoor.PropertyKey} property was found.");
                         continue;
                     }
 
                     // Log an error if the door property is invalid.
-                    if (!MapDoorProperty.TryParseString(doorValue.ToString(), version.PropertyVersion, out error, out MapDoorProperty property))
+                    if (!MapDoor.TryParseString(doorValue.ToString(), version.PropertyVersion, out error, out MapDoor property))
                     {
-                        this.errorManager.AddError($"The {MapDoorProperty.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
+                        this.errorQueue.AddError($"The {MapDoor.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
                         continue;
                     }
 
                     // Log an error if the door extras property is present but invalid.
-                    MapDoorExtraProperty extras = new MapDoorExtraProperty();
-                    if (tile.Properties.TryGetValue(MapDoorExtraProperty.PropertyKey, out PropertyValue doorExtraValue) && !MapDoorExtraProperty.TryParseString(doorExtraValue.ToString(), version.PropertyVersion, out error, out extras))
+                    MapDoorExtras extras = new MapDoorExtras();
+                    if (tile.Properties.TryGetValue(MapDoorExtras.PropertyKey, out PropertyValue doorExtraValue) && !MapDoorExtras.TryParseString(doorExtraValue.ToString(), version.PropertyVersion, out error, out extras))
                     {
-                        this.errorManager.AddError($"The {MapDoorExtraProperty.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
+                        this.errorQueue.AddError($"The {MapDoorExtras.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
                         continue;
                     }
 
                     // Log an error for invalid door and extras property combinations.
                     if (property.Orientation == Orientation.Horizontal && extras.IsDoubleDoor)
                     {
-                        this.errorManager.AddError($"The door at ({x},{y}) is invalid. Info: Horizontal doors can't be double doors.");
+                        this.errorQueue.AddError($"The door at ({x},{y}) is invalid. Info: Horizontal doors can't be double doors.");
                         continue;
                     }
 
                     foundDoors = true;
 
                     // Record sprite request.
-                    this.spriteManager.RegisterDoorSpriteRequest(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection);
+                    this.doorTileInfoManager.RegisterDoorRequest(property.ModId, property.DoorName, property.Orientation, property.OpeningDirection);
 
                     // Mark door as pending.
-                    this.pendingDoors.Add(new PendingDoor(location.Map, new Point(x, y), property, extras, this.timer));
+                    pendingDoors.Add(new PendingDoor(new Point(x, y), property, map, extras, this.timer));
                 }
             }
 
-            this.errorManager.PrintErrors("Found some errors when parsing doors from maps:");
+            this.errorQueue.PrintErrors("Found some errors when parsing doors from maps:");
 
             return foundDoors;
         }
 
-        public IList<Door> CreateDoors()
+        /// <summary>Creates doors.</summary>
+        /// <param name="pendingDoors">The pending doors to use.</param>
+        /// <returns>The created doors.</returns>
+        public IList<Door> CreateDoors(IList<PendingDoor> pendingDoors)
         {
             IList<Door> foundDoors = new List<Door>();
 
-            foreach (PendingDoor pendingDoor in this.pendingDoors)
+            foreach (PendingDoor pendingDoor in pendingDoors)
             {
                 // Get the right door type to create.
-                if (!this.spriteManager.GetDoorSprite(pendingDoor.Property.ModId, pendingDoor.Property.DoorName, pendingDoor.Property.Orientation, pendingDoor.Property.OpeningDirection, out string error, out GeneratedDoorTileInfo tileInfo))
+                if (!this.doorTileInfoManager.GetGeneratedTileInfo(pendingDoor.Property.ModId, pendingDoor.Property.DoorName, pendingDoor.Property.Orientation, pendingDoor.Property.OpeningDirection, out string error, out GeneratedDoorTileInfo tileInfo))
                 {
-                    this.errorManager.AddError($"The tile property at {pendingDoor.Position.X} {pendingDoor.Position.Y} is invalid. Info: {error}.");
+                    this.errorQueue.AddError($"The tile property at {pendingDoor.Position.X} {pendingDoor.Position.Y} is invalid. Info: {error}.");
                     continue;
                 }
 
                 foundDoors.Add(pendingDoor.ToDoor(tileInfo));
             }
 
-            this.errorManager.PrintErrors("Found some errors when creating doors from maps:");
+            this.errorQueue.PrintErrors("Found some errors when creating doors from maps:");
 
             return foundDoors;
-        }
-
-        public void Reset()
-        {
-            this.pendingDoors.Clear();
         }
     }
 }

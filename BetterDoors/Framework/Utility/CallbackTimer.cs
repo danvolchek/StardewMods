@@ -1,16 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BetterDoors.Framework.Utility
 {
-    /// <summary>
-    /// A timer that invokes callback functions at a regular interval.
-    /// </summary>
+    /// <summary> A timer that invokes callback functions at a regular interval.</summary>
     internal class CallbackTimer
     {
-        private readonly IDictionary<Callback, int> activeCallbacks = new Dictionary<Callback, int>();
+        /*********
+        ** Fields
+        *********/
+        /// <summary>Map of current active callbacks => time left before invocation.</summary>
+        private readonly IDictionary<Func<int>, int> activeCallbacks = new Dictionary<Func<int>, int>();
 
-        public void RegisterCallback(Callback callback, int ms)
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>Registers a callback function.</summary>
+        /// <param name="callback">The function to call.</param>
+        /// <param name="ms">How many ms before it should be invoked.</param>
+        public void RegisterCallback(Func<int> callback, int ms)
         {
             this.activeCallbacks[callback] = ms;
 
@@ -18,15 +27,21 @@ namespace BetterDoors.Framework.Utility
                 this.TimeElapsed(0);
         }
 
-        public bool IsRegistered(Callback callback)
+        /// <summary>Checks whether a callback is already registered.</summary>
+        /// <param name="callback">The callback to check.</param>
+        /// <returns>Whether the callback is already registered.</returns>
+        public bool IsRegistered(Func<int> callback)
         {
             return this.activeCallbacks.ContainsKey(callback);
         }
 
+        /// <summary>Handles time elapsing and invokes callback if necessary.</summary>
+        /// <param name="ms">Milliseconds that have elapsed since the last call.</param>
         public void TimeElapsed(int ms)
         {
-            IDictionary<Callback, int> callbacksToRemove = new Dictionary<Callback, int>();
-            foreach (Callback callback in this.activeCallbacks.Keys.ToList())
+            // Process and call callbacks.
+            IDictionary<Func<int>, int> callbacksToRemove = new Dictionary<Func<int>, int>();
+            foreach (Func<int> callback in this.activeCallbacks.Keys.ToList())
             {
                 this.activeCallbacks[callback] -= ms;
 
@@ -36,13 +51,12 @@ namespace BetterDoors.Framework.Utility
                 }
             }
 
-            foreach (KeyValuePair<Callback, int> result in callbacksToRemove)
+            // Reschedule callbacks based on return value of callback function.
+            foreach (KeyValuePair<Func<int>, int> result in callbacksToRemove)
                 if (result.Value < 0)
                     this.activeCallbacks.Remove(result.Key);
                 else
                     this.activeCallbacks[result.Key] = result.Value;
         }
-
-        public delegate int Callback();
     }
 }

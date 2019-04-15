@@ -8,20 +8,40 @@ using System.Collections.Generic;
 
 namespace BetterDoors.Framework.DoorGeneration
 {
-    /// <summary>
-    /// Generates alternate door sprites.
-    /// </summary>
+    /// <summary>Generates door sprites.</summary>
     internal class DoorSpriteGenerator
     {
+        /*********
+        ** Fields
+        *********/
+        /// <summary>The number of pixels in one tile dimension.</summary>
         internal const int TileSize = 16;
 
-        private readonly IMonitor monitor;
-        private readonly GraphicsDevice device;
-        private readonly string modId;
-        private readonly GeneratedSpriteManager manager;
+        /// <summary>The info manager where generated sprite info is stored.</summary>
+        private readonly GeneratedDoorTileInfoManager manager;
+
+        /// <summary>Content packs used to load doors.</summary>
         private readonly IList<LoadedContentPackDoorEntry> contentPacks;
 
-        public DoorSpriteGenerator(GeneratedSpriteManager manager, string modId, IMonitor monitor, GraphicsDevice device, IList<LoadedContentPackDoorEntry> contentPacks)
+        /// <summary>Unique id used to create tile sheet ids.</summary>
+        private readonly string modId;
+
+        /// <summary>Encapsulates monitoring and logging for a given module.</summary>
+        private readonly IMonitor monitor;
+
+        /// <summary>Graphics device used to create textures.</summary>
+        private readonly GraphicsDevice device;
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>Construct an instance.</summary>
+        /// <param name="manager">The info manager where generated sprite info is stored.</param>
+        /// <param name="contentPacks">Content packs used to load doors.</param>
+        /// <param name="modId">Unique id used to create tile sheet ids.</param>
+        /// <param name="monitor">Encapsulates monitoring and logging for a given module.</param>
+        /// <param name="device">Graphics device used to create textures.</param>
+        public DoorSpriteGenerator(GeneratedDoorTileInfoManager manager, IList<LoadedContentPackDoorEntry> contentPacks, string modId, IMonitor monitor, GraphicsDevice device)
         {
             this.manager = manager;
             this.modId = modId;
@@ -30,11 +50,13 @@ namespace BetterDoors.Framework.DoorGeneration
             this.contentPacks = contentPacks;
         }
 
+        /// <summary>Generates door sprites.</summary>
+        /// <param name="locationName">A unique location named used to create tile sheet ids.</param>
+        /// <returns>A map of asset key -> generated texture.</returns>
         public IDictionary<string, Texture2D> GenerateDoorSprites(string locationName)
         {
             IDictionary<string, Texture2D> generatedTextures = new Dictionary<string, Texture2D>();
 
-            // Fields needed and modified during generation.
             DoorGenerationState state = new DoorGenerationState(locationName, this.modId, this.device, this.contentPacks.Count * 2);
             generatedTextures.Add(state.CreateNewTexture());
 
@@ -45,41 +67,40 @@ namespace BetterDoors.Framework.DoorGeneration
 
                 Point infoTileIndex = Utils.ConvertTileIndexToPosition(info.Texture.Width, DoorSpriteGenerator.TileSize, info.Entry.TopLeftTileIndex);
 
-                bool vlRequested = this.manager.IsSpriteRequested(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left);
-                bool hrRequested = this.manager.IsSpriteRequested(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right);
-                bool vrRequested = this.manager.IsSpriteRequested(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right);
-                bool hlRequested = this.manager.IsSpriteRequested(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left);
+                bool vlRequested = this.manager.IsDoorRequested(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left);
+                bool hrRequested = this.manager.IsDoorRequested(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right);
+                bool vrRequested = this.manager.IsDoorRequested(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right);
+                bool hlRequested = this.manager.IsDoorRequested(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left);
 
                 if (vlRequested || hrRequested)
                 {
                     //Copy original sprite        -> Vertical Left + Horizontal Right
                     state.Copy(spriteData, infoTileIndex, info.Texture.Width);
                     if (vlRequested)
-                        this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left, state.CreateTileInfo(true));
+                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left, state.CreateTileInfo(true));
                     if (hrRequested)
-                        this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right, state.CreateTileInfo(false));
+                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right, state.CreateTileInfo(false));
 
-                    if (state.FinishSprite(out KeyValuePair<string, Texture2D> finishedTexture))
+                    if (state.FinishAnimation(out KeyValuePair<string, Texture2D> finishedTexture))
                         generatedTextures.Add(finishedTexture);
                 }
 
                 if (vrRequested || hlRequested)
                 {
-                    //Reflect + reverse VL sprite -> Vertical Right
+                    //Reflect + reverse VL sprite -> Vertical Right + Horizontal Left
                     state.ReflectOverYAxis(spriteData, infoTileIndex, info.Texture.Width);
                     if (vrRequested)
-                        this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right, state.CreateTileInfo(false));
+                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right, state.CreateTileInfo(false));
                     if (hlRequested)
-                        this.manager.RegisterDoorSprite(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo(true));
+                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo(true));
 
-                    if (state.FinishSprite(out KeyValuePair<string, Texture2D>  finishedTexture))
+                    if (state.FinishAnimation(out KeyValuePair<string, Texture2D>  finishedTexture))
                         generatedTextures.Add(finishedTexture);
                 }
             }
 
             state.Texture.SetData(state.TextureData);
 
-            //TODO: remove
             //state.Texture.SaveAsPng(File.Create($"{state.TileSheetInfo.TileSheetId}.png"), state.Width, state.Texture.Height);
 
             if (state.NumberOfDoorsLeft != 0)

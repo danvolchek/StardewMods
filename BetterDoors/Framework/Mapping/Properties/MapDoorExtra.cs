@@ -1,31 +1,49 @@
-﻿using System;
-using StardewModdingAPI;
-using SemanticVersion = StardewModdingAPI.Toolkit.SemanticVersion;
+﻿using StardewModdingAPI;
+using System;
 
 namespace BetterDoors.Framework.Mapping.Properties
 {
-    internal class MapDoorExtraProperty
+    internal class MapDoorExtras
     {
-        public static string PropertyKey = "DoorExtra";
-        
+        /*********
+        ** Accessors
+        *********/
+        /// <summary>Whether the door is a double door.</summary>
         public bool IsDoubleDoor { get; }
+
+        /// <summary>Whether the door is an automatic door.</summary>
         public bool IsAutomaticDoor { get; }
 
-        public MapDoorExtraProperty(bool isDoubleDoor, bool isAutomaticDoor)
+        /*********
+        ** Fields
+        *********/
+        /// <summary>The key to read this property with.</summary>
+        public const string PropertyKey = "DoorExtra";
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>Construct an instance.</summary>
+        /// <param name="isDoubleDoor">Whether the door is a double door.</param>
+        /// <param name="isAutomaticDoor">Whether the door is an automatic door.</param>
+        public MapDoorExtras(bool isDoubleDoor, bool isAutomaticDoor)
         {
             this.IsDoubleDoor = isDoubleDoor;
             this.IsAutomaticDoor = isAutomaticDoor;
         }
 
-        public MapDoorExtraProperty() : this(false, false)
+        /// <summary>Construct an instance with all values set to false.</summary>
+        public MapDoorExtras() : this(false, false)
         {
         }
 
-        /// <summary>
-        /// Parses properties of the form "versionNumber modID doorName orientation openingDirection"
-        /// </summary>
-        /// <returns></returns>
-        public static bool TryParseString(string propertyString, ISemanticVersion version, out string error, out MapDoorExtraProperty property)
+        /// <summary>Try to parse an instance from a string.</summary>
+        /// <param name="propertyString">The string to parse.</param>
+        /// <param name="version">The version the string follows.</param>
+        /// <param name="error">The error while parsing, if any.</param>
+        /// <param name="property">The resulting property, if no errors.</param>
+        /// <returns>If parsing was successful.</returns>
+        public static bool TryParseString(string propertyString, ISemanticVersion version, out string error, out MapDoorExtras property)
         {
             error = null;
             property = null;
@@ -35,12 +53,6 @@ namespace BetterDoors.Framework.Mapping.Properties
             if (parts.Length == 0)
             {
                 error = "No extras provided";
-                return false;
-            }
-
-            if (!version.Equals(new SemanticVersion(1, 0, 0)))
-            {
-                error = $"Property version {version} is not recognized";
                 return false;
             }
 
@@ -63,7 +75,7 @@ namespace BetterDoors.Framework.Mapping.Properties
                 }
             }
 
-            property = new MapDoorExtraProperty(isDoubleDoor, isAutomaticDoor);
+            property = new MapDoorExtras(isDoubleDoor, isAutomaticDoor);
             return true;
         }
     }

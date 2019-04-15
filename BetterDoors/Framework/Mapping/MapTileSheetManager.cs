@@ -7,14 +7,22 @@ using xTile.Tiles;
 
 namespace BetterDoors.Framework.Mapping
 {
-    /// <summary>
-    /// Modifies map tile sheets and layers so that doors can be drawn on them.
-    /// </summary>
-    internal class MapModifier : IResetable
+    /// <summary>Manages map tile sheets and layers so that doors can be drawn on them.</summary>
+    internal class MapTileSheetManager
     {
-        private readonly IDictionary<Map, IEnumerable<string>> addedSheetsByLocation = new Dictionary<Map, IEnumerable<string>>();
+        /*********
+        ** Fields
+        *********/
+        /// <summary>Map of map => tile sheets added to that map.</summary>
+        private readonly IDictionary<Map, IEnumerable<string>> addedSheetsByMap = new Dictionary<Map, IEnumerable<string>>();
 
-        public void AddTileSheetsToLocation(Map map, IList<Door> doors)
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>Adds tile sheets to a map.</summary>
+        /// <param name="map">The map to edit.</param>
+        /// <param name="doors">The doors that need their tile sheets added.</param>
+        public void AddTileSheetsToMap(Map map, IList<Door> doors)
         {
             //Don't add the same tile sheet to a map twice
             HashSet<string> addedSheets = new HashSet<string>();
@@ -23,6 +31,7 @@ namespace BetterDoors.Framework.Mapping
 
             foreach (Door door in doors)
             {
+                // Create and add the tile sheet if not yet added or get it if added.
                 TileSheet tileSheet;
                 if (addedSheets.Add(door.DoorTileInfo.TileSheetInfo.TileSheetId))
                 {
@@ -41,9 +50,9 @@ namespace BetterDoors.Framework.Mapping
                     tileSheet = map.GetTileSheet(door.DoorTileInfo.TileSheetInfo.TileSheetId);
                 }
 
+                // Make the entire tile sheet passable.
                 if (addedTileInfo.Add(door.DoorTileInfo))
                 {
-                    // Make the entire tile sheet passable
                     for (int animationFrame = 0; animationFrame < 4; animationFrame++)
                     {
                         for (int doorYTile = 0; doorYTile < 3; doorYTile++)
@@ -53,27 +62,29 @@ namespace BetterDoors.Framework.Mapping
                     }
                 }
 
+                // Add an always front layer if it's missing.
                 if(map.GetLayer("AlwaysFront") == null)
                 {
                    Layer buildingsLayer = map.GetLayer("Buildings");
                    map.AddLayer(new Layer("AlwaysFront", map, buildingsLayer.LayerSize, buildingsLayer.TileSize));
                 }
 
-                this.addedSheetsByLocation[map] = addedSheets;
-
-                map.LoadTileSheets(Game1.mapDisplayDevice);
+                this.addedSheetsByMap[map] = addedSheets;
             }
+
+            map.LoadTileSheets(Game1.mapDisplayDevice);
         }
 
+        /// <summary>Reset this manager, removing added tile sheets from every map.</summary>
         public void Reset()
         {
-            foreach (KeyValuePair<Map, IEnumerable<string>> sheetsInMap in this.addedSheetsByLocation)
+            foreach (KeyValuePair<Map, IEnumerable<string>> sheetsInMap in this.addedSheetsByMap)
             {
                 foreach(string layerId in sheetsInMap.Value)
                     sheetsInMap.Key.RemoveTileSheet(sheetsInMap.Key.GetTileSheet(layerId));
             }
 
-            this.addedSheetsByLocation.Clear();
+            this.addedSheetsByMap.Clear();
         }
     }
 }
