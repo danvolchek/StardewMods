@@ -5,6 +5,7 @@ using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterDoors.Framework.Serialization;
 
 namespace BetterDoors.Framework
 {
@@ -14,6 +15,9 @@ namespace BetterDoors.Framework
         /*********
          ** Fields
          *********/
+        /// <summary>Mod configuration.</summary>
+        private BetterDoorsModConfig config;
+
         /// <summary>The action to take when a door is toggled.</summary>
         private readonly Action<Door> onToggledDoor;
 
@@ -28,8 +32,9 @@ namespace BetterDoors.Framework
         *********/
         /// <summary>Constructs an instance.</summary>
         /// <param name="onToggledDoor">The action to take when a door is toggled.</param>
-        public DoorManager(Action<Door> onToggledDoor)
+        public DoorManager(BetterDoorsModConfig config, Action<Door> onToggledDoor)
         {
+            this.config = config;
             this.onToggledDoor = onToggledDoor;
         }
 
@@ -86,7 +91,7 @@ namespace BetterDoors.Framework
             if ((door.IsAnimating && door.StateBeforeToggle != stateBeforeToggle) || (!door.IsAnimating && door.State == stateBeforeToggle))
             {
                 // Don't callback forceful changes.
-                door.Toggle(true);
+                door.Toggle(true, true);
             }
         }
 
@@ -111,7 +116,7 @@ namespace BetterDoors.Framework
                 return;
 
             // Get currently near doors.
-            IList<Door> nearDoors = this.GetDoorsNearPlayers(location).ToList();
+            IList<Door> nearDoors = this.GetDoorsNearLocalPlayer(location).ToList();
 
             // Find doors that entered and exited the range.
             ISet<Door> newInRangeDoors = new HashSet<Door>(nearDoors);
@@ -128,7 +133,7 @@ namespace BetterDoors.Framework
 
             this.doorsNearPlayers = nearDoors;
 
-            foreach (Door toggleDoor in doorsToToggle.Where(door => door.Toggle(true)))
+            foreach (Door toggleDoor in doorsToToggle.Where(door => door.Toggle(true, !this.config.SilenceAutomaticDoors)))
                 this.onToggledDoor(toggleDoor);
         }
 
@@ -171,7 +176,7 @@ namespace BetterDoors.Framework
                 return false;
 
             cursor = 2;
-            transparency = Utils.GetTaxiCabDistance(playerTile, mouseTile) < 3 ? 1f : 0.5f;
+            transparency = Utils.GetTaxiCabDistance(playerTile, mouseTile) <= this.config.DoorToggleRadius ? 1f : 0.5f;
             return true;
         }
 
@@ -193,43 +198,40 @@ namespace BetterDoors.Framework
         /// <returns>All doors that were toggled.</returns>
         private IEnumerable<Door> TryToggleDoor(Door door, IDictionary<Point, Door> doorsInLocation, bool force)
         {
-            if (door.Toggle(force))
+            if (door.Toggle(force, true))
             {
                 yield return door;
-                if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor) && doubleDoor.Toggle(force))
+                if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor) && doubleDoor.Toggle(force, true))
                     yield return doubleDoor;
             }
         }
 
-        /// <summary>Gets all doors near any player.</summary>
+        /// <summary>Gets all doors near the local player.</summary>
         /// <param name="location">The location to look in.</param>
         /// <returns>The doors that were found.</returns>
-        private IEnumerable<Door> GetDoorsNearPlayers(GameLocation location)
+        private IEnumerable<Door> GetDoorsNearLocalPlayer(GameLocation location)
         {
             if (!this.doors.TryGetValue(Utils.GetLocationName(location), out IDictionary<Point, Door> doorsInLocation))
                 yield break;
 
-            foreach (Farmer farmer in location.farmers)
+            for (int i = -1 * this.config.DoorToggleRadius; i <= this.config.DoorToggleRadius; i++)
             {
-                for (int i = -2; i < 3; i++)
+                // Search along the x axis for horizontal doors and along the y axis for vertical doors (parallel to the hallway direction).
+
+                if (doorsInLocation.TryGetValue(new Point(Game1.player.getTileX() + i, Game1.player.getTileY()), out Door door) && (door.Extras.IsAutomaticDoor || this.config.MakeAllDoorsAutomatic) && door.Orientation == Orientation.Horizontal)
                 {
-                    // Search along the x axis for horizontal doors and along the y axis for vertical doors (parallel to the hallway direction).
+                    yield return door;
 
-                    if (doorsInLocation.TryGetValue(new Point(farmer.getTileX() + i, farmer.getTileY()), out Door door) && door.Extras.IsAutomaticDoor && door.Orientation == Orientation.Horizontal)
-                    {
-                        yield return door;
+                    if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
+                        yield return doubleDoor;
+                }
 
-                        if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
-                            yield return doubleDoor;
-                    }
+                if (doorsInLocation.TryGetValue(new Point(Game1.player.getTileX(), Game1.player.getTileY() + i), out door) && (door.Extras.IsAutomaticDoor || this.config.MakeAllDoorsAutomatic) && door.Orientation == Orientation.Vertical)
+                {
+                    yield return door;
 
-                    if (doorsInLocation.TryGetValue(new Point(farmer.getTileX(), farmer.getTileY() + i), out door) && door.Extras.IsAutomaticDoor && door.Orientation == Orientation.Vertical)
-                    {
-                        yield return door;
-
-                        if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
-                            yield return doubleDoor;
-                    }
+                    if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
+                        yield return doubleDoor;
                 }
             }
         }

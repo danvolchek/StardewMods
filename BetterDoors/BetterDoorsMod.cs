@@ -1,5 +1,4 @@
-﻿using System;
-using BetterDoors.Framework;
+﻿using BetterDoors.Framework;
 using BetterDoors.Framework.ContentPacks;
 using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Enums;
@@ -22,7 +21,7 @@ namespace BetterDoors
     /*TODO:
      - Programming:
          - Features:
-             - Config option for making all doors automatic, automatic door radius, and manual click radius.
+             - Player 1 enters auto door range, player 2 enters auto door range, player 2 exits auto door range -> door closes. Should stay open until all players leave range.
              - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
          - Code Review:
              - Think about how door states are synced in multiplayer and whether a desync could happen.
@@ -60,6 +59,9 @@ namespace BetterDoors
         /// <summary>Manages created doors.</summary>
         private DoorManager manager;
 
+        /// <summary>Mod configuration.</summary>
+        private BetterDoorsModConfig config;
+
         /// <summary>Whether the mod is enabled or not.</summary>
         /// <remarks>See <see cref="Multiplayer_PeerContextReceived"/> for why it would be disabled.</remarks>
         private bool enabled;
@@ -77,6 +79,9 @@ namespace BetterDoors
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            // Read config.
+            this.config = new ConfigManager(this.Helper).GetConfig();
+
             // Create helper classes that make the mod work.
             ErrorQueue errorQueue = new ErrorQueue(this.Monitor);
             ContentPackLoader packLoader = new ContentPackLoader(this.Helper, this.Monitor, errorQueue);
@@ -88,7 +93,7 @@ namespace BetterDoors
             this.creator = new DoorCreator(this.doorTileInfoManager, this.timer, errorQueue, this.Helper.ModRegistry.Get(this.Helper.ModRegistry.ModID).Manifest.Version);
             this.assetLoader = new DoorAssetLoader(this.Helper.Content);
             this.mapTileSheetManager = new MapTileSheetManager();
-            this.manager = new DoorManager(this.OnDoorToggled);
+            this.manager = new DoorManager(this.config, this.OnDoorToggled);
 
             // Apply Harmony patches.
             BetterDoorsMod.Instance = this;
@@ -145,8 +150,12 @@ namespace BetterDoors
         private void Multiplayer_PeerContextReceived(object sender, PeerContextReceivedEventArgs e)
         {
             // If the host doesn't have the same version of Better Doors installed, disable for this player.
-            if (e.Peer.IsHost && (!e.Peer.HasSmapi || e.Peer.GetMod(this.Helper.Multiplayer.ModID)?.Version != this.Helper.ModRegistry.Get(this.Helper.Multiplayer.ModID).Manifest.Version))
+            if (e.Peer.IsHost && (!e.Peer.HasSmapi || !this.Helper.ModRegistry.Get(this.Helper.Multiplayer.ModID).Manifest.Version.Equals(e.Peer.GetMod(this.Helper.Multiplayer.ModID)?.Version)))
+            {
+                this.Monitor.Log("Disabling mod for farmhand because the host doesn't have a compatible Better Doors version.");
+                this.Monitor.Log($"Host version: {e.Peer.GetMod(this.Helper.Multiplayer.ModID)?.Version}. Local version: {this.Helper.ModRegistry.Get(this.Helper.Multiplayer.ModID).Manifest.Version}.");
                 this.Disable();
+            }
         }
 
         /// <summary>Raised after the game returns to the title screen.</summary>
@@ -169,7 +178,7 @@ namespace BetterDoors
             Point playerTile = Utils.GetPlayerTile();
             Point clickedTile = new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y);
 
-            if(Utils.GetTaxiCabDistance(playerTile, clickedTile) < 3)
+            if(Utils.GetTaxiCabDistance(playerTile, clickedTile) <= this.config.DoorToggleRadius)
                 this.manager.MouseToggleDoor(Utils.GetLocationName(Game1.currentLocation), clickedTile);
         }
 

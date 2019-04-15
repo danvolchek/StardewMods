@@ -84,13 +84,15 @@ namespace BetterDoors.Framework
 
         /// <summary>Toggle this door's state.</summary>
         /// <param name="force">If true, cancel any current toggle animation. Otherwise do nothing.</param>
+        /// <param name="makeSound">Whether to make a sound or not.</param>
         /// <returns>Whether the toggle animation started.</returns>
-        public bool Toggle(bool force)
+        public bool Toggle(bool force, bool makeSound)
         {
             if (!force && this.IsAnimating)
                 return false;
 
-            Game1.currentLocation.playSoundAt(this.State == State.Closed ? "doorCreak" : "doorOpen", new Vector2(this.Position.X, this.Position.Y));
+            if(makeSound)
+                Game1.currentLocation.playSoundAt(this.State == State.Closed ? "doorCreak" : "doorOpen", new Vector2(this.Position.X, this.Position.Y));
 
             // If not toggling, the state before toggle is the current state. Otherwise, it's the opposite of the old state before toggle.
             if (!this.IsAnimating)
