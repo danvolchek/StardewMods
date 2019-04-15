@@ -21,6 +21,7 @@ namespace BetterDoors
     /*TODO:
      - Programming:
          - Features:
+             - If CP or Map version > mod version, log an error saying to update.
              - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
          - Code Review:
              - Think about how door states are synced in multiplayer and whether a desync could happen.
@@ -51,8 +52,8 @@ namespace BetterDoors
         private DoorAssetLoader assetLoader;
 
         /// <summary>Manages map tile sheets.</summary>
-        /// 
         private MapTileSheetManager mapTileSheetManager;
+
         /// <summary>Finds and creates doors.</summary>
         private DoorCreator creator;
 
@@ -69,6 +70,9 @@ namespace BetterDoors
         /// <summary>A static reference to the mod for Harmony patches to use.</summary>
         internal static BetterDoorsMod Instance { get; private set; }
 
+        /*********
+         ** Public methods
+         *********/
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
@@ -98,7 +102,7 @@ namespace BetterDoors
         }
 
         /*********
-         ** Event Handlers
+         ** Private methods
          *********/
         /// <summary>Enables the mod, attaching necessary event handlers.</summary>
         private void Enable()
@@ -132,6 +136,9 @@ namespace BetterDoors
             this.Helper.Events.Multiplayer.ModMessageReceived -= this.Multiplayer_ModMessageReceived;
         }
 
+        /*********
+         ** Event Handlers
+         *********/
         /// <summary>Raised after the mod context for a peer is received. This happens before the game approves the connection, so the player doesn't yet exist in the game. This is the earliest point where messages can be sent to the peer via SMAPI.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
