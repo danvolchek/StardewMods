@@ -11,7 +11,7 @@ using StardewValley;
 
 namespace BetterDoors.Framework.Patches
 {
-    /// <summary>Patches GameLocation.isCollidingPosition to allow for accurate door collision detection.</summary>
+    /// <summary>Patches Game1.drawMouseCursor to update the mouse cursor when hovering over doors.</summary>
     [HarmonyPatch]
     internal class MouseCursorPatch
     {
@@ -32,7 +32,7 @@ namespace BetterDoors.Framework.Patches
         {
             Point mousePosition = new Point((Game1.viewport.X + Game1.getOldMouseX()) / 64, (Game1.viewport.Y + Game1.getOldMouseY()) / 64);
 
-            if (BetterDoorsMod.Instance.GetMouseCursor(Game1.currentLocation, mousePosition, out int cursor, out float transparency))
+            if (BetterDoorsMod.Instance.TryGetMouseCursorForDoor(Game1.currentLocation, mousePosition, out int cursor, out float transparency))
             {
                 Game1.mouseCursor = cursor;
                 Game1.mouseCursorTransparency = transparency;
