@@ -42,15 +42,21 @@ namespace BetterDoors.Framework
         /// <summary>The collision info of the door.</summary>
         public Rectangle CollisionInfo { get; }
 
+        /// <summary>The state before a toggle began.</summary>
+        public State StateBeforeToggle { get; set; }
+
+        /// <summary>Whether the door is currently animating.</summary>
+        public bool IsAnimating => this.timer.IsRegistered(this.TimerCallback);
+
         /*********
         ** Fields
         *********/
         /// <summary>The map the door is in.</summary>
         private readonly Map map;
+
         /// <summary>A timer used to animate state change.</summary>
         private readonly CallbackTimer timer;
-        /// <summary>The state before a toggle began.</summary>
-        private State stateBeforeToggle;
+
         /// <summary>The current state. Use <see cref="State"/> instead.</summary>
         private State state;
 
@@ -81,14 +87,18 @@ namespace BetterDoors.Framework
         /// <returns>Whether the toggle animation started.</returns>
         public bool Toggle(bool force)
         {
-            if (!force && this.timer.IsRegistered(this.TimerCallback))
+            if (!force && this.IsAnimating)
                 return false;
 
-            Game1.currentLocation.playSoundAt(this.stateBeforeToggle == State.Closed ? "doorCreak" : "doorOpen", new Vector2(this.Position.X, this.Position.Y));
+            Game1.currentLocation.playSoundAt(this.State == State.Closed ? "doorCreak" : "doorOpen", new Vector2(this.Position.X, this.Position.Y));
 
-            this.stateBeforeToggle = this.stateBeforeToggle == State.Closed ? State.Open : State.Closed;
+            // If not toggling, the state before toggle is the current state. Otherwise, it's the opposite of the old state before toggle.
+            if (!this.IsAnimating)
+                this.StateBeforeToggle = this.State;
+            else
+                this.StateBeforeToggle = this.StateBeforeToggle == State.Closed ? State.Open : State.Closed;
+
             this.timer.RegisterCallback(this.TimerCallback, 0);
-
             return true;
         }
 
@@ -171,7 +181,7 @@ namespace BetterDoors.Framework
         /// <returns>The next state.</returns>
         private State GetNextStateInAnimation()
         {
-            bool opening = this.stateBeforeToggle == State.Closed;
+            bool opening = this.StateBeforeToggle == State.Closed;
             switch (this.state)
             {
                 case State.Closed:

@@ -1,4 +1,5 @@
-﻿using BetterDoors.Framework;
+﻿using System;
+using BetterDoors.Framework;
 using BetterDoors.Framework.ContentPacks;
 using BetterDoors.Framework.DoorGeneration;
 using BetterDoors.Framework.Enums;
@@ -21,6 +22,8 @@ namespace BetterDoors
     /*TODO:
      - Programming:
          - Features:
+             - Config option for making all doors automatic, automatic door radius, and manual click radius.
+             - Change mouse cursor when hovering over doors like vanilla does.
              - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
          - Code Review:
              - Think about how door states are synced in multiplayer and whether a desync could happen.
@@ -164,7 +167,11 @@ namespace BetterDoors
             if (!Context.IsWorldReady || (!e.Button.IsActionButton() && !e.Button.IsUseToolButton()))
                 return;
 
-            this.manager.FuzzyToggleDoor(Utils.GetLocationName(Game1.currentLocation), new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y));
+            Point playerTile = new Point(Game1.player.getTileX(), Game1.player.getTileY());
+            Point clickedTile = new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y);
+
+            if(Math.Abs(playerTile.X - clickedTile.X) + Math.Abs(playerTile.Y - clickedTile.Y) < 3)
+                this.manager.FuzzyToggleDoor(Utils.GetLocationName(Game1.currentLocation), clickedTile);
         }
 
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
@@ -263,7 +270,7 @@ namespace BetterDoors
             {
                 DoorToggle toggle = e.ReadAs<DoorToggle>();
                 if(Context.IsMainPlayer || toggle.LocationName == Utils.GetLocationName(Game1.currentLocation))
-                    this.manager.ToggleDoor(toggle.LocationName, toggle.Position);
+                    this.manager.ToggleDoor(toggle.LocationName, toggle.Position, toggle.StateBeforeToggle);
             }
         }
 
@@ -275,7 +282,7 @@ namespace BetterDoors
         private void OnDoorToggled(Door door)
         {
             // Broadcast the toggle to all other players.
-            this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
+            this.Helper.Multiplayer.SendMessage(new DoorToggle(door.Position, door.StateBeforeToggle, Utils.GetLocationName(Game1.currentLocation)), nameof(DoorToggle), new[] { this.Helper.Multiplayer.ModID });
         }
 
         /// <summary>Prepare a location for displaying doors.</summary>

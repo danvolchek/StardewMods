@@ -58,7 +58,7 @@ namespace BetterDoors.Framework.Mapping.Properties
                 return false;
             }
 
-            if (!version.Equals(new SemanticVersion(1, 0, 0)))
+            if (!version.Equals(new SemanticVersion("1.0.0")))
             {
                 error = $"Property version {version} is not recognized";
                 return false;

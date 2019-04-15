@@ -73,14 +73,21 @@ namespace BetterDoors.Framework
         /// <summary>Forcefully toggles a door state if found at the position.</summary>
         /// <param name="locationName">The location to toggle the door in.</param>
         /// <param name="position">The position to look for a door at.</param>
-        public void ToggleDoor(string locationName, Point position)
+        /// <param name="stateBeforeToggle">The door state before it was toggled.</param>
+        public void ToggleDoor(string locationName, Point position, State stateBeforeToggle)
         {
             if (!this.doors.TryGetValue(locationName, out IDictionary<Point, Door> doorsInLocation))
                 return;
 
-            // Don't callback forceful changes.
-            if(doorsInLocation.TryGetValue(position, out Door door))
+            if (!doorsInLocation.TryGetValue(position, out Door door))
+                return;
+
+            // If animating in the wrong direction or in the wrong end state, toggle to the right one.
+            if ((door.IsAnimating && door.StateBeforeToggle != stateBeforeToggle) || (!door.IsAnimating && door.State == stateBeforeToggle))
+            {
+                // Don't callback forceful changes.
                 door.Toggle(true);
+            }
         }
 
         /// <summary>Unforcefully toggles a door state if found at the position or near it.</summary>
