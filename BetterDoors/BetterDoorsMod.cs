@@ -29,9 +29,7 @@ namespace BetterDoors
          - Write up documentation.
     */
 
-    /// <summary>
-    /// A mod which provides better doors to map makers.
-    /// </summary>
+    /// <summary> A mod which provides better doors to map makers.</summary>
     public class BetterDoorsMod : Mod
     {
         /*********
@@ -62,7 +60,7 @@ namespace BetterDoors
         private DoorManager manager;
 
         /// <summary>Whether the mod is enabled or not.</summary>
-        /// <remarks>See  See <see cref="Multiplayer_PeerContextReceived"/> for why it would be disabled.</remarks>
+        /// <remarks>See <see cref="Multiplayer_PeerContextReceived"/> for why it would be disabled.</remarks>
         private bool enabled;
 
         /*********
