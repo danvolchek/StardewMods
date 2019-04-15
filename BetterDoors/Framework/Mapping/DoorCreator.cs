@@ -4,6 +4,7 @@ using BetterDoors.Framework.Mapping.Properties;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using StardewModdingAPI;
 using xTile;
 using xTile.Layers;
 using xTile.ObjectModel;
@@ -26,6 +27,9 @@ namespace BetterDoors.Framework.Mapping
         /// <summary>Queues door definitions errors.</summary>
         private readonly ErrorQueue errorQueue;
 
+        /// <summary>The loaded version of Better Doors.</summary>
+        private readonly ISemanticVersion modVersion;
+
         /*********
         ** Public methods
         *********/
@@ -33,11 +37,12 @@ namespace BetterDoors.Framework.Mapping
         /// <param name="doorTileInfoManager">Manages information about the tiles needed to draw doors.</param>
         /// <param name="timer">Callback timer for door animations.</param>
         /// <param name="errorQueue">Error manager for reading door definitions from map files.</param>
-        public DoorCreator(GeneratedDoorTileInfoManager doorTileInfoManager, CallbackTimer timer, ErrorQueue errorQueue)
+        public DoorCreator(GeneratedDoorTileInfoManager doorTileInfoManager, CallbackTimer timer, ErrorQueue errorQueue, ISemanticVersion modVersion)
         {
             this.doorTileInfoManager = doorTileInfoManager;
             this.errorQueue = errorQueue;
             this.timer = timer;
+            this.modVersion = modVersion;
         }
 
         /// <summary>Finds every door in a map.</summary>
@@ -83,6 +88,12 @@ namespace BetterDoors.Framework.Mapping
                     if(!MapDoorVersion.TryParseString(doorVersionValue.ToString(), out string error, out MapDoorVersion version))
                     {
                         this.errorQueue.AddError($"The {MapDoorVersion.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
+                        continue;
+                    }
+
+                    if (version.PropertyVersion.IsNewerThan(this.modVersion))
+                    {
+                        this.errorQueue.AddError($"The door at ({x},{y}) is too new to be loaded ({version.PropertyVersion}). Please update Better Doors! ");
                         continue;
                     }
 
@@ -142,7 +153,7 @@ namespace BetterDoors.Framework.Mapping
                 // Get the right door type to create.
                 if (!this.doorTileInfoManager.GetGeneratedTileInfo(pendingDoor.Property.ModId, pendingDoor.Property.DoorName, pendingDoor.Property.Orientation, pendingDoor.Property.OpeningDirection, out string error, out GeneratedDoorTileInfo tileInfo))
                 {
-                    this.errorQueue.AddError($"The tile property at {pendingDoor.Position.X} {pendingDoor.Position.Y} is invalid. Info: {error}.");
+                    this.errorQueue.AddError($"The door at ({pendingDoor.Position.X},{pendingDoor.Position.Y}) is invalid. Info: {error}.");
                     continue;
                 }
 

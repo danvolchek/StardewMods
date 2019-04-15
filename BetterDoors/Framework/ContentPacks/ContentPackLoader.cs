@@ -16,8 +16,10 @@ namespace BetterDoors.Framework.ContentPacks
         *********/
         /// <summary>Provides simplified APIs for writing mods.</summary>
         private readonly IModHelper helper;
+
         /// <summary>Encapsulates monitoring and logging for a given module.</summary>
         private readonly IMonitor monitor;
+
         /// <summary>Queues content pack loading errors.</summary>
         private readonly ErrorQueue errorQueue;
 
@@ -46,15 +48,21 @@ namespace BetterDoors.Framework.ContentPacks
             {
                 if (contentPack.Manifest.UniqueID.Equals("vanilla", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    this.errorQueue.AddError($"{contentPack.Manifest.UniqueID} - A content pack's unique id can't be {contentPack.Manifest.UniqueID}. This pack won't be loaded.");
+                    this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - A content pack's unique id can't be {contentPack.Manifest.UniqueID}. This pack won't be loaded.");
                     continue;
                 }
 
                 ContentPack loadedPack = contentPack.ReadJsonFile<ContentPack>("content.json");
 
+                if (loadedPack.Version.IsNewerThan(this.helper.ModRegistry.Get(this.helper.ModRegistry.ModID).Manifest.Version))
+                {
+                    this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) is too new to be loaded ({loadedPack.Version}). Please update Better Doors! ");
+                    continue;
+                }
+
                 if (loadedPack.Version != new SemanticVersion(1, 0, 0))
                 {
-                    this.errorQueue.AddError($"{contentPack.Manifest.UniqueID} - Unrecognized content pack version: {loadedPack.Version}.  This pack won't be loaded. ");
+                    this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - Unrecognized content pack version: {loadedPack.Version}. This pack won't be loaded. ");
                     continue;
                 }
 
@@ -98,7 +106,7 @@ namespace BetterDoors.Framework.ContentPacks
 
                     if (error != null)
                     {
-                        this.errorQueue.AddError($"{contentPack.Manifest.UniqueID} - {doorEntry.Name} - This entry is invalid. It won't be loaded. Info: {error}.");
+                        this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - {doorEntry.Name} - This entry is invalid. Info: {error}. This entry won't be loaded.");
                         continue;
                     }
 

@@ -78,7 +78,7 @@ namespace BetterDoors.Framework.Mapping.Properties
                 return false;
             }
 
-            property = new MapDoor(parts[0].ToLower(), parts[1], orientation, direction);
+            property = new MapDoor(parts[0], parts[1], orientation, direction);
             return true;
         }
     }

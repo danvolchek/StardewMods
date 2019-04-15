@@ -21,12 +21,10 @@ namespace BetterDoors
     /*TODO:
      - Programming:
          - Features:
-             - If CP or Map version > mod version, log an error saying to update.
              - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
          - Code Review:
              - Think about how door states are synced in multiplayer and whether a desync could happen.
      - UX:
-         - Go through all of the user input validation and make sure the errors are helpful.
          - Write up documentation.
     */
 
@@ -85,7 +83,7 @@ namespace BetterDoors
             this.timer = new CallbackTimer();
             this.doorTileInfoManager = new GeneratedDoorTileInfoManager();
             this.generator = new DoorSpriteGenerator(this.doorTileInfoManager, packLoader.LoadContentPacks(), this.Helper.Multiplayer.ModID, this.Monitor, Game1.graphics.GraphicsDevice);
-            this.creator = new DoorCreator(this.doorTileInfoManager, this.timer, errorQueue);
+            this.creator = new DoorCreator(this.doorTileInfoManager, this.timer, errorQueue, this.Helper.ModRegistry.Get(this.Helper.ModRegistry.ModID).Manifest.Version);
             this.assetLoader = new DoorAssetLoader(this.Helper.Content);
             this.mapTileSheetManager = new MapTileSheetManager();
             this.manager = new DoorManager(this.OnDoorToggled);

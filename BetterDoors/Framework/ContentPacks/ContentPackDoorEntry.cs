@@ -8,8 +8,10 @@
         *********/
         /// <summary>The relative file path to the image.</summary>
         public string ImageFilePath { get; set; }
+
         /// <summary>The top left tile index of the animation.</summary>
         public int TopLeftTileIndex { get; set; }
+
         /// <summary>The name of the door animation.</summary>
         public string Name { get; set; }
 

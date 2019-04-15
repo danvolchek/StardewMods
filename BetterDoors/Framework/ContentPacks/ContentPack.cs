@@ -13,6 +13,7 @@ namespace BetterDoors.Framework.ContentPacks
     {
         /// <summary>The version of the content pack.</summary>
         public ISemanticVersion Version { get; }
+
         /// <summary>The doors the content pack provides.</summary>
         public IList<ContentPackDoorEntry> Doors { get; }
     }
