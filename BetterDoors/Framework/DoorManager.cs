@@ -92,20 +92,15 @@ namespace BetterDoors.Framework
 
         /// <summary>Unforcefully toggles a door state if found at the position or near it.</summary>
         /// <param name="locationName">The location to toggle the door in.</param>
-        /// <param name="position">The position to look for a door at.</param>
-        public void FuzzyToggleDoor(string locationName, Point position)
+        /// <param name="mouseTile">The position to look for a door at.</param>
+        public void MouseToggleDoor(string locationName, Point mouseTile)
         {
             if (!this.doors.TryGetValue(locationName, out IDictionary<Point, Door> doorsInLocation))
                 return;
 
-            for (int y = 0; y < 2; y++)
-            {
-                if (doorsInLocation.TryGetValue(new Point(position.X, position.Y + y), out Door door))
-                {
-                    foreach (Door toggleDoor in this.TryToggleDoor(door, doorsInLocation, false))
-                        this.onToggledDoor(toggleDoor);
-                }
-            }
+            if(DoorManager.TryGetDoorFromMouse(mouseTile, doorsInLocation, out Door door))
+                foreach (Door toggleDoor in this.TryToggleDoor(door, doorsInLocation, false))
+                    this.onToggledDoor(toggleDoor);
         }
 
         /// <summary>Toggles automatic doors as necessary.</summary>
@@ -160,6 +155,26 @@ namespace BetterDoors.Framework
             return this.doors.TryGetValue(locationName, out IDictionary<Point, Door> doorsInLocation) && doorsInLocation.Values.Where(door => door.State == State.Closed).Any(door => door.CollisionInfo.Intersects(position));
         }
 
+        /// <summary>Gets the mouse cursor to display if a door is found.</summary>
+        /// <param name="locationName">The location to check in.</param>
+        /// <param name="playerTile">The position the player is at.</param>
+        /// <param name="mouseTile">The position of the mouse.</param>
+        /// <param name="cursor">The resulting cursor index, if any.</param>
+        /// <param name="transparency">The resulting transparency value, if any.</param>
+        /// <returns>Whether a door was found.</returns>
+        public bool TryGetMouseCursorForDoor(string locationName, Point playerTile, Point mouseTile, out int cursor, out float transparency)
+        {
+            cursor = 0;
+            transparency = 0;
+
+            if (!this.doors.TryGetValue(locationName, out IDictionary<Point, Door> doorsInLocation) || !DoorManager.TryGetDoorFromMouse(mouseTile, doorsInLocation, out Door _))
+                return false;
+
+            cursor = 2;
+            transparency = Utils.GetTaxiCabDistance(playerTile, mouseTile) < 3 ? 1f : 0.5f;
+            return true;
+        }
+
         /// <summary>Resets the manager, removing each door from its map.</summary>
         public void Reset()
         {
@@ -181,7 +196,7 @@ namespace BetterDoors.Framework
             if (door.Toggle(force))
             {
                 yield return door;
-                if (DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor) && doubleDoor.Toggle(force))
+                if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor) && doubleDoor.Toggle(force))
                     yield return doubleDoor;
             }
         }
@@ -204,7 +219,7 @@ namespace BetterDoors.Framework
                     {
                         yield return door;
 
-                        if (DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
+                        if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
                             yield return doubleDoor;
                     }
 
@@ -212,11 +227,30 @@ namespace BetterDoors.Framework
                     {
                         yield return door;
 
-                        if (DoorManager.GetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
+                        if (DoorManager.TryGetDoubleDoor(door, doorsInLocation, out Door doubleDoor))
                             yield return doubleDoor;
                     }
                 }
             }
+        }
+
+        /// <summary>Gets a door from a mouse position, allowing for some fuzzyness.</summary>
+        /// <param name="mouseTile">The tile the mouse is on.</param>
+        /// <param name="doorsInLocation">The doors in the location to search.</param>
+        /// <param name="door">The resulting door, if any.</param>
+        /// <returns>Whether a door was found.</returns>
+        private static bool TryGetDoorFromMouse(Point mouseTile, IDictionary<Point, Door> doorsInLocation, out Door door)
+        {
+            door = null;
+            for (int y = 0; y < 2; y++)
+            {
+                if (doorsInLocation.TryGetValue(new Point(mouseTile.X, mouseTile.Y + y), out door))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>Gets the associated double door for the given door, if both are double doors.</summary>
@@ -224,7 +258,7 @@ namespace BetterDoors.Framework
         /// <param name="doorsInLocation">The doors in the location.</param>
         /// <param name="doubleDoor">The found double door.</param>
         /// <returns>Whether a double door was found.</returns>
-        private static bool GetDoubleDoor(Door door, IDictionary<Point, Door> doorsInLocation, out Door doubleDoor)
+        private static bool TryGetDoubleDoor(Door door, IDictionary<Point, Door> doorsInLocation, out Door doubleDoor)
         {
             doubleDoor = null;
 

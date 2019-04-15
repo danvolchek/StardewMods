@@ -1,4 +1,5 @@
-﻿using BetterDoors.Framework.Enums;
+﻿using System;
+using BetterDoors.Framework.Enums;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
@@ -94,6 +95,25 @@ namespace BetterDoors.Framework.Utility
             return location.uniqueName.Value ?? location.Name;
         }
 
+        /// <summary>Gets the taxi cab distance between two points.</summary>
+        /// <param name="first">The first point.</param>
+        /// <param name="second">The second point.</param>
+        /// <returns>The distance between them.</returns>
+        public static int GetTaxiCabDistance(Point first, Point second)
+        {
+            return Math.Abs(first.X - second.X) + Math.Abs(first.Y - second.Y);
+        }
+
+        /// <summary>Gets the tile the player is standing on.</summary>
+        /// <returns>The tile the player is standing on.</returns>
+        public static Point GetPlayerTile()
+        {
+            return new Point(Game1.player.getTileX(), Game1.player.getTileY());
+        }
+
+        /*********
+        ** Private methods
+        *********/
         /// <summary>Converts a door state to an index in the door's animation without knowing how the animation is laid out.</summary>
         /// <param name="state">The door state.</param>
         /// <returns>The x tile offset.</returns>

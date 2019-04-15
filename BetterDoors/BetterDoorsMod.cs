@@ -23,7 +23,6 @@ namespace BetterDoors
      - Programming:
          - Features:
              - Config option for making all doors automatic, automatic door radius, and manual click radius.
-             - Change mouse cursor when hovering over doors like vanilla does.
              - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
          - Code Review:
              - Think about how door states are synced in multiplayer and whether a desync could happen.
@@ -167,11 +166,11 @@ namespace BetterDoors
             if (!Context.IsWorldReady || (!e.Button.IsActionButton() && !e.Button.IsUseToolButton()))
                 return;
 
-            Point playerTile = new Point(Game1.player.getTileX(), Game1.player.getTileY());
+            Point playerTile = Utils.GetPlayerTile();
             Point clickedTile = new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y);
 
-            if(Math.Abs(playerTile.X - clickedTile.X) + Math.Abs(playerTile.Y - clickedTile.Y) < 3)
-                this.manager.FuzzyToggleDoor(Utils.GetLocationName(Game1.currentLocation), clickedTile);
+            if(Utils.GetTaxiCabDistance(playerTile, clickedTile) < 3)
+                this.manager.MouseToggleDoor(Utils.GetLocationName(Game1.currentLocation), clickedTile);
         }
 
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
@@ -342,6 +341,9 @@ namespace BetterDoors
             }
         }
 
+        /*********
+        ** Harmony methods
+        *********/
         /// <summary>Checks for a closed door.</summary>
         /// <param name="location">The location to check in.</param>
         /// <param name="position">The position to check at.</param>
@@ -349,6 +351,17 @@ namespace BetterDoors
         internal bool IsClosedDoorAt(GameLocation location, Rectangle position)
         {
             return this.manager.IsClosedDoorAt(Utils.GetLocationName(location), position);
+        }
+
+        /// <summary>Gets the right mouse cursor to display for a door, if the mouse is one.</summary>
+        /// <param name="location">The location to search for doors in.</param>
+        /// <param name="mouseTile">The position of the mouse.</param>
+        /// <param name="cursor">The resulting cursor index, if any.</param>
+        /// <param name="transparency">The resulting transparency, if any.</param>
+        /// <returns>Whether the cursor should be changed.</returns>
+        internal bool TryGetMouseCursorForDoor(GameLocation location, Point mouseTile, out int cursor, out float transparency)
+        {
+            return this.manager.TryGetMouseCursorForDoor(Utils.GetLocationName(location), Utils.GetPlayerTile(), mouseTile, out cursor, out transparency);
         }
     }
 }

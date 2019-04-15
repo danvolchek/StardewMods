@@ -94,6 +94,7 @@
     <Compile Include="Framework\Multiplayer\DoorStateRequest.cs" />
     <Compile Include="Framework\Multiplayer\DoorToggle.cs" />
     <Compile Include="Framework\Patches\DoorCollisionPatch.cs" />
+    <Compile Include="Framework\Patches\MouseCursorPatch.cs" />
     <Compile Include="Framework\Utility\CallbackTimer.cs" />
     <Compile Include="BetterDoorsMod.cs" />
     <Compile Include="Framework\ContentPacks\ContentPack.cs" />
