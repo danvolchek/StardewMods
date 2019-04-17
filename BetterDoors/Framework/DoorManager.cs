@@ -1,11 +1,11 @@
 ﻿using BetterDoors.Framework.Enums;
+using BetterDoors.Framework.Serialization;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BetterDoors.Framework.Serialization;
 
 namespace BetterDoors.Framework
 {
@@ -16,7 +16,7 @@ namespace BetterDoors.Framework
          ** Fields
          *********/
         /// <summary>Mod configuration.</summary>
-        private BetterDoorsModConfig config;
+        private readonly BetterDoorsModConfig config;
 
         /// <summary>The action to take when a door is toggled.</summary>
         private readonly Action<Door> onToggledDoor;
@@ -31,6 +31,7 @@ namespace BetterDoors.Framework
         ** Public methods
         *********/
         /// <summary>Constructs an instance.</summary>
+        /// <param name="config">Mod configuration.</param>
         /// <param name="onToggledDoor">The action to take when a door is toggled.</param>
         public DoorManager(BetterDoorsModConfig config, Action<Door> onToggledDoor)
         {
@@ -127,9 +128,9 @@ namespace BetterDoors.Framework
             // Find doors to toggle that:
             // - Are not both in and out of the range (can be caused by double doors).
             // - Should be open and are not open.
-            // - Should be closed and are not closed.
+            // - Should be closed and are not closed and aren't near any other players.
             HashSet<Door> doorsToToggle = new HashSet<Door>(newInRangeDoors.Where(door => door.State != State.Open));
-            doorsToToggle.SymmetricExceptWith(newOutOfRangeDoors.Where(door => door.State != State.Closed));
+            doorsToToggle.SymmetricExceptWith(newOutOfRangeDoors.Where(door => door.State != State.Closed && !this.IsDoorNearAnyPlayer(door, location)));
 
             this.doorsNearPlayers = nearDoors;
 
@@ -211,6 +212,24 @@ namespace BetterDoors.Framework
         /// <returns>The doors that were found.</returns>
         private IEnumerable<Door> GetDoorsNearLocalPlayer(GameLocation location)
         {
+            return this.GetDoorsNearPosition(location, new Point(Game1.player.getTileX(), Game1.player.getTileY()));
+        }
+
+        /// <summary>Gets whether the door is near any player in the given location.</summary>
+        /// <param name="door">The door to look for.</param>
+        /// <param name="location">The location to look in.</param>
+        /// <returns>Whether a player is near the door.</returns>
+        private bool IsDoorNearAnyPlayer(Door door, GameLocation location)
+        {
+            return location.farmers.Select(player => new Point(player.getTileX(), player.getTileY())).Any(position => this.GetDoorsNearPosition(location, position).Contains(door));
+        }
+
+        /// <summary>Gets all doors near the given position.</summary>
+        /// <param name="location">The location to look in.</param>
+        /// <param name="position">The position to search at.</param>
+        /// <returns>The doors that were found.</returns>
+        private IEnumerable<Door> GetDoorsNearPosition(GameLocation location, Point position)
+        {
             if (!this.doors.TryGetValue(Utils.GetLocationName(location), out IDictionary<Point, Door> doorsInLocation))
                 yield break;
 
@@ -218,7 +237,7 @@ namespace BetterDoors.Framework
             {
                 // Search along the x axis for horizontal doors and along the y axis for vertical doors (parallel to the hallway direction).
 
-                if (doorsInLocation.TryGetValue(new Point(Game1.player.getTileX() + i, Game1.player.getTileY()), out Door door) && (door.Extras.IsAutomaticDoor || this.config.MakeAllDoorsAutomatic) && door.Orientation == Orientation.Horizontal)
+                if (doorsInLocation.TryGetValue(new Point(position.X + i, position.Y), out Door door) && (door.Extras.IsAutomaticDoor || this.config.MakeAllDoorsAutomatic) && door.Orientation == Orientation.Horizontal)
                 {
                     yield return door;
 
@@ -226,7 +245,7 @@ namespace BetterDoors.Framework
                         yield return doubleDoor;
                 }
 
-                if (doorsInLocation.TryGetValue(new Point(Game1.player.getTileX(), Game1.player.getTileY() + i), out door) && (door.Extras.IsAutomaticDoor || this.config.MakeAllDoorsAutomatic) && door.Orientation == Orientation.Vertical)
+                if (doorsInLocation.TryGetValue(new Point(position.X, position.Y + i), out door) && (door.Extras.IsAutomaticDoor || this.config.MakeAllDoorsAutomatic) && door.Orientation == Orientation.Vertical)
                 {
                     yield return door;
 

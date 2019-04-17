@@ -21,7 +21,6 @@ namespace BetterDoors
     /*TODO:
      - Programming:
          - Features:
-             - Player 1 enters auto door range, player 2 enters auto door range, player 2 exits auto door range -> door closes. Should stay open until all players leave range.
              - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
          - Code Review:
              - Think about how door states are synced in multiplayer and whether a desync could happen.
