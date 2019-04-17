@@ -23,7 +23,7 @@ namespace BetterDoors
          - Features:
              - There's one more axis the doors could theoretically be opened on - decide whether it's feasible/worth it to add. -> A later release.
          - Code Review:
-             - Think about how door states are synced in multiplayer and whether a desync could happen.
+             - Think about how door states are synced in multiplayer and whether a desync could happen. -> no?
      - UX:
          - Write up documentation.
     */

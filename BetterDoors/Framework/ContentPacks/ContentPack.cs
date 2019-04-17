@@ -15,6 +15,6 @@ namespace BetterDoors.Framework.ContentPacks
         public ISemanticVersion Version { get; }
 
         /// <summary>The doors the content pack provides.</summary>
-        public IList<ContentPackDoorEntry> Doors { get; }
+        public IDictionary<string, IList<string>> Doors { get; }
     }
 }

@@ -17,7 +17,7 @@ namespace BetterDoors.Framework.DoorGeneration
         public const int DisplayScaleFactor = 4;
 
         /// <summary>The size of a door animation in tiles.</summary>
-        public static readonly Point DoorAnimationSize = new Point(DoorSpriteGenerator.TileSize * 4, DoorSpriteGenerator.TileSize * 3);
+        public static readonly Point DoorAnimationSize = new Point(Utils.TileSize * 4, Utils.TileSize * 3);
 
         /// <summary>The max number of door animations in one sheet.</summary>
         public const int MaxDoorsInSheet = 5440;
@@ -173,19 +173,19 @@ namespace BetterDoors.Framework.DoorGeneration
         /// <returns>The collision info.</returns>
         private Rectangle CreateCollisionInfo(int closedTileOffset)
         {
-            int left = DoorSpriteGenerator.TileSize;
-            int top = DoorSpriteGenerator.TileSize;
+            int left = Utils.TileSize;
+            int top = Utils.TileSize;
             int right = 0;
             int bottom = 0;
 
-            int xOffset = this.texturePoint.X + DoorSpriteGenerator.TileSize * closedTileOffset;
-            int yOffset = this.texturePoint.Y + DoorSpriteGenerator.TileSize * 2;
+            int xOffset = this.texturePoint.X + Utils.TileSize * closedTileOffset;
+            int yOffset = this.texturePoint.Y + Utils.TileSize * 2;
 
             Color blank = new Color(0, 0, 0, 0);
 
-            for (int x = 0; x < DoorSpriteGenerator.TileSize; x++)
+            for (int x = 0; x < Utils.TileSize; x++)
             {
-                for (int y = 0; y < DoorSpriteGenerator.TileSize; y++)
+                for (int y = 0; y < Utils.TileSize; y++)
                 {
                     bool isFilledIn = this.TextureData[Utils.CollapseDimension(this.Width, x + xOffset, y + yOffset)] != blank;
 
@@ -215,7 +215,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /// <returns>The tile index.</returns>
         private int GetTileIndex()
         {
-            return Utils.ConvertPositionToTileIndex(this.Width, DoorSpriteGenerator.TileSize, this.texturePoint);
+            return Utils.ConvertPositionToTileIndex(this.Width, Utils.TileSize, this.texturePoint);
         }
 
         /// <summary>Swaps two animation frames in the current animation slot.</summary>

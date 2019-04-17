@@ -87,7 +87,7 @@
   <ItemGroup>
     <Compile Include="Framework\Serialization\BetterDoorsModConfig.cs" />
     <Compile Include="Framework\DoorGeneration\DoorGenerationState.cs" />
-    <Compile Include="Framework\Mapping\Properties\MapDoorExtra.cs" />
+    <Compile Include="Framework\Mapping\Properties\MapDoorExtras.cs" />
     <Compile Include="Framework\Mapping\Properties\MapDoorVersion.cs" />
     <Compile Include="Framework\Mapping\MapTileSheetManager.cs" />
     <Compile Include="Framework\Mapping\PendingDoor.cs" />
@@ -101,10 +101,9 @@
     <Compile Include="BetterDoorsMod.cs" />
     <Compile Include="Framework\ContentPacks\ContentPack.cs" />
     <Compile Include="Framework\ContentPacks\ContentPackLoader.cs" />
-    <Compile Include="Framework\ContentPacks\ContentPackDoorEntry.cs" />
     <Compile Include="Framework\Door.cs" />
     <Compile Include="Framework\DoorManager.cs" />
-    <Compile Include="Framework\ContentPacks\LoadedContentPackDoorEntry.cs" />
+    <Compile Include="Framework\ContentPacks\ContentPackDoor.cs" />
     <Compile Include="Framework\Enums\OpeningDirection.cs" />
     <Compile Include="Framework\DoorGeneration\DoorAssetLoader.cs" />
     <Compile Include="Framework\DoorGeneration\DoorSpriteGenerator.cs" />

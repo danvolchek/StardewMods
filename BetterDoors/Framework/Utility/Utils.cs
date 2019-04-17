@@ -10,6 +10,12 @@ namespace BetterDoors.Framework.Utility
     internal static class Utils
     {
         /*********
+        ** Accessors
+        *********/
+        /// <summary>The number of pixels in one tile dimension.</summary>
+        public const int TileSize = 16;
+
+        /*********
         ** Public methods
         *********/
         /// <summary>Checks whether the tile index is inside the bounds of the sheet. Assumes that sheetWidth, sheetHeight % tileSize == 0.</summary>

@@ -5,6 +5,7 @@ using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Xna.Framework;
 
 namespace BetterDoors.Framework.ContentPacks
 {
@@ -39,9 +40,9 @@ namespace BetterDoors.Framework.ContentPacks
 
         /// <summary>Loads content packs and vanilla doors.</summary>
         /// <returns>The loaded doors.</returns>
-        public IList<LoadedContentPackDoorEntry> LoadContentPacks()
+        public IList<ContentPackDoor> LoadContentPacks()
         {
-            IList<LoadedContentPackDoorEntry> data = new List<LoadedContentPackDoorEntry>();
+            IList<ContentPackDoor> data = new List<ContentPackDoor>();
 
             // Validate each pack and load the tile sheets referenced in the process.
             foreach (IContentPack contentPack in this.helper.ContentPacks.GetOwned())
@@ -66,51 +67,70 @@ namespace BetterDoors.Framework.ContentPacks
                     continue;
                 }
 
-                string error = null;
-                IDictionary<string, Texture2D> spriteSheets = new Dictionary<string, Texture2D>();
-                ISet<string> spriteNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-                foreach (ContentPackDoorEntry doorEntry in loadedPack.Doors)
+                ISet<string> doorNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+
+                foreach (KeyValuePair<string, IList<string>> entry in loadedPack.Doors)
                 {
-                    if (!File.Exists(Path.Combine(contentPack.DirectoryPath, doorEntry.ImageFilePath)))
+                    if (!File.Exists(Path.Combine(contentPack.DirectoryPath, entry.Key)))
                     {
-                        error = $"{doorEntry.ImageFilePath} doesn't exist";
-                    }
-                    else if (!spriteNames.Add(doorEntry.Name))
-                    {
-                        error = $"{doorEntry.Name} is repeated more than once";
-                    }
-                    else
-                    {
-                        try
-                        {
-                            if (!spriteSheets.ContainsKey(doorEntry.ImageFilePath))
-                            {
-                                Texture2D spriteSheet = contentPack.LoadAsset<Texture2D>(doorEntry.ImageFilePath);
-                                spriteSheets[doorEntry.ImageFilePath] = spriteSheet;
-
-                                if (spriteSheet.Width % 64 != 0 || spriteSheet.Height % 48 != 0)
-                                {
-                                    error = $"The dimensions of the sprite sheet are invalid. Must be a multiple of 64 x 48. Instead, they are {spriteSheet.Width} x {spriteSheet.Height}";
-                                }
-                                else
-                                {
-                                    Utils.IsValidTile(spriteSheet.Width, spriteSheet.Height, 16, doorEntry.TopLeftTileIndex, out error);
-                                }
-                            }
-                        }
-                        catch (ContentLoadException)
-                        {
-                            error = $"{doorEntry.ImageFilePath} isn't a valid image";
-                        }
-                    }
-
-                    if (error != null)
-                    {
-                        this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - {doorEntry.Name} - This entry is invalid. Info: {error}. This entry won't be loaded.");
+                        this.QueueError(contentPack, entry.Key, $"{entry.Key} doesn't exist", false);
                         continue;
                     }
 
-                    data.Add(new LoadedContentPackDoorEntry(contentPack.Manifest.UniqueID, spriteSheets[doorEntry.ImageFilePath], doorEntry));
+                    string imageError = null;
+                    Texture2D spriteSheet = null;
+
+                    try
+                    {
+                        spriteSheet = contentPack.LoadAsset<Texture2D>(entry.Key);
+
+                        if (spriteSheet.Width % 64 != 0 || spriteSheet.Height % 48 != 0)
+                        {
+                            imageError = $"The dimensions of the sprite sheet are invalid. Must be a multiple of 64 x 48. Instead, they are {spriteSheet.Width} x {spriteSheet.Height}";
+                        }
+
+                    }
+                    catch (ContentLoadException)
+                    {
+                        imageError = $"{entry.Key} isn't a valid image";
+                    }
+
+                    if (imageError != null)
+                    {
+                        this.QueueError(contentPack, entry.Key, imageError, false);
+                        continue;
+                    }
+
+                    int count = 0;
+                    foreach (string doorName in entry.Value)
+                    {
+                        string nameError = null;
+
+                        if (!doorNames.Add(doorName))
+                        {
+                            nameError = $"{doorName} is repeated more than once";
+                        }
+                        else if (doorName.Contains(" "))
+                        {
+                            nameError = $"{doorName} can't have spaces in it";
+                        }
+
+                        if (nameError != null)
+                        {
+                            this.QueueError(contentPack, entry.Key, nameError, true);
+                            continue;
+                        }
+
+                        if (!Utils.IsValidTile(spriteSheet.Width, spriteSheet.Height, 16, count * 4, out string tileError))
+                        {
+                            this.QueueError(contentPack, entry.Key, tileError, true);
+                            continue;
+                        }
+
+                        data.Add(new ContentPackDoor(contentPack.Manifest.UniqueID, spriteSheet, doorName, Utils.ConvertTileIndexToPosition(spriteSheet.Width, Utils.TileSize, count*4)));
+
+                        count++;
+                    }
                 }
             }
 
@@ -122,11 +142,24 @@ namespace BetterDoors.Framework.ContentPacks
             const string vanillaPath = "LooseSprites/Cursors";
             Texture2D vanillaTexture = this.helper.Content.Load<Texture2D>(vanillaPath, ContentSource.GameContent);
 
-            data.Add(new LoadedContentPackDoorEntry("vanilla", vanillaTexture, new ContentPackDoorEntry(vanillaPath, 428, "light")));
-            data.Add(new LoadedContentPackDoorEntry("vanilla", vanillaTexture, new ContentPackDoorEntry(vanillaPath, 432, "window")));
-            data.Add(new LoadedContentPackDoorEntry("vanilla", vanillaTexture, new ContentPackDoorEntry(vanillaPath, 436, "saloon")));
+            data.Add(new ContentPackDoor("vanilla", vanillaTexture, "light", new Point(512, 144)));
+            data.Add(new ContentPackDoor("vanilla", vanillaTexture, "window", new Point(576, 144)));
+            data.Add(new ContentPackDoor("vanilla", vanillaTexture, "saloon", new Point(640, 144)));
 
             return data;
+        }
+
+        /*********
+        ** Private methods
+        *********/
+        /// <summary>Queues an error.</summary>
+        /// <param name="contentPack">The content pack the error is for.</param>
+        /// <param name="id">An id to use when displaying the error.</param>
+        /// <param name="info">The error info.</param>
+        /// <param name="forIndividualDoor">Whether the error is for one door or an entire image.</param>
+        private void QueueError(IContentPack contentPack, string id, string info, bool forIndividualDoor)
+        {
+            this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - {id} - Found an error. Info: {info}. {(forIndividualDoor ? "This door": "Every door in this image")} won't be loaded.");
         }
     }
 }

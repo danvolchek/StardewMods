@@ -14,14 +14,11 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Fields
         *********/
-        /// <summary>The number of pixels in one tile dimension.</summary>
-        internal const int TileSize = 16;
-
         /// <summary>The info manager where generated sprite info is stored.</summary>
         private readonly GeneratedDoorTileInfoManager manager;
 
         /// <summary>Content packs used to load doors.</summary>
-        private readonly IList<LoadedContentPackDoorEntry> contentPacks;
+        private readonly IList<ContentPackDoor> contentPacks;
 
         /// <summary>Unique id used to create tile sheet ids.</summary>
         private readonly string modId;
@@ -41,7 +38,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /// <param name="modId">Unique id used to create tile sheet ids.</param>
         /// <param name="monitor">Encapsulates monitoring and logging for a given module.</param>
         /// <param name="device">Graphics device used to create textures.</param>
-        public DoorSpriteGenerator(GeneratedDoorTileInfoManager manager, IList<LoadedContentPackDoorEntry> contentPacks, string modId, IMonitor monitor, GraphicsDevice device)
+        public DoorSpriteGenerator(GeneratedDoorTileInfoManager manager, IList<ContentPackDoor> contentPacks, string modId, IMonitor monitor, GraphicsDevice device)
         {
             this.manager = manager;
             this.modId = modId;
@@ -60,26 +57,24 @@ namespace BetterDoors.Framework.DoorGeneration
             DoorGenerationState state = new DoorGenerationState(locationName, this.modId, this.device, this.contentPacks.Count * 2);
             generatedTextures.Add(state.CreateNewTexture());
 
-            foreach (LoadedContentPackDoorEntry info in this.contentPacks)
+            foreach (ContentPackDoor info in this.contentPacks)
             {
                 Color[] spriteData = new Color[info.Texture.Width * info.Texture.Height];
                 info.Texture.GetData(spriteData);
 
-                Point infoTileIndex = Utils.ConvertTileIndexToPosition(info.Texture.Width, DoorSpriteGenerator.TileSize, info.Entry.TopLeftTileIndex);
-
-                bool vlRequested = this.manager.IsDoorRequested(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left);
-                bool hrRequested = this.manager.IsDoorRequested(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right);
-                bool vrRequested = this.manager.IsDoorRequested(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right);
-                bool hlRequested = this.manager.IsDoorRequested(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left);
+                bool vlRequested = this.manager.IsDoorRequested(info.ModId, info.Name, Orientation.Vertical, OpeningDirection.Left);
+                bool hrRequested = this.manager.IsDoorRequested(info.ModId, info.Name, Orientation.Horizontal, OpeningDirection.Right);
+                bool vrRequested = this.manager.IsDoorRequested(info.ModId, info.Name, Orientation.Vertical, OpeningDirection.Right);
+                bool hlRequested = this.manager.IsDoorRequested(info.ModId, info.Name, Orientation.Horizontal, OpeningDirection.Left);
 
                 if (vlRequested || hrRequested)
                 {
                     //Copy original sprite        -> Vertical Left + Horizontal Right
-                    state.Copy(spriteData, infoTileIndex, info.Texture.Width);
+                    state.Copy(spriteData, info.StartPosition, info.Texture.Width);
                     if (vlRequested)
-                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Left, state.CreateTileInfo(true));
+                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Name, Orientation.Vertical, OpeningDirection.Left, state.CreateTileInfo(true));
                     if (hrRequested)
-                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Right, state.CreateTileInfo(false));
+                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Name, Orientation.Horizontal, OpeningDirection.Right, state.CreateTileInfo(false));
 
                     if (state.FinishAnimation(out KeyValuePair<string, Texture2D> finishedTexture))
                         generatedTextures.Add(finishedTexture);
@@ -88,11 +83,11 @@ namespace BetterDoors.Framework.DoorGeneration
                 if (vrRequested || hlRequested)
                 {
                     //Reflect + reverse VL sprite -> Vertical Right + Horizontal Left
-                    state.ReflectOverYAxis(spriteData, infoTileIndex, info.Texture.Width);
+                    state.ReflectOverYAxis(spriteData, info.StartPosition, info.Texture.Width);
                     if (vrRequested)
-                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Entry.Name, Orientation.Vertical, OpeningDirection.Right, state.CreateTileInfo(false));
+                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Name, Orientation.Vertical, OpeningDirection.Right, state.CreateTileInfo(false));
                     if (hlRequested)
-                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Entry.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo(true));
+                        this.manager.RegisterGeneratedTileInfo(info.ModId, info.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo(true));
 
                     if (state.FinishAnimation(out KeyValuePair<string, Texture2D>  finishedTexture))
                         generatedTextures.Add(finishedTexture);

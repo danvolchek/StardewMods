@@ -18,7 +18,7 @@ namespace BetterDoors.Framework.Mapping.Properties
         ** Fields
         *********/
         /// <summary>The key to read this property with.</summary>
-        public const string PropertyKey = "DoorExtra";
+        public const string PropertyKey = "DoorExtras";
 
         /*********
         ** Public methods
@@ -49,12 +49,6 @@ namespace BetterDoors.Framework.Mapping.Properties
             property = null;
 
             string[] parts = propertyString.Split(' ');
-
-            if (parts.Length == 0)
-            {
-                error = "No extras provided";
-                return false;
-            }
 
             bool isDoubleDoor = false;
             bool isAutomaticDoor = false;
