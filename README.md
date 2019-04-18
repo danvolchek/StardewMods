@@ -4,6 +4,7 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 ## Overview
 - [Auto Stacker](/AutoStacker): Automatically stacks items in your inventory into as few stacks as possible at the press of a key.
 - [Better Artisan Good Icons](/BetterArtisanGoodIcons): Draws a different texture for different wines, juices, jellies, and honey based on what was used to make them.
+- [Better Doors](/BetterDoors): Lets map makers easily add doors that are better than normal doors to their maps.
 - [Better Fruit Trees](/BetterFruitTrees): Lets fruit trees grow even if there are things around them, and lets junimos harvest fruit trees for you.
 - [Better Garden Pots](/BetterGardenPots): Makes garden pots way better. Makes sprinklers water them, bee houses notice them, and more!
 - [Better Hay](/BetterHay): Allows for hay collection when you don't have a siloh or your silohs are full, also has option to drop grass starter.
