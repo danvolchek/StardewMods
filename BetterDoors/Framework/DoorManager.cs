@@ -117,7 +117,7 @@ namespace BetterDoors.Framework
                 return;
 
             // Get currently near doors.
-            IList<Door> nearDoors = this.GetDoorsNearLocalPlayer(location).ToList();
+            IList<Door> nearDoors = this.GetAutomaticDoorsNearLocalPlayer(location).ToList();
 
             // Find doors that entered and exited the range.
             ISet<Door> newInRangeDoors = new HashSet<Door>(nearDoors);
@@ -130,7 +130,7 @@ namespace BetterDoors.Framework
             // - Should be open and are not open.
             // - Should be closed and are not closed and aren't near any other players.
             HashSet<Door> doorsToToggle = new HashSet<Door>(newInRangeDoors.Where(door => door.State != State.Open));
-            doorsToToggle.SymmetricExceptWith(newOutOfRangeDoors.Where(door => door.State != State.Closed && !this.IsDoorNearAnyPlayer(door, location)));
+            doorsToToggle.SymmetricExceptWith(newOutOfRangeDoors.Where(door => door.State != State.Closed && !this.IsAutomaticDoorNearAnyPlayer(door, location)));
 
             this.doorsNearPlayers = nearDoors;
 
@@ -210,25 +210,25 @@ namespace BetterDoors.Framework
         /// <summary>Gets all doors near the local player.</summary>
         /// <param name="location">The location to look in.</param>
         /// <returns>The doors that were found.</returns>
-        private IEnumerable<Door> GetDoorsNearLocalPlayer(GameLocation location)
+        private IEnumerable<Door> GetAutomaticDoorsNearLocalPlayer(GameLocation location)
         {
-            return this.GetDoorsNearPosition(location, new Point(Game1.player.getTileX(), Game1.player.getTileY()));
+            return this.GetAutomaticDoorsNearPosition(location, new Point(Game1.player.getTileX(), Game1.player.getTileY()));
         }
 
         /// <summary>Gets whether the door is near any player in the given location.</summary>
         /// <param name="door">The door to look for.</param>
         /// <param name="location">The location to look in.</param>
         /// <returns>Whether a player is near the door.</returns>
-        private bool IsDoorNearAnyPlayer(Door door, GameLocation location)
+        private bool IsAutomaticDoorNearAnyPlayer(Door door, GameLocation location)
         {
-            return location.farmers.Select(player => new Point(player.getTileX(), player.getTileY())).Any(position => this.GetDoorsNearPosition(location, position).Contains(door));
+            return location.farmers.Select(player => new Point(player.getTileX(), player.getTileY())).Any(position => this.GetAutomaticDoorsNearPosition(location, position).Contains(door));
         }
 
         /// <summary>Gets all doors near the given position.</summary>
         /// <param name="location">The location to look in.</param>
         /// <param name="position">The position to search at.</param>
         /// <returns>The doors that were found.</returns>
-        private IEnumerable<Door> GetDoorsNearPosition(GameLocation location, Point position)
+        private IEnumerable<Door> GetAutomaticDoorsNearPosition(GameLocation location, Point position)
         {
             if (!this.doors.TryGetValue(Utils.GetLocationName(location), out IDictionary<Point, Door> doorsInLocation))
                 yield break;
