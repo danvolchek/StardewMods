@@ -122,6 +122,7 @@
   <ItemGroup>
     <None Include="manifest.json" />
     <None Include="packages.config" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Pathoschild.Stardew.ModBuildConfig.2.2.0\analyzers\dotnet\cs\StardewModdingAPI.ModBuildConfig.Analyzer.dll" />
