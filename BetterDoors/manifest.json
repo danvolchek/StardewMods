@@ -6,5 +6,5 @@
   "UniqueID": "cat.betterdoors",
   "EntryDll": "BetterDoors.dll",
   "MinimumApiVersion": "2.9.0",
-  "UpdateKeys": [ ]
+  "UpdateKeys": [ "Nexus:3797" ]
 }
