@@ -1,6 +1,4 @@
-﻿using StardewModdingAPI;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
 
 namespace BetterDoors.Framework.ContentPacks
 {
@@ -8,13 +6,12 @@ namespace BetterDoors.Framework.ContentPacks
     ** Accessors
     *********/
     /// <summary> The format content packs that provide door animations must follow.</summary>
-    [SuppressMessage("ReSharper", "UnassignedGetOnlyAutoProperty", Justification = "This class is loaded from a file by a JSON parser.")]
     internal class ContentPack
     {
         /// <summary>The version of the content pack.</summary>
-        public ISemanticVersion Version { get; }
+        public string Version { get; set; }
 
         /// <summary>The doors the content pack provides.</summary>
-        public IDictionary<string, IList<string>> Doors { get; }
+        public IDictionary<string, IList<string>> Doors { get; set; }
     }
 }

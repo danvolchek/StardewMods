@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
+using SemanticVersion = StardewModdingAPI.Toolkit.SemanticVersion;
 
 namespace BetterDoors.Framework.ContentPacks
 {
@@ -55,15 +56,21 @@ namespace BetterDoors.Framework.ContentPacks
 
                 ContentPack loadedPack = contentPack.ReadJsonFile<ContentPack>("content.json");
 
-                if (loadedPack.Version.IsNewerThan(this.helper.ModRegistry.Get(this.helper.ModRegistry.ModID).Manifest.Version))
+                if (!SemanticVersion.TryParse(loadedPack.Version, out ISemanticVersion version))
                 {
-                    this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) is too new to be loaded ({loadedPack.Version}). Please update Better Doors! ");
+                    this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - The version ({loadedPack.Version}) is invalid. This pack won't be loaded.");
                     continue;
                 }
 
-                if (loadedPack.Version != new SemanticVersion(1, 0, 0))
+                if (version.IsNewerThan(this.helper.ModRegistry.Get(this.helper.ModRegistry.ModID).Manifest.Version))
                 {
-                    this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - Unrecognized content pack version: {loadedPack.Version}. This pack won't be loaded. ");
+                    this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - ({loadedPack.Version}) is too new to be loaded. Please update Better Doors!");
+                    continue;
+                }
+
+                if (!version.Equals(new SemanticVersion("1.0.0")))
+                {
+                    this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - Unrecognized content pack version: {loadedPack.Version}. This pack won't be loaded.");
                     continue;
                 }
 
