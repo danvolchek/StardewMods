@@ -37,7 +37,9 @@ namespace Pong.Menus
 
         private bool paused;
 
-        private const int MessageSendFrequency = 5;
+        private const int MessageSendFrequency = 400;
+
+        private double lastSentMessageTimestamp;
 
         public GameMenu(long? enemyPlayer = null)
         {
@@ -113,10 +115,23 @@ namespace Pong.Menus
         {
             while (this.shouldSyncData)
             {
-                this.state.CurrentTime = GetUnixTimestamp();
-                MailBox.Send(new MessageEnvelope(this.state, this.enemyPlayerId));
-                Thread.Sleep(MessageSendFrequency);
+                this.state.CurrentTime = GetTimestamp();
+
+                if (this.state.CurrentTime - this.lastSentMessageTimestamp > MessageSendFrequency)
+                {
+                    this.state.All = false;
+                    MailBox.Send(new MessageEnvelope(this.state, this.enemyPlayerId));
+                    this.state.All = true;
+                    this.lastSentMessageTimestamp = this.state.CurrentTime;
+                }
             }
+        }
+
+        private void ForceSyncGameState()
+        {
+            this.state.CurrentTime = GetTimestamp();
+            MailBox.Send(new MessageEnvelope(this.state, this.enemyPlayerId));
+            this.lastSentMessageTimestamp = this.state.CurrentTime;
         }
 
         private void SendMyPaddlePosition()
@@ -135,7 +150,7 @@ namespace Pong.Menus
             if (e.Type == typeof(GameState).Name && !this.isLeader)
             {
                 GameState newState = e.ReadAs<GameState>();
-                double diff = GetUnixTimestamp() - newState.CurrentTime;
+                double diff = GetTimestamp() - newState.CurrentTime;
 
                 newState.BallVelocityState.Invert();
                 newState.BallPositionState.Invert();
@@ -143,10 +158,13 @@ namespace Pong.Menus
 
                 this.state.SetState(newState);
 
-                //diff seconds, 60 frames per second -> need to run diff * 60
+                //diff milli seconds, 60 frames per second -> need to run diff * 60
 
-                for (int i = 0; i < diff * 60; i++)
-                    this.Update();
+                //for (int i = 0; i < (diff * 60) / 1000; i++)
+                //    this.Update();
+
+                //if ((int)((diff * 60) / 1000) > 0)
+                //    ModEntry.Instance.Monitor.Log($"Follower updated {(int)((diff * 60) / 1000)} times");
 
             }
             else if (e.Type == typeof(PositionState).Name && this.isLeader)
@@ -158,9 +176,9 @@ namespace Pong.Menus
 
         }
 
-        private static double GetUnixTimestamp()
+        private static double GetTimestamp()
         {
-            return DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+            return DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
 
         public override void BeforeMenuSwitch()
@@ -219,6 +237,7 @@ namespace Pong.Menus
                                 this.scoreDisplay.UpdateScore(wall.Side == Side.Top);
                                 this.Reset(false);
                                 this.Start();
+                                this.ForceSyncGameState();
                                 return;
                             }
                             else
@@ -243,6 +262,9 @@ namespace Pong.Menus
 
                 this.ball.Update();
                 this.scoreDisplay.Update();
+
+                if(this.state.BallCollidedLastFrame)
+                    this.ForceSyncGameState();
             }
             else if (this.state.Starting)
             {
@@ -250,6 +272,8 @@ namespace Pong.Menus
                     SoundManager.PlayCountdownSound();
                 this.state.StartTimer--;
                 if (this.state.StartTimer == 0) this.state.Starting = false;
+
+                this.ForceSyncGameState();
             }
         }
 

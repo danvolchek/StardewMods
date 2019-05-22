@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Pong.Framework.Common;
 using Pong.Framework.Menus.Elements;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -120,7 +121,7 @@ namespace Pong.Framework.Menus
 
         public void Draw(SpriteBatch b)
         {
-            //b.Draw(AssetManager.SquareTexture, new Rectangle(0, 0, ScreenWidth, ScreenWidth), null, Color.Black);
+            b.Draw(AssetManager.SquareTexture, new Rectangle(0, 0, ScreenWidth, ScreenWidth), null, Color.Black);
 
             foreach (IDrawable drawable in this.drawables)
             {

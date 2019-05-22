@@ -18,15 +18,21 @@
             this.Reset();
         }
 
+        public bool All = true;
+
         public void SetState(GameState state)
         {
-            this.BallCollidedLastFrame = state.BallCollidedLastFrame;
-            this.Starting = state.Starting;
-            this.StartTimer = state.StartTimer;
+            if (this.All)
+            {
+                this.BallCollidedLastFrame = state.BallCollidedLastFrame;
+                this.Starting = state.Starting;
+                this.StartTimer = state.StartTimer;
 
-            this.BallVelocityState.SetState(state.BallVelocityState);
-            this.ScoreState.SetState(state.ScoreState);
-            this.BallPositionState.SetState(state.BallPositionState);
+                this.BallVelocityState.SetState(state.BallVelocityState);
+                this.ScoreState.SetState(state.ScoreState);
+                this.BallPositionState.SetState(state.BallPositionState);
+
+            }
             this.PaddlePositionState.SetState(state.PaddlePositionState);
         }
 

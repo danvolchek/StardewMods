@@ -1,3 +1,5 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Common;
 using Pong.Framework.Menus;
 using Pong.Menus;
@@ -88,6 +90,17 @@ namespace Pong
             //}
 
             this.currentMenu?.Draw(Game1.spriteBatch);
+
+            /*for (int i = Menu.ScreenHeight / 2 - 25; i < Menu.ScreenHeight; i += 75)
+            {
+                Game1.spriteBatch.Draw(AssetManager.SquareTexture, new Rectangle(Menu.ScreenWidth / 2 - 25, i, 50, 50), Color.White);
+                Game1.spriteBatch.Draw(AssetManager.SquareTexture, new Rectangle(Menu.ScreenWidth / 2 - 25, (Menu.ScreenHeight/2 - 25)*2 - i, 50, 50), Color.White);
+            }
+            for (int i = Menu.ScreenWidth / 2 - 25; i < Menu.ScreenWidth; i += 75)
+            {
+                Game1.spriteBatch.Draw(AssetManager.SquareTexture, new Rectangle(i, Menu.ScreenHeight / 2 - 25, 50, 50), Color.Red);
+                Game1.spriteBatch.Draw(AssetManager.SquareTexture, new Rectangle((Menu.ScreenWidth / 2 - 25) * 2 - i, Menu.ScreenHeight / 2 - 25, 50, 50), Color.Red);
+            }*/
         }
 
         /// <summary>Raised after the game window is resized.</summary>
