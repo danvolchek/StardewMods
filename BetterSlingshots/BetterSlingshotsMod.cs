@@ -18,8 +18,18 @@ namespace BetterSlingshots
         //TODO: docs, aiming, extra shots/spam prevention.
         private SlingshotManager slingshotManager;
         private BetterSlingshotsModConfig config;
-        private IDictionary<string, string> nameToConfigName;
-        private IDictionary<string, int> configNameToFireRate;
+        private readonly IDictionary<string, string> nameToConfigName = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
+        {
+            {"Slingshot", "Basic"},
+            {"Master Slingshot", "Master"},
+            {"Galaxy Slingshot", "Galaxy"}
+        };
+        private readonly IDictionary<string, int> configNameToFireRate = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase)
+        {
+            {"Basic", 60},
+            {"Master", 45},
+            {"Galaxy", 30}
+        };
         private bool isActionButtonDown;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
@@ -27,29 +37,9 @@ namespace BetterSlingshots
         public override void Entry(IModHelper helper)
         {
             this.config = new ConfigManager(this.Helper).GetConfig();
-            if (this.config.GalaxySlingshotPrice < 0)
-            {
-                this.config.GalaxySlingshotPrice = new LegacyConfig().GalaxySlingshotPrice;
-                helper.WriteConfig(this.config);
-            }
-
-            this.nameToConfigName = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
-            {
-                {"Slingshot", "Basic"},
-                {"Master Slingshot", "Master"},
-                {"Galaxy Slingshot", "Galaxy"}
-            };
-
-            this.configNameToFireRate = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase)
-            {
-                {"Basic", 60},
-                {"Master", 45},
-                {"Galaxy", 30}
-            };
-
             this.slingshotManager = new SlingshotManager(this.Helper.Reflection, this.config, new PatchManager(this.ModManifest.UniqueID));
-            
-            helper.Events.Display.MenuChanged += this.OnMenuChanged;
+
+            helper.Events.Display.MenuChanged += this.Display_MenuChanged;
             helper.Events.GameLoop.UpdateTicking += this.GameLoop_UpdateTicking;
             helper.Events.Input.ButtonPressed += this.Input_ButtonPressed;
             helper.Events.Input.ButtonReleased += this.Input_ButtonReleased;
@@ -82,11 +72,11 @@ namespace BetterSlingshots
         /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
-        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
+        private void Display_MenuChanged(object sender, MenuChangedEventArgs e)
         {
             if (e.NewMenu is ShopMenu shopMenu && shopMenu.portraitPerson == null && Game1.currentLocation is Club)
             {
-                Item slingshotItem = new StardewValley.Tools.Slingshot(34);
+                Item slingshotItem = new Slingshot(34);
 
                 Dictionary<Item, int[]> itemPriceAndStock = this.Helper.Reflection
                     .GetField<Dictionary<Item, int[]>>(shopMenu, "itemPriceAndStock").GetValue();

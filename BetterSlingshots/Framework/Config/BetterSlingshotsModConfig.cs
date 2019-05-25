@@ -14,7 +14,6 @@
 
         public BetterSlingshotsModConfig()
         {
-
         }
 
         public BetterSlingshotsModConfig(bool disableReverseAiming, bool autoReload, string[] automaticSlingshots, bool showActualMousePositionWhenAiming, bool canMoveWhileFiring, bool infiniteAmmo, bool rapidFire, int galaxySlingshotPrice)
