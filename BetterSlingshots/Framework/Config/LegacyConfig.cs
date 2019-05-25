@@ -1,6 +1,6 @@
-﻿namespace BetterSlingshots
+﻿namespace BetterSlingshots.Framework.Config
 {
-    internal class BetterSlingshotsConfig
+    internal class LegacyConfig
     {
         public bool DisableReverseAiming { get; set; } = true;
         public bool AutoReload { get; set; } = true;

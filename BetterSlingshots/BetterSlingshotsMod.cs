@@ -1,36 +1,82 @@
-﻿using System.Collections.Generic;
-using BetterSlingshots.Slingshot;
+﻿using BetterSlingshots.Framework;
+using BetterSlingshots.Framework.Config;
+using BetterSlingshots.Framework.Patching;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
+using StardewValley.Tools;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BetterSlingshots
 {
     public class BetterSlingshotsMod : Mod
     {
-        private BetterSlingshotsConfig config;
-        private SlingshotManager manager;
-        private bool wasUsingSlingshot;
+        //TODO: docs, aiming, extra shots/spam prevention.
+        private SlingshotManager slingshotManager;
+        private BetterSlingshotsModConfig config;
+        private IDictionary<string, string> nameToConfigName;
+        private IDictionary<string, int> configNameToFireRate;
+        private bool isActionButtonDown;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            this.config = helper.ReadConfig<BetterSlingshotsConfig>();
+            this.config = new ConfigManager(this.Helper).GetConfig();
             if (this.config.GalaxySlingshotPrice < 0)
             {
-                this.config.GalaxySlingshotPrice = new BetterSlingshotsConfig().GalaxySlingshotPrice;
+                this.config.GalaxySlingshotPrice = new LegacyConfig().GalaxySlingshotPrice;
                 helper.WriteConfig(this.config);
             }
 
-            this.manager = new SlingshotManager(this.config, helper.Reflection);
+            this.nameToConfigName = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
+            {
+                {"Slingshot", "Basic"},
+                {"Master Slingshot", "Master"},
+                {"Galaxy Slingshot", "Galaxy"}
+            };
 
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-            helper.Events.Input.ButtonReleased += this.OnButtonReleased;
-            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            this.configNameToFireRate = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase)
+            {
+                {"Basic", 60},
+                {"Master", 45},
+                {"Galaxy", 30}
+            };
+
+            this.slingshotManager = new SlingshotManager(this.Helper.Reflection, this.config, new PatchManager(this.ModManifest.UniqueID));
+            
             helper.Events.Display.MenuChanged += this.OnMenuChanged;
+            helper.Events.GameLoop.UpdateTicking += this.GameLoop_UpdateTicking;
+            helper.Events.Input.ButtonPressed += this.Input_ButtonPressed;
+            helper.Events.Input.ButtonReleased += this.Input_ButtonReleased;
+        }
+
+        private void Input_ButtonReleased(object sender, ButtonReleasedEventArgs e)
+        {
+            if (e.Button.IsActionButton())
+                this.isActionButtonDown = false;
+        }
+
+        private void Input_ButtonPressed(object sender, ButtonPressedEventArgs e)
+        {
+            if (e.Button.IsActionButton())
+                this.isActionButtonDown = true;
+        }
+
+        private void GameLoop_UpdateTicking(object sender, UpdateTickingEventArgs e)
+        {
+            if (Game1.player.usingSlingshot && Game1.player.CurrentTool is Slingshot slingshot &&
+                this.isActionButtonDown &&
+                this.nameToConfigName.TryGetValue(slingshot.BaseName, out string configName) &&
+                this.config.AutomaticSlingshots.Contains(configName) &&
+                this.configNameToFireRate.TryGetValue(configName, out int rate) && e.IsMultipleOf((uint)(this.config.RapidFire ? rate / 2 : rate)))
+            {
+                this.slingshotManager.FireSlingshot(slingshot);
+            }
         }
 
         /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
@@ -50,54 +96,5 @@ namespace BetterSlingshots
             }
         }
 
-        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
-        {
-            bool usingSlingshot = Game1.player?.usingSlingshot ?? false;
-            if (usingSlingshot)
-            {
-                if (!this.wasUsingSlingshot) this.manager.PrepareForFiring();
-            }
-            else if (this.wasUsingSlingshot)
-            {
-                this.manager.FiringOver();
-            }
-
-            /*//this fixes the problem, which means that for some reason the finish event is not getting sent. No idea why
-            //it does it when we can only detect the issue - when they scroll away
-            foreach (Farmer farmer in Game1.getAllFarmers())
-            {
-                if (farmer.usingSlingshot && !(farmer.CurrentTool is StardewValley.Tools.Slingshot))
-                {
-                    farmer.usingSlingshot = false;
-                    farmer.canReleaseTool = true;
-                    farmer.UsingTool = false;
-                    farmer.canMove = true;
-                    farmer.Halt();
-                }
-            }*/
-
-            this.wasUsingSlingshot = usingSlingshot;
-        }
-
-        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
-        {
-            if (e.Button.IsActionButton())
-                this.manager.SetActionButtonDownState(false);
-        }
-
-        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
-        {
-            if (e.Button.IsActionButton())
-                this.manager.SetActionButtonDownState(true);
-        }
     }
 }
