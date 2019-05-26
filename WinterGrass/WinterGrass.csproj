@@ -48,6 +48,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Lib.Harmony">
+      <Version>1.2.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
@@ -61,9 +64,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GrassSave.cs" />
+    <Compile Include="LegacySaving\LegacySaveConverter.cs" />
+    <Compile Include="Patches\GrassSeasonUpdatePatch.cs" />
+    <Compile Include="LegacySaving\LegacyGrassSave.cs" />
     <Compile Include="ModConfig.cs" />
-    <Compile Include="ModEntry.cs" />
+    <Compile Include="WinterGrassMod.cs" />
+    <Compile Include="Patches\GrowWeedsPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
