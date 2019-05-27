@@ -1,10 +1,11 @@
-﻿using Harmony;
-using StardewValley.Tools;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Harmony;
+using StardewValley.Tools;
 
-namespace BetterSlingshots.Framework.Patching.Patches
+namespace BetterSlingshots.Framework.Patches
 {
+    /// <summary>Allows for automatic firing by disabling the finish fire event.</summary>
     [HarmonyPatch]
     internal class SlingshotFinishPatch
     {
