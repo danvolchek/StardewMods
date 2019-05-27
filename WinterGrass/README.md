@@ -5,4 +5,4 @@ See [This link](http://www.nexusmods.com/stardewvalley/mods/1601?) for the Nexus
 
 ## How it works
 
-The mod saves grass to a file during the transition to and every day of winter, and then adds it back into the game when a new save is loaded.
+The mod Harmony patches various grass methods to cause it to not die in winter and optionally not grow. This new approach saves grass like normal in the main save file - it no longer requires a separate save file making updates easy. The mod also automatically converts old save files to the new format.
