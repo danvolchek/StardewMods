@@ -9,6 +9,7 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Better Garden Pots](/BetterGardenPots): Makes garden pots way better. Makes sprinklers water them, bee houses notice them, and more!
 - [Better Hay](/BetterHay): Allows for hay collection when you don't have a siloh or your silohs are full, also has option to drop grass starter.
 - [Better Slingshots](/BetterSlingshots): Adds full auto fire, auto reload, better aiming, fixes bugs, and more to slingshots.
+- [Cacti Hurt You](/CactiHurtYou): Touching cacti hurts the player a bit. Ouch!
 - [Casks Everywhere](/CasksEverywhere): Lets you use casks in any location - not just in cellars.
 - [Chat Commands](/ChatCommands): Lets you run SMAPI console commands in the in game chat box. Also adds scrolling, command history, and better text entry.
 - [Copy Invite Code](/CopyInviteCode): Adds an option to copy your invite code to your clipboard in the show invite code menu.
