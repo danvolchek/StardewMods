@@ -1,19 +1,12 @@
 ﻿using StardewValley.Objects;
-using SObject = StardewValley.Object;
 
 namespace StackEverything.ObjectCopiers
 {
     /// <summary>Copies furniture, orienting it in the right direction.</summary>
-    internal class FurnitureCopier : IObjectCopier
+    internal class FurnitureCopier : ICopier<Furniture>
     {
-        public bool CanCopy(SObject obj)
+        public Furniture Copy(Furniture toCopy)
         {
-            return obj is Furniture;
-        }
-
-        public SObject Copy(SObject obj)
-        {
-            Furniture toCopy = obj as Furniture;
             Furniture furniture = toCopy.getOne() as Furniture;
 
             // Attempting to copy the rotation of the placed object is awful.

@@ -63,7 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ObjectCopiers\FurnitureCopier.cs" />
-    <Compile Include="ObjectCopiers\IObjectCopier.cs" />
+    <Compile Include="ObjectCopiers\ICopier.cs" />
     <Compile Include="ObjectCopiers\TapperCopier.cs" />
     <Compile Include="Patches\DoDoneFishingPatch.cs" />
     <Compile Include="Patches\DrawInMenuPatch.cs" />

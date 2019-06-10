@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Stack Everything",
   "Author": "Cat",
-  "Version": "2.14.0",
+  "Version": "2.15.0",
   "Description": "Lets you stack BigCraftables (scarecrows, furnaces, casks, etc), Furniture, and Wallpapers up to 999.",
   "UniqueID": "cat.stackeverything",
   "EntryDll": "StackEverything.dll",
