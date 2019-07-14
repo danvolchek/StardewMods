@@ -16,7 +16,7 @@ namespace StackEverything.Patches
 
         public static void Postfix(FishingRod __instance)
         {
-            if (__instance.attachments == null || __instance.attachments.Count <= 1)
+            if (__instance.attachments == null || __instance.attachments?.Count <= 1)
                 return;
 
             if (tackle != null && __instance.attachments[1] == null)

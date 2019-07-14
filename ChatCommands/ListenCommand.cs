@@ -1,8 +1,9 @@
-﻿using StardewModdingAPI;
+﻿using ChatCommands.Commands;
+using StardewModdingAPI;
 
 namespace ChatCommands
 {
-    internal class ListenCommand
+    internal class ListenCommand : ICommand
     {
         private readonly NotifyingTextWriter writer;
         private readonly IMonitor monitor;

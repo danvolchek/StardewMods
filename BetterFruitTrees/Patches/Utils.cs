@@ -104,8 +104,7 @@ namespace BetterFruitTrees.Patches
                 }
 
             // large terrain features
-            if (location.largeTerrainFeatures != null &&
-                location.largeTerrainFeatures.Any(p => p.getBoundingBox().Intersects(tilePixels)))
+            if (location.largeTerrainFeatures?.Any(p => p.getBoundingBox().Intersects(tilePixels)) ?? false)
                 return true;
 
 
