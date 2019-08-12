@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="SMAPI.Toolkit">
-      <HintPath>D:\Steam\SteamApps\common\Stardew Valley\smapi-internal\SMAPI.Toolkit.dll</HintPath>
+    <Reference Include="StardewModdingAPI.Toolkit">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Stardew Valley\smapi-internal\StardewModdingAPI.Toolkit.dll</HintPath>
     </Reference>
   </ItemGroup>
 

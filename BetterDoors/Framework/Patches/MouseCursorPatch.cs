@@ -25,6 +25,11 @@ namespace BetterDoors.Framework.Patches
         [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Method names are defined by Harmony.")]
         private static void Prefix()
         {
+            if (Game1.currentLocation == null)
+            {
+                return;
+            }
+
             Point mousePosition = new Point((Game1.viewport.X + Game1.getOldMouseX()) / 64, (Game1.viewport.Y + Game1.getOldMouseY()) / 64);
 
             if (BetterDoorsMod.Instance.TryGetMouseCursorForDoor(Game1.currentLocation, mousePosition, out int cursor, out float transparency))
