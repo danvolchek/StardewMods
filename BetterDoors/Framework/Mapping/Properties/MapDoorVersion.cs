@@ -1,5 +1,5 @@
 ﻿using StardewModdingAPI;
-using SemanticVersion = StardewModdingAPI.Toolkit.SemanticVersion;
+using SemanticVersion = StardewModdingAPI.SemanticVersion;
 
 namespace BetterDoors.Framework.Mapping.Properties
 {
