@@ -44,7 +44,7 @@ namespace AutoStacker
                     int remain = stackOnMe.getRemainingStackSpace();
                     int add = Math.Min(remain, item.Stack);
 
-                    stackOnMe.addToStack(add);
+                    stackOnMe.addToStack(item);
                     item.Stack -= add;
 
                     if (item.Stack == 0)
