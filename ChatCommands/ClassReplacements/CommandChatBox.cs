@@ -91,7 +91,7 @@ namespace ChatCommands.ClassReplacements
             {
                 if (chatTextBox.finalText.Count > 0)
                 {
-                    string message = ChatMessage.makeMessagePlaintext(chatTextBox.finalText);
+                    string message = ChatMessage.makeMessagePlaintext(chatTextBox.finalText, true);
                     if (message.Length < 1)
                     {
                         this.textBoxEnter(sender);
@@ -133,7 +133,7 @@ namespace ChatCommands.ClassReplacements
                                 LocalizedContentManager.CurrentLanguageCode,
                                 $"{(char)(WhisperSeparator + 1)}{playerName}{WhisperSeparator}{message}");
                             this.multiplayer.sendChatMessage(LocalizedContentManager.CurrentLanguageCode,
-                                $"{WhisperSeparator}{Utils.EncipherText(identifier, key)}{WhisperSeparator}{Utils.EncipherText(message, key)}");
+                                $"{WhisperSeparator}{Utils.EncipherText(identifier, key)}{WhisperSeparator}{Utils.EncipherText(message, key)}", Game1.player.UniqueMultiplayerID);
                         }
                     }
                     else if ((whisperMatch = CommandChatTextBox.WhisperRegex.Match(filtered)).Success)

@@ -119,7 +119,7 @@ namespace ChatCommands.ClassReplacements
 
         private bool CheckForWhisper()
         {
-            Match match = WhisperRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
+            Match match = WhisperRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText, true));
             if (!match.Success)
                 return false;
 
@@ -137,7 +137,7 @@ namespace ChatCommands.ClassReplacements
 
         private void CheckForWhisperReply()
         {
-            Match match = WhisperReplyRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
+            Match match = WhisperReplyRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText, true));
             if (!match.Success || this.LastWhisperId == -1) return;
 
             this.UpdateForNewRecepient(this.LastWhisperId);
