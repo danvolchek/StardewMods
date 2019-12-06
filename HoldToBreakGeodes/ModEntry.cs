@@ -42,7 +42,7 @@ namespace HoldToBreakGeodes
                 bool clintNotBusy =
                     menu.heldItem != null
                     && menu.heldItem.Name.Contains("Geode")
-                    && Game1.player.money >= 25 && menu.geodeAnimationTimer <= 0;
+                    && Game1.player.Money >= 25 && menu.geodeAnimationTimer <= 0;
 
                 bool playerHasRoom =
                     Game1.player.freeSpotsInInventory() > 1

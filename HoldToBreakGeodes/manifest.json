@@ -5,6 +5,6 @@
   "Description": "Hold left click/<gamepad key> to continuously break geodes.",
   "UniqueID": "cat.holdtobreakgeodes",
   "EntryDll": "HoldToBreakGeodes.dll",
-  "MinimumApiVersion": "2.9.0",
+  "MinimumApiVersion": "3.0.0",
   "UpdateKeys": [ "Nexus:1689" ]
 }
