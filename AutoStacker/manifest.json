@@ -5,6 +5,6 @@
   "Description": "Press a key (K by default) to automatically stack the current items in the open inventory.",
   "UniqueID": "cat.autostacker",
   "EntryDll": "AutoStacker.dll",
-  "MinimumApiVersion": "2.9.0",
+  "MinimumApiVersion": "3.0.0",
   "UpdateKeys": [ "Nexus:1184" ]
 }
