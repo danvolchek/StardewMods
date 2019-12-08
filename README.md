@@ -8,6 +8,7 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Better Fruit Trees](/BetterFruitTrees): Lets fruit trees grow even if there are things around them, and lets junimos harvest fruit trees for you.
 - [Better Garden Pots](/BetterGardenPots): Makes garden pots way better. Makes sprinklers water them, bee houses notice them, and more!
 - [Better Hay](/BetterHay): Allows for hay collection when you don't have a siloh or your silohs are full, also has option to drop grass starter.
+- [Better Workbenches](/BetterWorkbenches): Makes workbenches pull items from every connected chest rather than just the 8 adjacent chests.
 - [Better Slingshots](/BetterSlingshots): Adds full auto fire, auto reload, better aiming, fixes bugs, and more to slingshots.
 - [Cacti Hurt You](/CactiHurtYou): Touching cacti hurts the player a bit. Ouch!
 - [Casks Everywhere](/CasksEverywhere): Lets you use casks in any location - not just in cellars.
