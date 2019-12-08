@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Better Workbenches",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Workbenches now pull items from every touching chest, not just interconnected ones.",
+  "UniqueID": "cat.betterworkbenches",
+  "EntryDll": "BetterWorkbenches.dll",
+  "MinimumApiVersion": "3.0.1",
+  "UpdateKeys": [ "Nexus:4830" ]
+}
