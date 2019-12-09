@@ -110,13 +110,14 @@ namespace BetterWorkbenches
             {
                 Chest chest = null;
 
-                if (who.currentLocation is FarmHouse farmHouse && who.currentLocation.getTileIndexAt((int)(position.X + offset.X), (int)(position.Y + offset.Y), "Buildings") == 173)
+                Vector2 key = new Vector2((int)(position.X + offset.X), (int)(position.Y + offset.Y));
+
+                if (who.currentLocation is FarmHouse farmHouse && who.currentLocation.getTileIndexAt((int)key.X, (int)key.Y, "Buildings") == 173)
                 {
                     chest = farmHouse.fridge.Value;
                 }
                 else
                 {
-                    Vector2 key = new Vector2((int)(position.X + offset.X), (int)(position.Y + offset.Y));
                     if (who.currentLocation.objects.TryGetValue(key, out StardewValley.Object obj) && obj is Chest foundChest)
                         chest = foundChest;
                 }
@@ -124,7 +125,7 @@ namespace BetterWorkbenches
                 if (chest != null && !nearbyChests.Contains(chest))
                 {
                     nearbyChests.Add(chest);
-                    GetChests(chest.TileLocation, who, nearbyChests);
+                    GetChests(key, who, nearbyChests);
                 }
             }
         }
