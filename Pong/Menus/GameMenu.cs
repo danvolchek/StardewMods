@@ -235,7 +235,8 @@ namespace Pong.Menus
                                 this.scoreDisplay.UpdateScore(wall.Side == Side.Top);
                                 this.Reset(false);
                                 this.Start();
-                                this.ForceSyncGameState();
+                                if(this.isMultiplayerGame)
+                                    this.ForceSyncGameState();
                                 return;
                             }
                             else
@@ -315,8 +316,8 @@ namespace Pong.Menus
             // This is bad
             if (!resetScore)
             {
-                this.state.ScoreState.PlayerTwoScore = one;
-                this.state.ScoreState.PlayerOneScore = two;
+                this.state.ScoreState.PlayerOneScore = one;
+                this.state.ScoreState.PlayerTwoScore = two;
             }
 
             foreach (IResetable resetable in this.resetables)
