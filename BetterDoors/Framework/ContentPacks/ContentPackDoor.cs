@@ -9,6 +9,7 @@ namespace BetterDoors.Framework.ContentPacks
         /*********
         ** Accessors
         *********/
+
         /// <summary>The mod id providing this door.</summary>
         public string ModId { get; }
 
@@ -24,6 +25,7 @@ namespace BetterDoors.Framework.ContentPacks
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="modId">The mod id.</param>
         /// <param name="texture">The loaded texture.</param>

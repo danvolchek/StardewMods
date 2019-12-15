@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using ChatCommands.Util;
+﻿using ChatCommands.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ChatCommands.ClassReplacements
 {
-    /// <summary>
-    ///     Replaces the game's chat box.
-    /// </summary>
+    /// <summary>Replaces the game's chat box.</summary>
     internal class CommandChatBox : ChatBox
     {
         internal const char WhisperSeparator = (char)250;
@@ -39,9 +37,7 @@ namespace ChatCommands.ClassReplacements
 
         private bool sawChangeToTrue;
 
-        /// <summary>
-        ///     Construct an instance.
-        /// </summary>
+        /// <summary>Construct an instance.</summary>
         /// <remarks>Reassigns the enter handler, replaces <see cref="ChatTextBox" /> and <see cref="EmojiMenu" />.</remarks>
         public CommandChatBox(IModHelper helper, ICommandHandler handler, ChatCommandsConfig config)
         {
@@ -82,16 +78,14 @@ namespace ChatCommands.ClassReplacements
             this.DetermineNumberOfMaxMessages();
         }
 
-        /// <summary>
-        ///     Handle enter being pressed.
-        /// </summary>
+        /// <summary>Handle enter being pressed.</summary>
         public void EnterPressed(TextBox sender)
         {
             if (sender is ChatTextBox chatTextBox)
             {
                 if (chatTextBox.finalText.Count > 0)
                 {
-                    string message = ChatMessage.makeMessagePlaintext(chatTextBox.finalText);
+                    string message = ChatMessage.makeMessagePlaintext(chatTextBox.finalText, Utils.ShouldIncludeColorInfo(chatTextBox.finalText));
                     if (message.Length < 1)
                     {
                         this.textBoxEnter(sender);
@@ -99,7 +93,6 @@ namespace ChatCommands.ClassReplacements
                         this.bCheatHistoryPosition.SetValue(-1);
                         return;
                     }
-
 
                     this.sentMessageHistory.Insert(0, this.commandChatTextBox.Save());
                     if (this.sentMessageHistory.Count >= this.config.MaximumNumberOfHistoryMessages)
@@ -133,7 +126,7 @@ namespace ChatCommands.ClassReplacements
                                 LocalizedContentManager.CurrentLanguageCode,
                                 $"{(char)(WhisperSeparator + 1)}{playerName}{WhisperSeparator}{message}");
                             this.multiplayer.sendChatMessage(LocalizedContentManager.CurrentLanguageCode,
-                                $"{WhisperSeparator}{Utils.EncipherText(identifier, key)}{WhisperSeparator}{Utils.EncipherText(message, key)}");
+                                $"{WhisperSeparator}{Utils.EncipherText(identifier, key)}{WhisperSeparator}{Utils.EncipherText(message, key)}", this.commandChatTextBox.CurrentRecipientId);
                         }
                     }
                     else if ((whisperMatch = CommandChatTextBox.WhisperRegex.Match(filtered)).Success)
@@ -170,9 +163,7 @@ namespace ChatCommands.ClassReplacements
         }
 
         //breaks left clicks
-        /// <summary>
-        ///     Handles deactiving the chat box.
-        /// </summary>
+        /// <summary>Handles deactiving the chat box.</summary>
         public override void clickAway()
         {
             KeyboardState keyboardState = this.inputState.GetKeyboardState();
@@ -233,9 +224,7 @@ namespace ChatCommands.ClassReplacements
             }
         }
 
-        /// <summary>
-        ///     Whether the given position is within the bounds of this menu.
-        /// </summary>
+        /// <summary>Whether the given position is within the bounds of this menu.</summary>
         public override bool isWithinBounds(int x, int y)
         {
             if (x - this.xPositionOnScreen < this.width && x - this.xPositionOnScreen >= 0 &&
@@ -245,17 +234,13 @@ namespace ChatCommands.ClassReplacements
             return this.bChoosingEmoji.GetValue() && this.emojiMenu.isWithinBounds(x, y);
         }
 
-        /// <summary>
-        ///     Gets the old height of the chat box.
-        /// </summary>
+        /// <summary>Gets the old height of the chat box.</summary>
         private int GetOldMessagesBoxHeight()
         {
             return this.GetDisplayedLines().Select(item => item.verticalSize).Sum() + 20;
         }
 
-        /// <summary>
-        ///     Adds a message with formatting to the chat box.
-        /// </summary>
+        /// <summary>Adds a message with formatting to the chat box.</summary>
         public override void receiveChatMessage(long sourceFarmer, int chatKind,
             LocalizedContentManager.LanguageCode language, string message)
         {
@@ -292,9 +277,7 @@ namespace ChatCommands.ClassReplacements
                 this.AddNewMessage(part, this.messageColor(chatKind), this.chatBox.Font, language);
         }
 
-        /// <summary>
-        ///     Adds a message without any formatting to the chat box.
-        /// </summary>
+        /// <summary>Adds a message without any formatting to the chat box.</summary>
         public void AddConsoleMessage(string message, Color color)
         {
             string text = FixedParseText(message, this.chatBox.Font, this.chatBox.Width - 8,
@@ -304,9 +287,7 @@ namespace ChatCommands.ClassReplacements
                 this.AddNewMessage(part, color, this.chatBox.Font, LocalizedContentManager.CurrentLanguageCode, true);
         }
 
-        /// <summary>
-        ///     Adds a message without any formatting to the chat box.
-        /// </summary>
+        /// <summary>Adds a message without any formatting to the chat box.</summary>
         public override void addMessage(string message, Color color)
         {
             string text = FixedParseText(message, this.chatBox.Font, this.chatBox.Width - 8);
@@ -315,9 +296,7 @@ namespace ChatCommands.ClassReplacements
                 this.AddNewMessage(part, color, this.chatBox.Font, LocalizedContentManager.CurrentLanguageCode);
         }
 
-        /// <summary>
-        ///     Adds a new message to the chat box.
-        /// </summary>
+        /// <summary>Adds a new message to the chat box.</summary>
         private void AddNewMessage(string message, Color color, SpriteFont font,
             LocalizedContentManager.LanguageCode code, bool isConsoleMessage = false)
         {
@@ -353,9 +332,7 @@ namespace ChatCommands.ClassReplacements
                 : input;
         }
 
-        /// <summary>
-        ///     Handle the game window size changing.
-        /// </summary>
+        /// <summary>Handle the game window size changing.</summary>
         public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
         {
             base.gameWindowSizeChanged(oldBounds, newBounds);
@@ -363,9 +340,7 @@ namespace ChatCommands.ClassReplacements
             this.DetermineNumberOfMaxMessages();
         }
 
-        /// <summary>
-        ///     Determines the number of messages that should be displayed.
-        /// </summary>
+        /// <summary>Determines the number of messages that should be displayed.</summary>
         private void DetermineNumberOfMaxMessages()
         {
             this.maxMessages = 10;
@@ -381,9 +356,7 @@ namespace ChatCommands.ClassReplacements
             this.maxMessages--;
         }
 
-        /// <summary>
-        ///     Runs the given command.
-        /// </summary>
+        /// <summary>Runs the given command.</summary>
         protected override void runCommand(string command)
         {
             base.runCommand(command);
@@ -391,9 +364,7 @@ namespace ChatCommands.ClassReplacements
                 this.displayLineIndex = this.bMessages.Count - 1;
         }
 
-        /// <summary>
-        ///     Handles left click events.
-        /// </summary>
+        /// <summary>Handles left click events.</summary>
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
             if (!this.chatBox.Selected)
@@ -424,9 +395,7 @@ namespace ChatCommands.ClassReplacements
             }
         }
 
-        /// <summary>
-        ///     Handles key press events.
-        /// </summary>
+        /// <summary>Handles key press events.</summary>
         public override void receiveKeyPress(Keys key)
         {
             if (!this.isActive())
@@ -472,9 +441,7 @@ namespace ChatCommands.ClassReplacements
             }
         }
 
-        /// <summary>
-        ///     Scrolls down one line.
-        /// </summary>
+        /// <summary>Scrolls down one line.</summary>
         private void ScrollDown()
         {
             if (this.displayLineIndex >= this.bMessages.Count - 1) return;
@@ -482,9 +449,7 @@ namespace ChatCommands.ClassReplacements
             this.displayLineIndex++;
         }
 
-        /// <summary>
-        ///     Scrolls up one line.
-        /// </summary>
+        /// <summary>Scrolls up one line.</summary>
         private void ScrollUp()
         {
             if (this.displayLineIndex <= Math.Min(this.maxMessages, this.bMessages.Count) - 1) return;
@@ -492,9 +457,7 @@ namespace ChatCommands.ClassReplacements
             this.displayLineIndex--;
         }
 
-        /// <summary>
-        ///     Handle scroll wheel events.
-        /// </summary>
+        /// <summary>Handle scroll wheel events.</summary>
         public override void receiveScrollWheelAction(int direction)
         {
             if (!this.bChoosingEmoji.GetValue())
@@ -510,9 +473,7 @@ namespace ChatCommands.ClassReplacements
             }
         }
 
-        /// <summary>
-        ///     Draws the chat box and all its components.
-        /// </summary>
+        /// <summary>Draws the chat box and all its components.</summary>
         public override void draw(SpriteBatch b)
         {
             if (this.GetDisplayedLines().Any())
@@ -607,9 +568,7 @@ namespace ChatCommands.ClassReplacements
             this.emojiMenu.draw(b);
         }
 
-        /// <summary>
-        /// Clears sent message history.
-        /// </summary>
+        /// <summary>Clears sent message history.</summary>
         internal void ClearHistory()
         {
             this.sentMessageHistory.Clear();
@@ -619,9 +578,7 @@ namespace ChatCommands.ClassReplacements
             this.commandChatTextBox.Load(this.currentTypedMessage, true);
         }
 
-        /// <summary>
-        ///     Gets all lines currently being displayed.
-        /// </summary>
+        /// <summary>Gets all lines currently being displayed.</summary>
         private IEnumerable<ChatMessage> GetDisplayedLines()
         {
             for (int i = this.displayLineIndex; i >= this.GetEndDisplayIndex(); i--)
@@ -632,9 +589,7 @@ namespace ChatCommands.ClassReplacements
             }
         }
 
-        /// <summary>
-        ///     Gets the last index of the item that should be displayed.
-        /// </summary>
+        /// <summary>Gets the last index of the item that should be displayed.</summary>
         private int GetEndDisplayIndex()
         {
             if (this.displayLineIndex < this.maxMessages)
@@ -643,9 +598,7 @@ namespace ChatCommands.ClassReplacements
             return this.displayLineIndex - this.maxMessages + 1;
         }
 
-        /// <summary>
-        ///     A fixed version of <see cref="Game1.parseText(string,SpriteFont,int)" /> that uses .X instead of .Length.
-        /// </summary>
+        /// <summary>A fixed version of <see cref="Game1.parseText(string,SpriteFont,int)" /> that uses .X instead of .Length.</summary>
         private static string FixedParseText(string text, SpriteFont whichFont, int width, bool isConsole = false)
         {
             if (text == null)

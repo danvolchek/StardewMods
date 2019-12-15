@@ -12,6 +12,7 @@ namespace BetterDoors.Framework.Mapping
         /*********
         ** Accessors
         *********/
+
         /// <summary>The position the door is at.</summary>
         public Point Position { get; }
 
@@ -21,6 +22,7 @@ namespace BetterDoors.Framework.Mapping
         /*********
         ** Fields
         *********/
+
         /// <summary>The map the door will modify.</summary>
         private readonly Map map;
 
@@ -33,6 +35,7 @@ namespace BetterDoors.Framework.Mapping
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="position">The position the door is at.</param>
         /// <param name="property">Parsed door info.</param>

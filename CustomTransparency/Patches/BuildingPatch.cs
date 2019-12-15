@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Harmony;
+using StardewValley.Buildings;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using Harmony;
-using StardewValley.Buildings;
 
 namespace CustomTransparency.Patches
 {
@@ -14,9 +14,7 @@ namespace CustomTransparency.Patches
             return typeof(Building).GetMethod(nameof(Building.Update));
         }
 
-        /// <summary>
-        /// Change the first 0.4 in the method to the specified transparency in the config.
-        /// </summary>
+        /// <summary>Change the first 0.4 in the method to the specified transparency in the config.</summary>
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             bool changed = false;
@@ -27,7 +25,7 @@ namespace CustomTransparency.Patches
                     (float)instruction.operand <= 0.41f && (float)instruction.operand >= 0.39f)
                 {
                     changed = true;
-                    instruction.operand = CustomTransparencyMod.Config.MinimumBuildingTransparency;
+                    instruction.operand = ModEntry.Config.MinimumBuildingTransparency;
                 }
 
                 yield return instruction;

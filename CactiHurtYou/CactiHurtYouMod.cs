@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 using System.Collections.Generic;
 using System.Linq;
-using StardewValley.Objects;
 using xTile;
 using xTile.Dimensions;
 using xTile.Layers;
@@ -16,7 +16,7 @@ namespace CactiHurtYou
     public class CactiHurtYouMod : Mod
     {
         /// <summary>Known cactus tile indices.</summary>
-        private readonly int[] cactusTiles = {116, 131, 132, 147, 148};
+        private readonly int[] cactusTiles = { 116, 131, 132, 147, 148 };
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -75,7 +75,7 @@ namespace CactiHurtYou
         /// <param name="isClick">Whether the hurt is caused by a click.</param>
         private void TryHurtBecauseCactus(GameLocation location, Vector2 tileLocation, Farmer who, bool isClick)
         {
-            this.TryHurtBecauseCactusTile(location.Map, new Location((int) tileLocation.X, (int) tileLocation.Y), who);
+            this.TryHurtBecauseCactusTile(location.Map, new Location((int)tileLocation.X, (int)tileLocation.Y), who);
             this.TryHurtBecauseCactusCrop(location, tileLocation, who, isClick);
         }
 

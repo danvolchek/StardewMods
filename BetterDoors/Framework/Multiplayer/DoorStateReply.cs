@@ -10,6 +10,7 @@ namespace BetterDoors.Framework.Multiplayer
         /*********
         ** Accessors
         *********/
+
         /// <summary>The location the states are in.</summary>
         public string LocationName { get; }
 
@@ -19,6 +20,7 @@ namespace BetterDoors.Framework.Multiplayer
         /*********
         ** Public methods
         *********/
+
         /// <summary>Constructs an instance.</summary>
         /// <param name="locationName">The location the states are in.</param>
         /// <param name="doorStates">The state of each door in the location.</param>

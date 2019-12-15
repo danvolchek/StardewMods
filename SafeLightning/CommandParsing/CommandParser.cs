@@ -1,53 +1,69 @@
-﻿using System.Collections.Generic;
-using SafeLightning.CommandParsing.Commands;
+﻿using SafeLightning.CommandParsing.Commands;
 using StardewModdingAPI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace SafeLightning.CommandParsing
 {
-    /// <summary>
-    ///     Registers and parses command line arguments.
-    /// </summary>
+    /// <summary>Registers and parses command line arguments.</summary>
     internal class CommandParser
     {
-        private readonly IList<ICommand> commands;
+        /*********
+        ** Fields
+        *********/
 
-        private readonly IDictionary<string, string> descriptions = new Dictionary<string, string>();
+        /// <summary>The monitor used for command output.</summary>
         private readonly IMonitor monitor;
 
-        public CommandParser(SafeLightningMod mod)
+        /// <summary>The command helper used to register commands.</summary>
+        private readonly ICommandHelper commandHelper;
+
+        /// <summary>All known commands</summary>
+        private readonly IList<BaseCommand> commands = new List<BaseCommand>();
+
+        /// <summary>All known command descriptions</summary>
+        private readonly IDictionary<string, string> descriptions = new Dictionary<string, string>();
+
+        /*********
+        ** Public methods
+        *********/
+
+        /// <summary>Construct an instance.</summary>
+        /// <param name="monitor">The monitor used for command output.</param>
+        /// <param name="commandHelper">The command helper used to register commands.</param>
+        public CommandParser(IMonitor monitor, ICommandHelper commandHelper)
         {
-            this.monitor = mod.Monitor;
+            this.monitor = monitor;
+            this.commandHelper = commandHelper;
 
-            //Get available commands
-            this.commands = new List<ICommand>
+            foreach (Type commandType in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseCommand))))
             {
-                new PrintLocationCommand(),
-                new SetLightningCommand(),
-                new GrowTreesCommand(),
-                new RemoveFeaturesCommand()
-            };
-
-            //Register both a long and short command, hiding dangerous commands
-            foreach (string s in new List<string> {"safe_lightning", "sl"})
-            {
-                string helpString = "Safe lightning related debug commands.\n\nUsage:\n";
-                foreach (ICommand command in this.commands)
-                {
-                    if (command.Dangerous)
-                        continue;
-                    helpString += $"   {s} {command.Description} \n";
-                }
-
-                this.descriptions.Add(s, helpString);
-                mod.Helper.ConsoleCommands.Add(s, helpString, this.ParseCommand);
+                this.commands.Add(Activator.CreateInstance(commandType, this.monitor) as BaseCommand);
             }
         }
 
-        /// <summary>
-        ///     Parses the given command.
-        /// </summary>
-        /// <param name="commandName">Name used to call this method</param>
-        /// <param name="args">Command arguments</param>
+        /// <summary>Registers all known commands.</summary>
+        public void RegisterCommands()
+        {
+            //Register both a long and short command, hiding dangerous commands
+            foreach (string s in new[] { "safe_lightning", "sl" })
+            {
+                string helpString = this.commands.Where(command => !command.Dangerous).Aggregate("Safe lightning related debug commands.\n\nUsage:\n", (current, command) => current + $"   {s} {command.Description} \n");
+
+                this.descriptions.Add(s, helpString);
+                this.commandHelper.Add(s, helpString, this.ParseCommand);
+            }
+        }
+
+        /*********
+        ** Private methods
+        *********/
+
+        /// <summary>Parses the given command.</summary>
+        /// <param name="commandName">The name used to call the command.</param>
+        /// <param name="args">The command arguments.</param>
         private void ParseCommand(string commandName, string[] args)
         {
             if (args.Length == 0)
@@ -60,43 +76,28 @@ namespace SafeLightning.CommandParsing
             }
             else
             {
-                foreach (ICommand command in this.commands)
-                    if (command.Handles(args[0]))
-                    {
-                        //If the command is dangerous, only show how to use it if user guessed name exactly right.
-                        if (command.Dangerous)
-                        {
-                            if (args.Length > 2 || args.Length == 1 || args.Length == 2 && args[1] != "--force")
-                                this.PrintInvalidUsageError(commandName, $"Unrecognized command '{args[0]}'.");
-                            else
-                                this.monitor.Log(command.Parse(args), LogLevel.Info);
-                            return;
-                        }
+                string name = args[0].ToLowerInvariant();
 
-                        if (args.Length != 1)
-                            this.PrintInvalidUsageError(commandName, $"Too many arguments for command '{args[0]}'.");
-                        else
-                            this.monitor.Log(command.Parse(args), LogLevel.Info);
-                        return;
-                    }
+                BaseCommand toInvoke = this.commands.FirstOrDefault(command => command.Dangerous ? name == command.FullName : name == command.FullName || name == command.ShortName);
 
-                this.PrintInvalidUsageError(commandName, $"Unrecognized command '{args[0]}'.");
+                if (toInvoke != null)
+                {
+                    toInvoke.Invoke(args);
+                }
+                else
+                {
+                    this.PrintInvalidUsageError(commandName, $"Unrecognized command '{args[0]}'.");
+                }
             }
         }
 
-        private void PrintInvalidUsageError(string commandName, string type, bool append = true)
+        /// <summary>Prints an invalid usage error.</summary>
+        /// <param name="commandName"></param>
+        /// <param name="message"></param>
+        private void PrintInvalidUsageError(string commandName, string message)
         {
-            string toAppend = $"See help {commandName} for more info.";
-            string[] split = type.Split('\n');
-            if (split.Length == 1)
-            {
-                this.monitor.Log($"{type} {(append ? toAppend : "")}", LogLevel.Error);
-            }
-            else
-            {
-                foreach (string s in split) this.monitor.Log($"{s}", LogLevel.Error);
-                if (append) this.monitor.Log(toAppend, LogLevel.Error);
-            }
+            this.monitor.Log(message, LogLevel.Error);
+            this.monitor.Log($"Run help {commandName} for more info.", LogLevel.Error);
         }
     }
 }

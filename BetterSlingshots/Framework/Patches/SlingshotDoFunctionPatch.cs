@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using Harmony;
+﻿using Harmony;
 using Microsoft.Xna.Framework;
 using Netcode;
 using StardewValley;
 using StardewValley.Projectiles;
 using StardewValley.Tools;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using SObject = StardewValley.Object;
 
 namespace BetterSlingshots.Framework.Patches
@@ -29,7 +29,7 @@ namespace BetterSlingshots.Framework.Patches
         [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Method names are defined by Harmony.")]
         private static void Prefix(Slingshot __instance)
         {
-            if(BetterSlingshotsMod.Instance.IsAutoFire)
+            if (BetterSlingshotsMod.Instance.IsAutoFire)
                 BetterSlingshotsMod.Instance.Helper.Reflection.GetField<bool>(__instance, "canPlaySound").SetValue(false);
 
             SlingshotDoFunctionPatch.lastFiredAmmo = __instance.attachments[0];

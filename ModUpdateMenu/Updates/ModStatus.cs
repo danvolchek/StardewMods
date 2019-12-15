@@ -2,24 +2,62 @@
 
 namespace ModUpdateMenu.Updates
 {
-    public class ModStatus
+    /// <summary>A mod status.</summary>
+    internal class ModStatus
     {
+        /*********
+        ** Accessors
+        *********/
+        /// <summary>The update status.</summary>
         public UpdateStatus UpdateStatus { get; }
-        public string NewVersion { get; }
-        public string CurrentVersion { get; }
-        public string UpdateURL { get; }
-        public string UpdateURLType { get; }
-        public string ModName { get; }
-        public string ModAuthor { get; }
-        public string ErrorReason { get; }
-        public string Id { get; }
 
-        private ModStatus(UpdateStatus updateStatus, string Id, string name, string author, string updateURL)
+        /// <summary>The new version.</summary>
+        public string NewVersion { get; }
+
+        /// <summary>The current version.</summary>
+        public string CurrentVersion => this.manifest.Version.ToString();
+
+        /// <summary>The update url.</summary>
+        public string UpdateURL { get; }
+
+        /// <summary>The update url type.</summary>
+        public string UpdateURLType { get; }
+
+        /// <summary>The mod name.</summary>
+        public string ModName => this.manifest.Name;
+
+        /// <summary>The mod author.</summary>
+        public string ModAuthor => this.manifest.Author;
+
+        /// <summary>The reason an error occured while checking for updates.</summary>
+        public string ErrorReason { get; }
+
+        /// <summary>The mod unique id.</summary>
+        public string Id => this.manifest.UniqueID;
+
+        
+        /*********
+        ** Fields
+        *********/
+        /// <summary>The mod manifest.</summary>
+        private readonly IManifest manifest;
+
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>Construct an instance.</summary>
+        /// <param name="updateStatus">The update status.</param>
+        /// <param name="manifest">The mod manifest.</param>
+        /// <param name="updateURL">The update url.</param>
+        /// <param name="newVersion">The new version.</param>
+        /// <param name="errorReason">The reason an error occured while checking for updates.</param>
+        public ModStatus(UpdateStatus updateStatus, IManifest manifest, string updateURL, string newVersion = null, string errorReason = null)
         {
+            this.manifest = manifest;
+            this.NewVersion = newVersion;
+            this.ErrorReason = errorReason;
             this.UpdateStatus = updateStatus;
-            this.Id = Id;
-            this.ModName = name;
-            this.ModAuthor = author;
             this.UpdateURL = updateURL;
             if (updateURL.ToLower().Contains("nexusmods"))
                 this.UpdateURLType = "NexusMods";
@@ -32,18 +70,6 @@ namespace ModUpdateMenu.Updates
             else if (updateURL.ToLower().Contains("spacechase0"))
                 this.UpdateURLType = "Spacechase";
             else this.UpdateURLType = "???";
-        }
-
-        private ModStatus(UpdateStatus updateStatus, string Id, string name, string author, string updateURL, string currentVersion, string newVersion = null, string errorReason = null) : this(updateStatus, Id, name, author, updateURL)
-        {
-            this.NewVersion = newVersion;
-            this.CurrentVersion = currentVersion;
-            this.NewVersion = newVersion;
-            this.ErrorReason = errorReason;
-        }
-
-        public ModStatus(UpdateStatus updateStatus, IManifest manifest, string updateURL, string newVersion = null, string errorReason = null) : this(updateStatus, manifest.UniqueID, manifest.Name, manifest.Author, updateURL, manifest.Version.ToString(), newVersion, errorReason)
-        {
         }
     }
 }

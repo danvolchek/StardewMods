@@ -11,12 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.0.0-beta.7" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="StardewModdingAPI.Toolkit">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Stardew Valley\smapi-internal\StardewModdingAPI.Toolkit.dll</HintPath>
+    <Reference Include="SMAPI.Toolkit">
+      <HintPath>D:\Steam\SteamApps\common\Stardew Valley\smapi-internal\SMAPI.Toolkit.dll</HintPath>
     </Reference>
   </ItemGroup>
 

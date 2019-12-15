@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Common;
 using Pong.Framework.Game;
 using Pong.Framework.Game.States;
-using StardewModdingAPI;
 
 namespace Pong.Game
 {

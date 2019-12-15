@@ -1,0 +1,8 @@
+﻿{
+  "Name": "Colorful Console",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Makes console output colorful!",
+  "UniqueID": "cat.colorfulconsole",
+  "EntryDll": "ColorfulConsole.dll"
+}

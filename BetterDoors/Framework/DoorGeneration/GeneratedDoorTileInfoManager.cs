@@ -9,6 +9,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Fields
         *********/
+
         /// <summary>Maps mod id -> door name -> door orientation -> opening direction -> generated tile info</summary>
         private readonly IDictionary<string, IDictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>> generatedTileInfo = new Dictionary<string, IDictionary<string, IDictionary<Orientation, IDictionary<OpeningDirection, GeneratedDoorTileInfo>>>>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -18,6 +19,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Public methods
         *********/
+
         /// <summary>Gets generated tile info.</summary>
         /// <param name="modId">The mod id.</param>
         /// <param name="doorName">The door name.</param>
@@ -74,7 +76,6 @@ namespace BetterDoors.Framework.DoorGeneration
 
             if (!this.generatedTileInfo[modId][doorName].ContainsKey(orientation))
                 this.generatedTileInfo[modId][doorName][orientation] = new Dictionary<OpeningDirection, GeneratedDoorTileInfo>();
-
 
             this.generatedTileInfo[modId][doorName][orientation][openingDirection] = generatedDoorTileInfo;
         }

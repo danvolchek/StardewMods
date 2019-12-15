@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Pong.Framework.Messages
+﻿namespace Pong.Framework.Messages
 {
-    class GameStateMessage
+    internal class GameStateMessage
     {
     }
 }

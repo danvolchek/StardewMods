@@ -1,5 +1,4 @@
 ﻿using Pong.Framework.Enums;
-using System;
 using StardewModdingAPI;
 
 namespace Pong.Framework.Game
@@ -19,7 +18,6 @@ namespace Pong.Framework.Game
                 this.State = newState;
             else
                 ModEntry.Instance.Monitor.Log($"Tried to transition from {this.State} to {newState}, but that's illegal.", LogLevel.Error);
-
         }
 
         //Normal Flow (no errors):

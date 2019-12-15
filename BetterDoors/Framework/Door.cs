@@ -16,6 +16,7 @@ namespace BetterDoors.Framework
         /*********
         ** Accessors
         *********/
+
         /// <summary>The state of the door.</summary>
         public State State
         {
@@ -51,6 +52,7 @@ namespace BetterDoors.Framework
         /*********
         ** Fields
         *********/
+
         /// <summary>The map the door is in.</summary>
         private readonly Map map;
 
@@ -63,6 +65,7 @@ namespace BetterDoors.Framework
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="position">The position of the door.</param>
         /// <param name="orientation">The orientation of the door.</param>
@@ -91,7 +94,7 @@ namespace BetterDoors.Framework
             if (!force && this.IsAnimating)
                 return false;
 
-            if(makeSound)
+            if (makeSound)
                 Game1.currentLocation.playSoundAt(this.State == State.Closed ? "doorCreak" : "doorOpen", new Vector2(this.Position.X, this.Position.Y));
 
             // If not toggling, the state before toggle is the current state. Otherwise, it's the opposite of the old state before toggle.
@@ -125,6 +128,7 @@ namespace BetterDoors.Framework
         /*********
         ** Private methods
         *********/
+
         /// <summary>Updates map tiles, changing how the door appears.</summary>
         private void UpdateTiles()
         {
@@ -188,12 +192,16 @@ namespace BetterDoors.Framework
             {
                 case State.Closed:
                     return opening ? State.SlightlyOpen : State.Closed;
+
                 case State.SlightlyOpen:
                     return opening ? State.MostlyOpen : State.Closed;
+
                 case State.MostlyOpen:
                     return opening ? State.Open : State.SlightlyOpen;
+
                 case State.Open:
                     return opening ? State.Open : State.MostlyOpen;
+
                 default:
                     return State.Open;
             }

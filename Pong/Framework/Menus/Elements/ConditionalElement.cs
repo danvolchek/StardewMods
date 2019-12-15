@@ -19,10 +19,9 @@ namespace Pong.Framework.Menus.Elements
             return this.condition() ? this.element : null;
         }
 
-
         public void Draw(SpriteBatch b)
         {
-            if(this.condition())
+            if (this.condition())
                 this.element.Draw(b);
         }
 

@@ -1,5 +1,5 @@
-﻿using System;
-using Pong.Framework.Menus;
+﻿using Pong.Framework.Menus;
+using System;
 
 namespace Pong.Framework.Game.States
 {
@@ -33,7 +33,6 @@ namespace Pong.Framework.Game.States
             this.XPosition = state.XPosition;
             this.YPosition = state.YPosition;
         }
-
 
         public void Reset()
         {

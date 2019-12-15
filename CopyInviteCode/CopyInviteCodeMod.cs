@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using CopyInviteCode.ClipboardManagers;
+﻿using CopyInviteCode.ClipboardManagers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace CopyInviteCode
 {
@@ -43,9 +43,7 @@ namespace CopyInviteCode
                 this.AddCopyToClipboardOption(confDialog);
         }
 
-        /// <summary>
-        ///     Adds a copy to clipboard option for a <see cref="ConfirmationDialog" />.
-        /// </summary>
+        /// <summary>Adds a copy to clipboard option for a <see cref="ConfirmationDialog" />.</summary>
         private void AddCopyToClipboardOption(ConfirmationDialog confDialog)
         {
             confDialog.cancelButton = new ClickableTextureComponent("COPY",
@@ -65,9 +63,7 @@ namespace CopyInviteCode
             }
         }
 
-        /// <summary>
-        ///     Method to be called when player clicks the copy button.
-        /// </summary>
+        /// <summary>Method to be called when player clicks the copy button.</summary>
         private void CopyDialog(Farmer who)
         {
             ConfirmationDialog confDialog = Game1.activeClickableMenu as ConfirmationDialog;
@@ -82,9 +78,7 @@ namespace CopyInviteCode
             this.SetClipboardText(code);
         }
 
-        /// <summary>
-        ///     Set clipboard text, as well as show an indicator it was copied.
-        /// </summary>
+        /// <summary>Set clipboard text, as well as show an indicator it was copied.</summary>
         private void SetClipboardText(string text)
         {
             Thread thread = new Thread(() => this.SetClipboardTextImpl(text));
@@ -93,9 +87,7 @@ namespace CopyInviteCode
             thread.Join();
         }
 
-        /// <summary>
-        ///     Actually set clipboard text, as well as show an indicator it was copied.
-        /// </summary>
+        /// <summary>Actually set clipboard text, as well as show an indicator it was copied.</summary>
         private void SetClipboardTextImpl(string text)
         {
             this.clipboardManagers[Constants.TargetPlatform].SetText(text);
@@ -103,9 +95,7 @@ namespace CopyInviteCode
             Game1.addHUDMessage(new HUDMessage("Copied code to clipboard!", 1, false, Color.White, this.clipboardItem));
         }
 
-        /// <summary>
-        ///     Gets the non-invite code part of the invite message string.
-        /// </summary>
+        /// <summary>Gets the non-invite code part of the invite message string.</summary>
         private static string GetFirstPartOfInviteMessage()
         {
             return Game1.content.LoadString("Strings\\UI:Server_InviteCode").Replace("{0}", "").Trim();

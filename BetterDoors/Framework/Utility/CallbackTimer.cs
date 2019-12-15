@@ -10,12 +10,14 @@ namespace BetterDoors.Framework.Utility
         /*********
         ** Fields
         *********/
+
         /// <summary>Map of current active callbacks => time left before invocation.</summary>
         private readonly IDictionary<Func<int>, int> activeCallbacks = new Dictionary<Func<int>, int>();
 
         /*********
         ** Public methods
         *********/
+
         /// <summary>Registers a callback function.</summary>
         /// <param name="callback">The function to call.</param>
         /// <param name="ms">How many ms before it should be invoked.</param>

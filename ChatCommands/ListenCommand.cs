@@ -12,22 +12,18 @@ namespace ChatCommands
         {
             this.writer = writer;
             this.monitor = monitor;
-           
+
             if (config.ListenToConsoleOnStartup)
                 this.Handle(null, null);
         }
 
-        /// <summary>
-        /// Adds this command to SMAPI.
-        /// </summary>
+        /// <summary>Adds this command to SMAPI.</summary>
         public void Register(ICommandHelper helper)
         {
             helper.Add("listen", "Toggles displaying console output in the in game chat box.", this.Handle);
         }
 
-        /// <summary>
-        /// Handles the command.
-        /// </summary>
+        /// <summary>Handles the command.</summary>
         private void Handle(string name, string[] args)
         {
             this.writer.ToggleForceNotify();

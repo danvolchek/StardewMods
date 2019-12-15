@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
-using Pong.Framework.Common;
+﻿using Pong.Framework.Common;
 using Pong.Framework.Menus;
 using Pong.Framework.Menus.Elements;
 using StardewModdingAPI;
+using System.Collections.Generic;
 
 namespace Pong.Menus
 {
-    class ServerMenu : Menu
+    internal class ServerMenu : Menu
     {
         public override void Update()
         {
-            if(Context.IsWorldReady)
+            if (Context.IsWorldReady)
                 this.OnSwitchToNewMenu(new PlayerMenu());
             this.InitDrawables();
         }

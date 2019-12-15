@@ -1,5 +1,3 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Pong.Framework.Common;
 using Pong.Framework.Menus;
 using Pong.Menus;
@@ -85,7 +83,7 @@ namespace Pong
         {
             //if(this.i++ % 60 == 0)
             //{
-                this.currentMenu?.Update();
+            this.currentMenu?.Update();
             //    this.i = 0;
             //}
 

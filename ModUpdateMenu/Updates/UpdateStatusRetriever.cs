@@ -1,28 +1,41 @@
-﻿using System;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
+using StardewModdingAPI.Toolkit;
+using StardewModdingAPI.Toolkit.Framework.Clients.WebApi;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using StardewModdingAPI.Toolkit.Framework.Clients.WebApi;
-using StardewModdingAPI.Toolkit.Framework.ModData;
+using SemanticVersion = StardewModdingAPI.SemanticVersion;
 
 namespace ModUpdateMenu.Updates
 {
-    class UpdateStatusRetriever : IUpdateStatusRetriever
+    /// <summary>Retrieves update statuses.</summary>
+    internal class UpdateStatusRetriever
     {
+        /*********
+        ** Fields
+        *********/
+        /// <summary>The mod helper.</summary>
         private readonly IModHelper helper;
 
+        private readonly ModToolkit toolkit;
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>Construct an instance.</summary>
+        /// <param name="helper">The mod helper.</param>
         public UpdateStatusRetriever(IModHelper helper)
         {
             this.helper = helper;
+            this.toolkit = new ModToolkit();
         }
 
+        /// <summary>Gets the SMAPI update version.</summary>
+        /// <returns>The SMAPI update version.</returns>
         public ISemanticVersion GetSMAPIUpdateVersion()
         {
-            string updateMarker = (string) typeof(Constants)
-                .GetProperty("UpdateMarker", BindingFlags.Static | BindingFlags.NonPublic).GetValue(typeof(Constants));
+            string updateMarker = (string)typeof(Constants).GetProperty("UpdateMarker", BindingFlags.Static | BindingFlags.NonPublic).GetValue(typeof(Constants));
 
             //If there's no update marker, SMAPI is up to date
             //(Or there was an error, but we'd need to intercept console output to determine that)
@@ -31,85 +44,47 @@ namespace ModUpdateMenu.Updates
 
             //If there is an update marker, there is a SMAPI update
             string rawUpdate = File.ReadAllText(updateMarker);
-        
-            return StardewModdingAPI.Toolkit.SemanticVersion.TryParse(rawUpdate, out ISemanticVersion updateFound) ? updateFound : null;
+
+            return SemanticVersion.TryParse(rawUpdate, out ISemanticVersion updateFound) ? updateFound : null;
         }
 
+        /// <summary>Gets the update status of all mods.</summary>
+        /// <param name="statuses">All mod statuses.</param>
+        /// <returns>Whether any non skipped statuses were added.</returns>
         public bool GetUpdateStatuses(out IList<ModStatus> statuses)
         {
             statuses = new List<ModStatus>();
 
-
-            object registry = this.helper.ModRegistry.GetType()
-                .GetField("Registry", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(this.helper.ModRegistry);
-
             bool addedNonSkippedStatus = false;
 
-            foreach (object modMetaData in (IEnumerable<object>)registry.GetType().GetField("Mods", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(registry))
+            foreach (object modMetaData in GetInstanceField<IEnumerable<object>>(GetInstanceField<object>(this.helper.ModRegistry, "Registry"), "Mods"))
             {
                 ModEntryModel result = GetInstanceProperty<ModEntryModel>(modMetaData, "UpdateCheckData");
                 IManifest manifest = GetInstanceProperty<IManifest>(modMetaData, "Manifest");
 
+                string fallbackURL = manifest.UpdateKeys?.Select(this.toolkit.GetUpdateUrl).FirstOrDefault(p => p != null) ?? "";
+
                 if (result == null)
                 {
-                    statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, "", null, "SMAPI didn't check for an update"));
+                    statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, fallbackURL, null, "SMAPI didn't check for an update"));
                     continue;
                 }
 
-                if (!(bool)modMetaData.GetType().GetMethod("HasValidUpdateKeys").Invoke(modMetaData, null))
+                if (result.SuggestedUpdate == null)
                 {
-                    statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, "", null, "Mod has no update keys"));
-                    continue;
+                    if (result.Errors.Length != 0)
+                    {
+                        // Return the first error. That's not perfect, but generally users don't care why each different update failed, they just want to know there was an error.
+                        statuses.Add(new ModStatus(UpdateStatus.Error, manifest, fallbackURL, null, result.Errors[0]));
+                    }
+                    else
+                    {
+                        statuses.Add(new ModStatus(UpdateStatus.UpToDate, manifest, fallbackURL));
+                    }
                 }
-
-                ModDataRecordVersionedFields dataRecord =
-                    GetInstanceProperty<ModDataRecordVersionedFields>(modMetaData, "DataRecord");
-
-                //This section largely taken from https://github.com/Pathoschild/SMAPI/blob/924c3a5d3fe6bfad483834112883156bdf202b57/src/SMAPI/Framework/SCore.cs#L618-L630
-                bool useBetaInfo = result.HasBetaInfo && Constants.ApiVersion.IsPrerelease();
-                ISemanticVersion localVersion = dataRecord?.GetLocalVersionForUpdateChecks(manifest.Version) ?? manifest.Version;
-                ISemanticVersion latestVersion = dataRecord?.GetRemoteVersionForUpdateChecks(result.Main?.Version) ?? result.Main?.Version;
-                ISemanticVersion optionalVersion = dataRecord?.GetRemoteVersionForUpdateChecks(result.Optional?.Version) ?? result.Optional?.Version;
-                ISemanticVersion unofficialVersion = useBetaInfo ? result.UnofficialForBeta?.Version : result.Unofficial?.Version;
-
-                if (this.IsValidUpdate(localVersion, latestVersion, useBetaChannel: true))
-                    statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, result.Main?.Url, latestVersion.ToString()));
-                else if (this.IsValidUpdate(localVersion, optionalVersion, useBetaChannel: localVersion.IsPrerelease()))
-                    statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, result.Optional?.Url, optionalVersion.ToString()));
-                else if (this.IsValidUpdate(localVersion, unofficialVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
-                    statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url, unofficialVersion.ToString()));
                 else
                 {
-                    string updateURL = null;
-                    UpdateStatus updateStatus = UpdateStatus.UpToDate;
-                    if (localVersion.Equals(latestVersion))
-                        updateURL = result.Main?.Url;
-                    else if (localVersion.Equals(optionalVersion))
-                        updateURL = result.Optional?.Url;
-                    else if (localVersion.Equals(unofficialVersion))
-                        updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
-                    else if (latestVersion != null && this.IsValidUpdate(latestVersion, localVersion, useBetaChannel: true))
-                    {
-                        updateURL = result.Main?.Url;
-                        updateStatus = UpdateStatus.VeryNew;
-                    }
-                    else if (optionalVersion != null && this.IsValidUpdate(optionalVersion, localVersion, useBetaChannel: localVersion.IsPrerelease()))
-                    {
-                        updateURL = result.Optional?.Url;
-                        updateStatus = UpdateStatus.VeryNew;
-                    }
-                    else if (unofficialVersion != null && this.IsValidUpdate(unofficialVersion, localVersion, useBetaChannel: GetEnumName(modMetaData, "Status") == "Failed"))
-                    {
-                        updateURL = useBetaInfo ? result.UnofficialForBeta?.Url : result.Unofficial?.Url;
-                        updateStatus = UpdateStatus.VeryNew;
-                    }
-
-                    if(updateURL != null)
-                        statuses.Add(new ModStatus(updateStatus, manifest, updateURL));
-                    else if (result.Errors != null && result.Errors.Any())
-                        statuses.Add(new ModStatus(UpdateStatus.Error, manifest, "", "", result.Errors[0]));
-                    else
-                        statuses.Add(new ModStatus(UpdateStatus.Error, manifest, "", "", "Unknown Error"));
+                    statuses.Add(new ModStatus(UpdateStatus.OutOfDate, manifest, result.SuggestedUpdate.Url, result.SuggestedUpdate.Version.ToString()));
                 }
 
                 addedNonSkippedStatus = true;
@@ -118,32 +93,27 @@ namespace ModUpdateMenu.Updates
             return addedNonSkippedStatus;
         }
 
-        private static T GetInstanceProperty<T>(object obj, string name, bool isNonPublic = false)
+        /*********
+        ** Private methods
+        *********/
+        /// <summary>Gets an instance property value from an object.</summary>
+        /// <typeparam name="T">The type of the property value.</typeparam>
+        /// <param name="obj">The object to get the value from.</param>
+        /// <param name="name">The name of the property</param>
+        /// <returns>The property value.</returns>
+        private static T GetInstanceProperty<T>(object obj, string name)
         {
-            return (T)(obj?.GetType().GetProperty(name,
-                (isNonPublic ? BindingFlags.NonPublic : BindingFlags.Public) | BindingFlags.Instance).GetValue(obj));
+            return (T)(obj?.GetType().GetProperty(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance).GetValue(obj));
         }
 
-        private static string GetEnumName(object obj, string name, bool isNonPublic = false)
+        /// <summary>Gets an instance field value from an object.</summary>
+        /// <typeparam name="T">The type of the field value.</typeparam>
+        /// <param name="obj">The object to get the value from.</param>
+        /// <param name="name">The name of the field</param>
+        /// <returns>The field value.</returns>
+        private static T GetInstanceField<T>(object obj, string name)
         {
-            object foundEnum = GetInstanceProperty<object>(obj, name, isNonPublic);
-            if (foundEnum == null)
-                return null;
-            return Enum.GetName(foundEnum.GetType(), foundEnum);
-        }
-
-
-        ////Taken from https://github.com/Pathoschild/SMAPI/blob/924c3a5d3fe6bfad483834112883156bdf202b57/src/SMAPI/Framework/SCore.cs#L669
-        /// <summary>Get whether a given version should be offered to the user as an update.</summary>
-        /// <param name="currentVersion">The current semantic version.</param>
-        /// <param name="newVersion">The target semantic version.</param>
-        /// <param name="useBetaChannel">Whether the user enabled the beta channel and should be offered pre-release updates.</param>
-        private bool IsValidUpdate(ISemanticVersion currentVersion, ISemanticVersion newVersion, bool useBetaChannel)
-        {
-            return
-                newVersion != null
-                && newVersion.IsNewerThan(currentVersion)
-                && (useBetaChannel || !newVersion.IsPrerelease());
+            return (T)(obj?.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance).GetValue(obj));
         }
     }
 }

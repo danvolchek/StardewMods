@@ -14,6 +14,7 @@ namespace BetterDoors.Framework.Patches
         /*********
         ** Private methods
         *********/
+
         /// <summary>Gets the method to patch.</summary>
         /// <returns>The method to patch.</returns>
         [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Method names are defined by Harmony.")]

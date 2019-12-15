@@ -2,9 +2,7 @@
 
 namespace ChatCommands.Commands
 {
-    /// <summary>
-    /// Base class for commands.
-    /// </summary>
+    /// <summary>Base class for commands.</summary>
     internal abstract class BaseCommand : ICommand
     {
         protected IMonitor Monitor;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Harmony;
-using Microsoft.Xna.Framework;
+﻿using Harmony;
 using StackEverything.ObjectCopiers;
 using StackEverything.Patches;
 using StackEverything.Patches.Size;
@@ -13,15 +8,18 @@ using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.Tools;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using SObject = StardewValley.Object;
 
 namespace StackEverything
 {
     public class StackEverythingMod : Mod
     {
-        public static readonly Type[] PatchedTypes = {typeof(Furniture), typeof(Wallpaper)};
+        public static readonly Type[] PatchedTypes = { typeof(Furniture), typeof(Wallpaper) };
         private readonly ICopier<Furniture> furnitureCopier = new FurnitureCopier();
-        private readonly ICopier<SObject> tapperCopier = new TapperCopier();
         private bool isInDecoratableLocation;
 
         private IList<Furniture> lastKnownFurniture;
@@ -44,8 +42,7 @@ namespace StackEverything
                 [nameof(SObject.drawInMenu)] = typeof(DrawInMenuPatch)
             };
 
-            IList<Type> typesToPatch = PatchedTypes.Union(new[] {typeof(SObject)}).ToList();
-
+            IList<Type> typesToPatch = PatchedTypes.ToList();
 
             if (helper.ModRegistry.IsLoaded("Platonymous.CustomFarming"))
             {
@@ -55,8 +52,8 @@ namespace StackEverything
                 }
                 catch (Exception e)
                 {
-                    this.Monitor.Log("Failed to add support for CFR machines.", LogLevel.Debug);
-                    this.Monitor.Log(e.ToString(), LogLevel.Debug);
+                    this.Monitor.Log("Failed to add support for CFR machines.");
+                    this.Monitor.Log(e.ToString());
                 }
             }
 
@@ -76,8 +73,8 @@ namespace StackEverything
                 }
                 catch (Exception e)
                 {
-                    this.Monitor.Log("Failed to add support for Custom Furniture.", LogLevel.Debug);
-                    this.Monitor.Log(e.ToString(), LogLevel.Debug);
+                    this.Monitor.Log("Failed to add support for Custom Furniture.");
+                    this.Monitor.Log(e.ToString());
                 }
             }
 
@@ -94,7 +91,9 @@ namespace StackEverything
                 this.Patch(harmony, replacement.Key, replacement.Value.Item1, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, replacement.Value.Item2);
             }
 
-            helper.Events.World.ObjectListChanged += this.OnObjectListChanged;
+            // Make tackle stack
+            this.Patch(harmony, nameof(SObject.maximumStackSize), typeof(SObject), BindingFlags.Instance | BindingFlags.Public, typeof(MaximumStackSizePatch));
+
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
@@ -196,42 +195,6 @@ namespace StackEverything
                 {
                     this.lastKnownFurniture.Add(f);
                 }
-            }
-        }
-
-        /// <summary>Raised after objects are added or removed in a location.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnObjectListChanged(object sender, ObjectListChangedEventArgs e)
-        {
-            // Placed down tappers are the same instance as tappers in the inventory, leading to really weird behavior.
-            // Instead, we'll copy them.
-
-            if (e.Location != Game1.player.currentLocation)
-            {
-                return;
-            }
-
-            IDictionary<Vector2, SObject> toReplace = new Dictionary<Vector2, SObject>();
-            foreach (KeyValuePair<Vector2, SObject> item in e.Added)
-            {
-                if (Game1.player.Items.Contains(item.Value))
-                {
-                    SObject copy = this.tapperCopier.Copy(item.Value);
-                    if (copy != null)
-                    {
-                        toReplace[item.Key] = copy;
-                    }
-                    else
-                    {
-                        this.Monitor.Log($"Failed to make copy of an object: {item.Value.Name} - {item.Value.GetType().Name}.", LogLevel.Error);
-                    }
-                }
-            }
-
-            foreach (KeyValuePair<Vector2, SObject> item in toReplace)
-            {
-                Game1.currentLocation.objects[item.Key] = item.Value;
             }
         }
     }

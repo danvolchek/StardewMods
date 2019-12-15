@@ -28,7 +28,8 @@ namespace CustomWarpLocations.WarpOverrides
         {
             Farm,
             Mountains,
-            Beach
+            Beach,
+            Desert
         }
     }
 }

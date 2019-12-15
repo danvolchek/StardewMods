@@ -1,11 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using Harmony;
+﻿using Harmony;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
 using StardewValley;
 using StardewValley.Tools;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace BetterSlingshots.Framework.Patches
 {
@@ -23,7 +23,7 @@ namespace BetterSlingshots.Framework.Patches
         private static MethodBase TargetMethod()
         {
             return typeof(FarmerRenderer).GetMethod(nameof(FarmerRenderer.draw),
-                new []{typeof(SpriteBatch), typeof(FarmerSprite.AnimationFrame),
+                new[]{typeof(SpriteBatch), typeof(FarmerSprite.AnimationFrame),
                             typeof(int), typeof(Rectangle), typeof(Vector2), typeof(Vector2),
                             typeof(float), typeof(int), typeof(Color), typeof(float), typeof(float), typeof(Farmer)});
         }

@@ -1,14 +1,12 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Menus;
+using System;
 
 namespace ChatCommands.ClassReplacements
 {
-    /// <summary>
-    ///     Draws the message using a monospaced font.
-    /// </summary>
+    /// <summary>Draws the message using a monospaced font.</summary>
     internal class ConsoleChatMessage : ChatMessage
     {
         private static float widestCharacter = -1;
@@ -23,7 +21,7 @@ namespace ChatCommands.ClassReplacements
                 if (this.message[index].emojiIndex != -1)
                 {
                     b.Draw(ChatBox.emojiTexture,
-                        new Vector2((float) (x + (double) num1 + 1.0), (float) (y + (double) num2 - 4.0)),
+                        new Vector2((float)(x + (double)num1 + 1.0), (float)(y + (double)num2 - 4.0)),
                         new Rectangle(this.message[index].emojiIndex * 9 % ChatBox.emojiTexture.Width,
                             this.message[index].emojiIndex * 9 / ChatBox.emojiTexture.Width * 9, 9, 9),
                         Color.White * this.alpha, 0.0f, Vector2.Zero, 4f, SpriteEffects.None, 0.99f);
@@ -91,7 +89,7 @@ namespace ChatCommands.ClassReplacements
             }
 
             float widest = 0;
-            foreach (string part in text.Split(new[] {"\n", "\r\n"}, StringSplitOptions.None))
+            foreach (string part in text.Split(new[] { "\n", "\r\n" }, StringSplitOptions.None))
                 if (part.Length * widestCharacter > widest)
                     widest = part.Length * widestCharacter;
             return widest;

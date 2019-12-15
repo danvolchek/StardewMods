@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using BetterFruitTrees.Patches;
+﻿using BetterFruitTrees.Patches;
 using BetterFruitTrees.Patches.JunimoHarvester;
 using BetterFruitTrees.Patches.JunimoHut;
 using Harmony;
@@ -10,6 +6,10 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Characters;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using static BetterFruitTrees.Extensions.ListExtensions;
 using SObject = StardewValley.Object;
 
@@ -43,7 +43,6 @@ namespace BetterFruitTrees
 
             Utils.HarvestThreeAtOnce = this.Config.Wait_To_Harvest_Fruit_Trees_Until_They_Have_Three_Fruits__Then_Harvest_All_Three_At_Once;
 
-
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>
             {
                 { nameof(SObject.placementAction), typeof(SObject), typeof(PlacementPatch)}
@@ -57,11 +56,9 @@ namespace BetterFruitTrees
                 { "areThereMatureCropsWithinRadius", typeof(JunimoHut), typeof(AreThereMatureCropsWithinRadiusPatch) }
             };
 
-
             if (!this.Config.Disable_Fruit_Tree_Junimo_Harvesting)
                 foreach (Tuple<string, Type, Type> item in junimoReplacements)
                     replacements.Add(item);
-
 
             foreach (Tuple<string, Type, Type> replacement in replacements)
             {

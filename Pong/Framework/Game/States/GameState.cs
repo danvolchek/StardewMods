@@ -1,6 +1,6 @@
 ﻿namespace Pong.Framework.Game.States
 {
-    internal class GameState: IState<GameState>
+    internal class GameState : IState<GameState>
     {
         public bool BallCollidedLastFrame { get; set; }
         public bool Starting { get; set; } = true;
@@ -31,7 +31,6 @@
                 this.BallVelocityState.SetState(state.BallVelocityState);
                 this.ScoreState.SetState(state.ScoreState);
                 this.BallPositionState.SetState(state.BallPositionState);
-
             }
             this.PaddlePositionState.SetState(state.PaddlePositionState);
         }

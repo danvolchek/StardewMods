@@ -6,14 +6,14 @@ using SObject = StardewValley.Object;
 
 namespace BetterArtisanGoodIcons.Patches.SObjectPatches
 {
-    class DrawPatch
+    internal class DrawPatch
     {
         /// <summary>Draw the correct texture for machines that are ready for harvest and displaying their results.</summary>
-        /// <remarks>We can't just set <see cref="SObject.readyForHarvest"/> to be false during the draw call and draw the 
+        /// <remarks>We can't just set <see cref="SObject.readyForHarvest"/> to be false during the draw call and draw the
         /// tool tip ourselves because draw calls getScale, which actually modifies the object scale based upon <see cref="SObject.readyForHarvest"/>.</remarks>
         public static bool Prefix(SObject __instance, SpriteBatch spriteBatch, int x, int y, float alpha = 1f)
         {
-            if (!__instance.readyForHarvest.Value || !__instance.bigCraftable.Value || __instance.heldObject.Value == null || 
+            if (!__instance.readyForHarvest.Value || !__instance.bigCraftable.Value || __instance.heldObject.Value == null ||
                 !ArtisanGoodsManager.GetDrawInfo(__instance.heldObject.Value, out Texture2D spriteSheet, out Rectangle position, out Rectangle iconPosition))
                 return true;
             Vector2 vector2 = __instance.getScale() * (float)Game1.pixelZoom;
@@ -32,6 +32,5 @@ namespace BetterArtisanGoodIcons.Patches.SObjectPatches
             spriteBatch.Draw(spriteSheet, Game1.GlobalToLocal(Game1.viewport, new Vector2((float)(x * Game1.tileSize + Game1.tileSize / 2), (float)(y * Game1.tileSize - Game1.tileSize - Game1.tileSize / 8) + num)), new Microsoft.Xna.Framework.Rectangle?(position), Color.White * 0.75f, 0.0f, new Vector2(8f, 8f), (float)Game1.pixelZoom, SpriteEffects.None, (float)((double)((y + 1) * Game1.tileSize) / 10000.0 + 9.99999974737875E-06 + (double)__instance.TileLocation.X / 10000.0 + (__instance.ParentSheetIndex == 105 ? 0.00150000001303852 : 0.0)));
             return false;
         }
-
     }
 }

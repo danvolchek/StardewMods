@@ -1,51 +1,68 @@
-﻿namespace SafeLightning.CommandParsing.Commands
+﻿using StardewModdingAPI;
+
+namespace SafeLightning.CommandParsing.Commands
 {
-    /// <summary>
-    ///     Base class implementing common features commands will need.
-    /// </summary>
-    internal abstract class BaseCommand : ICommand
+    /// <summary>Common base class for commands.</summary>
+    internal abstract class BaseCommand
     {
+        /*********
+        ** Fields
+        *********/
+
+        /// <summary>The command description.</summary>
         private readonly string description;
-        private readonly CommandName name;
 
-        /// <summary>
-        ///     Creates a non dangerous <see cref="BaseCommand" />.
-        /// </summary>
-        /// <param name="fullName">The long name of the command</param>
-        /// <param name="shortName">The short name of the command</param>
-        /// <param name="desc">The command description</param>
-        protected BaseCommand(string fullName, string shortName, string desc)
-        {
-            this.name = new CommandName(fullName.ToLower(), shortName.ToLower());
-            this.description = desc;
-        }
+        /// <summary>The monitor used for command output.</summary>
+        protected readonly IMonitor monitor;
 
-        /// <summary>
-        ///     Creates a dangerous <see cref="BaseCommand" />.
-        /// </summary>
-        /// <param name="fullName">The long name of the command</param>
-        /// <param name="desc">The command description</param>
-        protected BaseCommand(string fullName, string desc) : this(fullName, "", desc.ToUpper())
-        {
-            this.Dangerous = true;
-        }
+        /*********
+        ** Accessors
+        *********/
 
-        public string Description => this.Dangerous
-            ? this.description
-            : $"{this.name.FullName} ({this.name.ShortName})\n    - {this.description}";
+        /// <summary>The full name of the command.</summary>
+        public string FullName { get; }
 
+        /// <summary>The short name of the command.</summary>
+        public string ShortName { get; }
+
+        /// <summary>The command description.</summary>
+        public string Description => this.Dangerous ? this.description : $"{this.FullName} ({this.ShortName})\n    - {this.description}";
+
+        /// <summary>Whether the command is dangerous or not.</summary>
         public bool Dangerous { get; }
 
-        /// <summary>
-        ///     Whether this command can handle the given input. Dangerous commands must be called with their full name.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public bool Handles(string name)
+        /*********
+         ** Protected methods
+         *********/
+
+        /// <summary>Construct an instance.</summary>
+        /// <param name="monitor">The monitor used for command output.</param>
+        /// <param name="fullName">The full name of the command.</param>
+        /// <param name="shortName">The short name of the command.</param>
+        /// <param name="desc">The command description.</param>
+        protected BaseCommand(IMonitor monitor, string fullName, string shortName, string desc)
         {
-            return name.ToLower() == this.name.FullName || !this.Dangerous && name.ToLower() == this.name.ShortName;
+            this.monitor = monitor;
+            this.ShortName = shortName.ToLowerInvariant();
+            this.FullName = fullName.ToLowerInvariant();
+            this.description = desc;
+            this.Dangerous = shortName == "";
         }
 
-        public abstract string Parse(string[] args);
+        /// <summary>Construct an instance.</summary>
+        /// <param name="monitor">The monitor used for command output.</param>
+        /// <param name="fullName">The full name of the command.</param>
+        /// <param name="desc">The command description.</param>
+        protected BaseCommand(IMonitor monitor, string fullName, string desc) : this(monitor, fullName, "", desc)
+        {
+        }
+
+        /*********
+         ** Public methods
+         *********/
+
+        /// <summary>Invokes the command.</summary>
+        /// <param name="args">The command arguments</param>
+        public abstract void Invoke(string[] args);
     }
 }

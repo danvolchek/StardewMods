@@ -1,6 +1,6 @@
-﻿using System.Reflection;
-using Harmony;
+﻿using Harmony;
 using StardewModdingAPI;
+using System.Reflection;
 
 namespace CasksEverywhere
 {

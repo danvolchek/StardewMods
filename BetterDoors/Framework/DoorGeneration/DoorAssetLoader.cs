@@ -11,6 +11,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Fields
         *********/
+
         /// <summary>Map of currently registered textures by asset key.</summary>
         private readonly IDictionary<string, Texture2D> doorTextures = new Dictionary<string, Texture2D>();
 
@@ -20,6 +21,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="helper">Provides an API for loading content assets.</param>
         public DoorAssetLoader(IContentHelper helper)
@@ -49,7 +51,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /// <param name="asset">Basic metadata about the asset being loaded.</param>
         public T Load<T>(IAssetInfo asset)
         {
-            return (T) (object) this.doorTextures[asset.AssetName];
+            return (T)(object)this.doorTextures[asset.AssetName];
         }
 
         /// <summary>Reset the asset loader, clearing loaded textures.</summary>
@@ -64,6 +66,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Private methods
         *********/
+
         /// <summary>Invalidates the cache.</summary>
         /// <param name="textures">The textures to invalidate.</param>
         private void InvalidateCache(IDictionary<string, Texture2D> textures)

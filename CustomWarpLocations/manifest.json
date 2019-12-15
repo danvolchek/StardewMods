@@ -1,10 +1,10 @@
 ﻿{
   "Name": "Custom Warp Locations",
   "Author": "Cat",
-  "Version": "1.3.0",
+  "Version": "1.3.1",
   "Description": "Lets you change where your warp totems, obelisks, and return scepter warp you to!",
   "UniqueID": "cat.customwarplocations",
   "EntryDll": "CustomWarpLocations.dll",
-  "MinimumApiVersion": "2.9.0",
+  "MinimumApiVersion": "3.0.0",
   "UpdateKeys": [ "Nexus:1688" ]
 }

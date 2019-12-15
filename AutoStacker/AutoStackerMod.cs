@@ -32,8 +32,7 @@ namespace AutoStacker
 
         private void StackOwnInventory()
         {
-            IList<Item> items = Game1.player.Items.Where(it => it != null && it.maximumStackSize() != -1).ToList();
-            items.Reverse();
+            IList<Item> items = Game1.player.Items.Where(it => it != null && it.maximumStackSize() != -1).Reverse().ToList();
             foreach (Item item in items)
             {
                 if (item.Stack == item.maximumStackSize() || item.Stack == 0)
@@ -44,7 +43,7 @@ namespace AutoStacker
                     int remain = stackOnMe.getRemainingStackSpace();
                     int add = Math.Min(remain, item.Stack);
 
-                    stackOnMe.addToStack(add);
+                    stackOnMe.Stack += add;
                     item.Stack -= add;
 
                     if (item.Stack == 0)

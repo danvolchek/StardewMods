@@ -31,7 +31,7 @@ namespace BetterHay
         {
             Config = helper.ReadConfig<ModConfig>();
             this.dropGrassStarterRandom = new Random();
-            
+
             if (Config.EnableGettingHayFromGrassAnytime)
             {
                 helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
@@ -100,7 +100,7 @@ namespace BetterHay
             }
 
             if (!silosAreFull && added)
-                Game1.getFarm().piecesOfHay.Value -= 1;          
+                Game1.getFarm().piecesOfHay.Value -= 1;
         }
 
         //Returns whether the first vector is with range of the second, in euclidian distance

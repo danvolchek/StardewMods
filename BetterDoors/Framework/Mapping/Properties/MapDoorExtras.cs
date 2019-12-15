@@ -8,6 +8,7 @@ namespace BetterDoors.Framework.Mapping.Properties
         /*********
         ** Accessors
         *********/
+
         /// <summary>Whether the door is a double door.</summary>
         public bool IsDoubleDoor { get; }
 
@@ -17,12 +18,14 @@ namespace BetterDoors.Framework.Mapping.Properties
         /*********
         ** Fields
         *********/
+
         /// <summary>The key to read this property with.</summary>
         public const string PropertyKey = "DoorExtras";
 
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="isDoubleDoor">Whether the door is a double door.</param>
         /// <param name="isAutomaticDoor">Whether the door is an automatic door.</param>
@@ -58,7 +61,8 @@ namespace BetterDoors.Framework.Mapping.Properties
                 if (part.Equals("double", StringComparison.InvariantCultureIgnoreCase))
                 {
                     isDoubleDoor = true;
-                } else if (part.Equals("automatic", StringComparison.InvariantCultureIgnoreCase))
+                }
+                else if (part.Equals("automatic", StringComparison.InvariantCultureIgnoreCase))
                 {
                     isAutomaticDoor = true;
                 }

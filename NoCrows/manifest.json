@@ -1,7 +1,7 @@
 ﻿{
   "Name": "No Crows",
   "Author": "Cat",
-  "Version": "2.0.0",
+  "Version": "2.0.1",
   "Description": "Crows will never eat your crops.",
   "UniqueID": "cat.nocrows",
   "EntryDll": "NoCrows.dll",

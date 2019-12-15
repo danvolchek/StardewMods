@@ -9,7 +9,9 @@ namespace BetterArtisanGoodIcons.Content
     internal abstract class TextureDataContentSource : IContentSource
     {
         public abstract CustomTextureData TextureData { get; }
+
         public abstract T Load<T>(string path);
+
         public abstract IManifest GetManifest();
 
         /// <summary>Group each texture path with its corresponding source list and artisan good type.</summary>

@@ -9,69 +9,57 @@ using System.Linq;
 
 namespace GeodeInfoMenu.Menus
 {
-    /// <summary>
-    /// Represents a search tab.
-    /// </summary>
+    /// <summary>Represents a search tab.</summary>
     public class SearchTab : IClickableMenu, IScrollableMenu
     {
         /***
          * New fields
          ***/
-        /// <summary>
-        /// The search text box.
-        /// </summary>
+
+        /// <summary>The search text box.</summary>
         private readonly UpdatingTextBox searchBox;
-        /// <summary>
-        /// All search results that were found.
-        /// </summary>
+
+        /// <summary>All search results that were found.</summary>
         private readonly IList<OptionsElement> searchResults;
-        /// <summary>
-        /// Bounds of each visible search result.
-        /// </summary>
-        readonly List<ClickableComponent> visibleSearchResults;
-        /// <summary>
-        /// The header text.
-        /// </summary>
+
+        /// <summary>Bounds of each visible search result.</summary>
+        private readonly List<ClickableComponent> visibleSearchResults;
+
+        /// <summary>The header text.</summary>
         private readonly OptionsElement headerText;
-        /// <summary>
-        /// Delegate definition to be called when search box text changes.
-        /// </summary>
+
+        /// <summary>Delegate definition to be called when search box text changes.</summary>
         public delegate void TextChangedDelegate();
-        /// <summary>
-        /// Where to draw header text.
-        /// </summary>
+
+        /// <summary>Where to draw header text.</summary>
         private readonly Point headerBounds;
-        /// <summary>
-        /// Mod config.
-        /// </summary>
-        private readonly GeodeInfoMenuConfig config;
-        /// <summary>
-        /// Mod itself to create search results.
-        /// </summary>
-        private readonly GeodeInfoMenuMod mod;
+
+        /// <summary>Mod config.</summary>
+        private readonly ModConfig config;
+
+        /// <summary>Mod itself to create search results.</summary>
+        private readonly ModEntry mod;
 
         /***
          * Existing Fields
          ***/
         private string hoverText = "";
         private int optionsSlotHeld = -1;
-        int currentItemIndex;
+        private int currentItemIndex;
         private readonly ClickableTextureComponent upArrow;
         private readonly ClickableTextureComponent downArrow;
         private readonly ClickableTextureComponent scrollBar;
         private readonly Rectangle scrollBarRunner;
         private const int NUM_ITEMS = 6;
 
-        /// <summary>
-        /// Constructs an instance.
-        /// </summary>
+        /// <summary>Constructs an instance.</summary>
         /// <param name="mod">Mod to use to create search results</param>
         /// <param name="config">Mod config</param>
         /// <param name="x">X position of tab</param>
         /// <param name="y">Y position of tab</param>
         /// <param name="width">Tab width</param>
         /// <param name="height">Tab height</param>
-        public SearchTab(GeodeInfoMenuMod mod, GeodeInfoMenuConfig config, int x, int y, int width, int height) : base(x, y, width, height, false)
+        public SearchTab(ModEntry mod, ModConfig config, int x, int y, int width, int height) : base(x, y, width, height, false)
         {
             this.config = config;
             this.mod = mod;
@@ -99,7 +87,8 @@ namespace GeodeInfoMenu.Menus
                         this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom +
                         (index + 1) * ((height - Game1.tileSize * 2) / (NUM_ITEMS + 1)), width - Game1.tileSize / 2,
                         (height - Game1.tileSize * 2) / (NUM_ITEMS + 1) + Game1.pixelZoom),
-                    string.Concat((object) index)) {myID = index};
+                    string.Concat((object)index))
+                { myID = index };
                 int num1 = index < SearchTab.NUM_ITEMS - 1 ? index + 1 : -7777;
                 clickableComponent.downNeighborID = num1;
                 int num2 = index > 0 ? index - 1 : -7777;
@@ -108,12 +97,9 @@ namespace GeodeInfoMenu.Menus
                 clickableComponent.fullyImmutable = num3 != 0;
                 optionSlots.Add(clickableComponent);
             }
-
         }
 
-        /// <summary>
-        /// Called when the search box text is changed - re creates the search list.
-        /// </summary>
+        /// <summary>Called when the search box text is changed - re creates the search list.</summary>
         private void SearchBoxTextChanged()
         {
             this.searchResults.Clear();
@@ -126,12 +112,12 @@ namespace GeodeInfoMenu.Menus
 
             this.currentItemIndex = 0;
             this.SetScrollBarToCurrentIndex();
-
         }
 
         /***
          * Getters/Setters
          ***/
+
         public string GetSearchBoxText()
         {
             return this.searchBox.Text;
@@ -165,7 +151,6 @@ namespace GeodeInfoMenu.Menus
         {
             this.searchBox.Text = s;
         }
-
 
         /***
          * Existing Methods
@@ -229,8 +214,6 @@ namespace GeodeInfoMenu.Menus
             if (this.hoverText.Equals(""))
                 return;
             IClickableMenu.drawHoverText(b, this.hoverText, Game1.smallFont, 0, 0, -1, (string)null, -1, (string[])null, (Item)null, 0, -1, -1, -1, -1, 1f, (CraftingRecipe)null);
-
-
         }
 
         public override void snapToDefaultClickableComponent()
@@ -342,7 +325,6 @@ namespace GeodeInfoMenu.Menus
                 this.UpArrowPressed();
                 Game1.playSound("shwip");
             }
-
             else if (!this.downArrow.containsPoint(x, y) && x > this.xPositionOnScreen + this.width && (x < this.xPositionOnScreen + this.width + Game1.tileSize * 2 && y > this.yPositionOnScreen) && y < this.yPositionOnScreen + this.height)
             {
                 this.leftClickHeld(x, y);
@@ -403,6 +385,5 @@ namespace GeodeInfoMenu.Menus
             this.searchBox.Hover(x, y);
             //eventually needed for unpin/pin item buttons
         }
-
     }
 }

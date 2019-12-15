@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Pong.Framework.Enums;
+using Pong.Framework.Game;
 using Pong.Framework.Menus;
 using Pong.Game.Controllers;
 using StardewValley;
 using System;
-using Pong.Framework.Game;
 
 namespace Pong.Game
 {

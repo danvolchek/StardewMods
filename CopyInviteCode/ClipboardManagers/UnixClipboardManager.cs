@@ -3,9 +3,7 @@ using System.Diagnostics;
 
 namespace CopyInviteCode.ClipboardManagers
 {
-    /// <summary>
-    /// Sets clipboard contents on Unix.
-    /// </summary>
+    /// <summary>Sets clipboard contents on Unix.</summary>
     internal abstract class UnixClipboardManager : IClipboardManager
     {
         protected abstract string FileName { get; }

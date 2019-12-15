@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.TerrainFeatures;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BetterFruitTrees
 {
-    /// <summary>
-    ///     Helps the player put down saplings where they want.
-    /// </summary>
+    /// <summary>Helps the player put down saplings where they want.</summary>
     internal class GrowHelper
     {
         /// <summary>Construct an instance.</summary>
@@ -20,9 +18,7 @@ namespace BetterFruitTrees
             events.GameLoop.Saving += this.OnSaving;
         }
 
-        /// <summary>
-        ///     Before a save, check every fruit tree to see if it can grow. If not, make it grow.
-        /// </summary>
+        /// <summary>Before a save, check every fruit tree to see if it can grow. If not, make it grow.</summary>
         private void OnSaving(object sender, SavingEventArgs e)
         {
             foreach (GameLocation l in Game1.locations)
@@ -32,9 +28,7 @@ namespace BetterFruitTrees
                         this.SimulateFruitTreeDayUpdate(l, fruitTree.Value as FruitTree);
         }
 
-        /// <summary>
-        ///     Simulates a day of growth on a fruit tree.
-        /// </summary>
+        /// <summary>Simulates a day of growth on a fruit tree.</summary>
         private void SimulateFruitTreeDayUpdate(GameLocation l, FruitTree tree)
         {
             if (tree.daysUntilMature.Value > 28)
@@ -58,9 +52,7 @@ namespace BetterFruitTrees
             }
         }
 
-        /// <summary>
-        ///     Whether a fruit tree at the given tile and game location could grow.
-        /// </summary>
+        /// <summary>Whether a fruit tree at the given tile and game location could grow.</summary>
         private bool CanFruitTreeGrow(GameLocation l, Vector2 tileLocation)
         {
             bool cannotGrow = false;

@@ -1,4 +1,5 @@
 ﻿using BetterSlingshots.Framework.Config;
+using BetterSlingshots.Framework.Patches;
 using Harmony;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -10,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BetterSlingshots.Framework.Patches;
 
 namespace BetterSlingshots
 {
@@ -26,12 +26,14 @@ namespace BetterSlingshots
             {"Master Slingshot", "Master"},
             {"Galaxy Slingshot", "Galaxy"}
         };
+
         private readonly IDictionary<string, int> configNameToFireRate = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase)
         {
             {"Basic", 60},
             {"Master", 45},
             {"Galaxy", 30}
         };
+
         private bool isActionButtonDown;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>

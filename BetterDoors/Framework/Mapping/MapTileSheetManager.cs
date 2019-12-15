@@ -13,12 +13,14 @@ namespace BetterDoors.Framework.Mapping
         /*********
         ** Fields
         *********/
+
         /// <summary>Map of map => tile sheets added to that map.</summary>
         private readonly IDictionary<Map, IEnumerable<string>> addedSheetsByMap = new Dictionary<Map, IEnumerable<string>>();
 
         /*********
         ** Public methods
         *********/
+
         /// <summary>Adds tile sheets to a map.</summary>
         /// <param name="map">The map to edit.</param>
         /// <param name="doors">The doors that need their tile sheets added.</param>
@@ -63,10 +65,10 @@ namespace BetterDoors.Framework.Mapping
                 }
 
                 // Add an always front layer if it's missing.
-                if(map.GetLayer("AlwaysFront") == null)
+                if (map.GetLayer("AlwaysFront") == null)
                 {
-                   Layer buildingsLayer = map.GetLayer("Buildings");
-                   map.AddLayer(new Layer("AlwaysFront", map, buildingsLayer.LayerSize, buildingsLayer.TileSize));
+                    Layer buildingsLayer = map.GetLayer("Buildings");
+                    map.AddLayer(new Layer("AlwaysFront", map, buildingsLayer.LayerSize, buildingsLayer.TileSize));
                 }
 
                 this.addedSheetsByMap[map] = addedSheets;
@@ -80,7 +82,7 @@ namespace BetterDoors.Framework.Mapping
         {
             foreach (KeyValuePair<Map, IEnumerable<string>> sheetsInMap in this.addedSheetsByMap)
             {
-                foreach(string layerId in sheetsInMap.Value)
+                foreach (string layerId in sheetsInMap.Value)
                     sheetsInMap.Key.RemoveTileSheet(sheetsInMap.Key.GetTileSheet(layerId));
             }
 

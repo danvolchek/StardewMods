@@ -1,16 +1,13 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Netcode;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Objects;
+using System.Threading.Tasks;
 
 namespace BetterFruitTrees.Patches.JunimoHarvester
 {
-    /// <summary>
-    /// Actually harvest fruit trees.
-    /// </summary>
+    /// <summary>Actually harvest fruit trees.</summary>
     internal class UpdatePatch
     {
         private static Item lastHarvestedItem;

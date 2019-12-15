@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using ChatCommands.Util;
+﻿using ChatCommands.Util;
 using StardewValley.Menus;
+using System.Collections.Generic;
 
 namespace ChatCommands.ClassReplacements
 {

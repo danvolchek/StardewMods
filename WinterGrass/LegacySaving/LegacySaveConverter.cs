@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.TerrainFeatures;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -10,10 +11,19 @@ namespace WinterGrass.LegacySaving
     /// <summary>Handles reading and then deleting legacy save files.</summary>
     internal class LegacySaveConverter
     {
+        /*********
+        ** Fields
+        *********/
+
         /// <summary>The path to the legacy saves directory.</summary>
         private readonly string saveDirectory;
+
         /// <summary>The path to the current legacy save file.</summary>
         private string saveFile;
+
+        /*********
+        ** Public methods
+        *********/
 
         /// <summary>Constructs an instance.</summary>
         /// <param name="directoryPath">The path to the legacy saves directory.</param>
@@ -35,7 +45,7 @@ namespace WinterGrass.LegacySaving
             {
                 return;
             }
-           
+
             foreach (KeyValuePair<string, Dictionary<Vector2, LegacyGrassSave>> item in this.ReadFromFile(this.saveFile))
             {
                 GameLocation l = Game1.getLocationFromName(item.Key);
@@ -55,12 +65,16 @@ namespace WinterGrass.LegacySaving
         /// <summary>Deletes the save file for the currently loaded save, and the entire folder if no saves are left.</summary>
         public void DeleteSaveFile()
         {
-            if(File.Exists(this.saveFile))
+            if (File.Exists(this.saveFile))
                 File.Delete(this.saveFile);
 
             if (Directory.Exists(this.saveDirectory) && Directory.GetFiles(this.saveDirectory).Length == 0)
                 Directory.Delete(this.saveDirectory);
         }
+
+        /*********
+        ** Private methods
+        *********/
 
         /// <summary>Reads saved grass data from a file.</summary>
         /// <param name="path">The file to read.</param>
@@ -93,7 +107,6 @@ namespace WinterGrass.LegacySaving
             }
 
             return savedItems;
-            
         }
 
         /// <summary>Reads an int according to the save file format</summary>
@@ -102,8 +115,8 @@ namespace WinterGrass.LegacySaving
         /// <returns></returns>
         private string ReadInt(string line, out int x)
         {
-            x = int.Parse(line.Substring(0, line.IndexOf(",")));
-            return line.Substring(line.IndexOf(",") + 1);
+            x = int.Parse(line.Substring(0, line.IndexOf(",", StringComparison.Ordinal)));
+            return line.Substring(line.IndexOf(",", StringComparison.Ordinal) + 1);
         }
     }
 }

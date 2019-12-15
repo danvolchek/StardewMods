@@ -1,7 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using Harmony;
+﻿using Harmony;
 using StardewValley.Tools;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace BetterSlingshots.Framework.Patches
 {

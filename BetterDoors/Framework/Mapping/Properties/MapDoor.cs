@@ -4,14 +4,13 @@ using System;
 
 namespace BetterDoors.Framework.Mapping.Properties
 {
-    /// <summary>
-    /// A property value placed on a tile indicating which door to spawn.
-    /// </summary>
+    /// <summary>A property value placed on a tile indicating which door to spawn.</summary>
     internal class MapDoor
     {
         /*********
         ** Accessors
         *********/
+
         /// <summary>The mod id to get the sprite from.</summary>
         public string ModId { get; }
 
@@ -27,12 +26,14 @@ namespace BetterDoors.Framework.Mapping.Properties
         /*********
         ** Fields
         *********/
+
         /// <summary>The key to read this property with.</summary>
         public const string PropertyKey = "Door";
 
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="modId">The mod id to get the sprite from.</param>
         /// <param name="doorName">The name of the door sprite.</param>

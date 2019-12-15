@@ -1,15 +1,13 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using static GeodeInfoMenu.Menus.SearchTab;
-using StardewValley;
 using Microsoft.Xna.Framework.Input;
+using StardewValley;
+using System;
+using static GeodeInfoMenu.Menus.SearchTab;
 
 namespace GeodeInfoMenu.Menus
 {
-    /// <summary>
-    /// Represents a text box that calls a method every time its text is changed.
-    /// </summary>
+    /// <summary>Represents a text box that calls a method every time its text is changed.</summary>
     public class UpdatingTextBox : IKeyboardSubscriber
     {
         /***
@@ -29,6 +27,7 @@ namespace GeodeInfoMenu.Menus
         /***
          * Changes from orignal class
          ***/
+
         public string Text
         {
             get => this._text;
@@ -161,7 +160,6 @@ namespace GeodeInfoMenu.Menus
             Utility.drawTextWithShadow(spriteBatch, text, this._font, new Vector2((float)(this.X + Game1.tileSize / 4), (float)(this.Y + (this._textBoxTexture != null ? Game1.tileSize / 4 - Game1.pixelZoom : Game1.pixelZoom * 2))), this._textColor, 1f, -1f, -1, -1, 1f, 3);
             if (flag && this.Selected)
                 spriteBatch.Draw(Game1.staminaRect, new Rectangle(this.X + Game1.tileSize / 4 + (int)vector2.X + 2, this.Y + 8, 4, 32), this._textColor);
-
         }
 
         public void RecieveTextInput(char inputChar)
@@ -211,7 +209,7 @@ namespace GeodeInfoMenu.Menus
                 }
                 Game1.playSound("cowboy_monsterhit");
             }
-            label_17:
+        label_17:
             this.Text = this.Text + inputChar.ToString();
         }
 

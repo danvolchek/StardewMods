@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Hats on Cats",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Lets you put hats on cats, dogs, all farm animals, NPCs, junimos, monsters, etc.",
+  "UniqueID": "cat.hatsoncats",
+  "EntryDll": "HatsOnCats.dll",
+  "MinimumApiVersion": "3.0.0-beta",
+  "UpdateKeys": [ ]
+}

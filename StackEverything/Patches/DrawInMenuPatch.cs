@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using System.Linq;
-using SObject = StardewValley.Object;
 
 namespace StackEverything.Patches
 {
@@ -11,7 +10,7 @@ namespace StackEverything.Patches
     {
         public static void Postfix(Item __instance, SpriteBatch spriteBatch, Vector2 location, float scaleSize, bool drawStackNumber)
         {
-            if (!((__instance is SObject objInstance && objInstance.bigCraftable.Value) || StackEverythingMod.PatchedTypes.Any(item => item.IsInstanceOfType(__instance))))
+            if (!StackEverythingMod.PatchedTypes.Any(item => item.IsInstanceOfType(__instance)))
                 return;
 
             if (drawStackNumber && __instance.maximumStackSize() > 1 && ((double)scaleSize > 0.3 && __instance.Stack != int.MaxValue) && __instance.Stack > 1)

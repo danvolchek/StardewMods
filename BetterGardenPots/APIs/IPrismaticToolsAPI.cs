@@ -7,6 +7,7 @@ namespace BetterGardenPots.APIs
     public interface IPrismaticToolsAPI
     {
         int SprinklerIndex { get; }
+
         IEnumerable<Vector2> GetSprinklerCoverage(Vector2 origin);
     }
 }

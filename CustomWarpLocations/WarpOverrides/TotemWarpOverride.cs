@@ -8,7 +8,7 @@ namespace CustomWarpLocations.WarpOverrides
 
         internal TotemWarpOverride(object target)
         {
-            this.parentSheetIndex = ((Object) target).ParentSheetIndex;
+            this.parentSheetIndex = ((Object)target).ParentSheetIndex;
         }
 
         internal override WarpLocation GetWarpLocation()
@@ -19,11 +19,17 @@ namespace CustomWarpLocations.WarpOverrides
                 case 688:
                     newLocation = WarpLocations.FarmWarpLocation_Totem;
                     break;
+
                 case 689:
                     newLocation = WarpLocations.MountainWarpLocation_Totem;
                     break;
+
                 case 690:
                     newLocation = WarpLocations.BeachWarpLocation_Totem;
+                    break;
+
+                case 261:
+                    newLocation = WarpLocations.DesertWarpLocation_Totem;
                     break;
             }
 

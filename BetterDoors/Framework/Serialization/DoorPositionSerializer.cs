@@ -11,6 +11,7 @@ namespace BetterDoors.Framework.Serialization
         /*********
         ** Fields
         *********/
+
         /// <summary>The key used to read and write data.</summary>
         internal const string DoorPositionKey = "door-positions";
 
@@ -20,6 +21,7 @@ namespace BetterDoors.Framework.Serialization
         /*********
         ** Public methods
         *********/
+
         /// <summary>Constructs an instance.</summary>
         /// <param name="dataHelper">Provides an API for reading and storing local mod data.</param>
         public DoorPositionSerializer(IDataHelper dataHelper)

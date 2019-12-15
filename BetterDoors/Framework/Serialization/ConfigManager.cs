@@ -8,12 +8,14 @@ namespace BetterDoors.Framework.Serialization
         /*********
         ** Fields
         *********/
+
         /// <summary>Provides simplified APIs for writing mods.</summary>
         private readonly IModHelper helper;
 
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public ConfigManager(IModHelper helper)
@@ -27,7 +29,7 @@ namespace BetterDoors.Framework.Serialization
         {
             BetterDoorsModConfig config = this.helper.ReadConfig<BetterDoorsModConfig>();
 
-            if(ConfigManager.ValidateConfig(ref config))
+            if (ConfigManager.ValidateConfig(ref config))
                 this.helper.WriteConfig(config);
 
             return config;
@@ -36,6 +38,7 @@ namespace BetterDoors.Framework.Serialization
         /*********
         ** Private methods
         *********/
+
         /// <summary>Validate config options, updating invalid values.</summary>
         /// <param name="config">The config to validate.</param>
         /// <returns>Whether the config was invalid.</returns>
@@ -48,7 +51,7 @@ namespace BetterDoors.Framework.Serialization
             }
 
             // Only allow positive radii
-            if(config.DoorToggleRadius < 1)
+            if (config.DoorToggleRadius < 1)
             {
                 config.DoorToggleRadius = new BetterDoorsModConfig().DoorToggleRadius;
                 return true;

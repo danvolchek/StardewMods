@@ -9,18 +9,21 @@ namespace BetterDoors.Framework.Mapping.Properties
         /*********
         ** Accessors
         *********/
+
         /// <summary>The parsed version value.</summary>
         public ISemanticVersion PropertyVersion { get; }
 
         /*********
         ** Fields
         *********/
+
         /// <summary>The key to read this property with.</summary>
         public const string PropertyKey = "DoorVersion";
 
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="propertyVersion">The parsed version value.</param>
         public MapDoorVersion(ISemanticVersion propertyVersion)

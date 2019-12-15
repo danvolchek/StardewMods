@@ -1,12 +1,11 @@
 ﻿using StardewValley;
 using SObject = StardewValley.Object;
+
 namespace StackEverything.Patches
 {
     internal class TryToPlaceItemPatch
     {
-        /// <summary>
-        /// The same as <see cref="Utility.tryToPlaceHere"/> except the furniture code is commented out.
-        /// </summary>
+        /// <summary>The same as <see cref="Utility.tryToPlaceHere"/> except the furniture code is commented out.</summary>
         /// <remarks> Hopefully this doesn't cause any problems. I have no idea why it was added in 1.3.</remarks>
         public static bool Prefix(GameLocation location, Item item, int x, int y)
         {

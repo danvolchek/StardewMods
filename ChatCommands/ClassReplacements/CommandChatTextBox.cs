@@ -1,12 +1,12 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using ChatCommands.Util;
+﻿using ChatCommands.Util;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ChatCommands.ClassReplacements
 {
@@ -37,9 +37,7 @@ namespace ChatCommands.ClassReplacements
         internal long CurrentRecipientId { get; private set; } = -1;
         internal string CurrentRecipientName { get; private set; }
 
-        /// <summary>
-        ///     Reset the current state.
-        /// </summary>
+        /// <summary>Reset the current state.</summary>
         public void Reset()
         {
             this.currentWidth = 0.0f;
@@ -48,25 +46,22 @@ namespace ChatCommands.ClassReplacements
             this.currentSnippetIndex = this.currentInsertPosition = 0;
         }
 
-        /// <summary>
-        ///     Handle command input.
-        /// </summary>
+        /// <summary>Handle command input.</summary>
         public override void RecieveCommandInput(char command)
         {
             switch (command)
             {
-                case (char) 8 when this.Selected:
+                case (char)8 when this.Selected:
                     this.Backspace();
                     break;
+
                 default:
                     base.RecieveCommandInput(command);
                     break;
             }
         }
 
-        /// <summary>
-        ///     Add text to the text box.
-        /// </summary>
+        /// <summary>Add text to the text box.</summary>
         public override void RecieveTextInput(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -75,7 +70,7 @@ namespace ChatCommands.ClassReplacements
             if (this.finalText.Count == 0)
                 this.finalText.Add(new ChatSnippet("", LocalizedContentManager.CurrentLanguageCode));
 
-            if ((double) this.currentWidth +
+            if ((double)this.currentWidth +
                 ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode).MeasureString(text).X >=
                 this.Width - 16)
                 return;
@@ -113,13 +108,14 @@ namespace ChatCommands.ClassReplacements
 
             this.updateWidth();
         }
+
         //AXIOMS:
         //If the current message is text, this.currentInsertPosition is in [0,text.length]
         //If the current message is an emoji, this.currentInsertPosition is either 0 or 1 (before/after)
 
         private bool CheckForWhisper()
         {
-            Match match = WhisperRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
+            Match match = WhisperRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText, Utils.ShouldIncludeColorInfo(this.finalText)));
             if (!match.Success)
                 return false;
 
@@ -137,7 +133,7 @@ namespace ChatCommands.ClassReplacements
 
         private void CheckForWhisperReply()
         {
-            Match match = WhisperReplyRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText));
+            Match match = WhisperReplyRegex.Match(ChatMessage.makeMessagePlaintext(this.finalText, Utils.ShouldIncludeColorInfo(this.finalText)));
             if (!match.Success || this.LastWhisperId == -1) return;
 
             this.UpdateForNewRecepient(this.LastWhisperId);
@@ -146,9 +142,7 @@ namespace ChatCommands.ClassReplacements
             this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
         }
 
-        /// <summary>
-        ///     Handle the backspace key being pressed.
-        /// </summary>
+        /// <summary>Handle the backspace key being pressed.</summary>
         public void Backspace()
         {
             if (this.finalText.Any())
@@ -280,9 +274,7 @@ namespace ChatCommands.ClassReplacements
             this.updateWidth();
         }
 
-        /// <summary>
-        ///     Re measures the length of the given snippet.
-        /// </summary>
+        /// <summary>Re measures the length of the given snippet.</summary>
         /// <param name="snippet"></param>
         private static void ReMeasureSnippetLength(ChatSnippet snippet)
         {
@@ -293,25 +285,19 @@ namespace ChatCommands.ClassReplacements
                     .MeasureString(snippet.message).X;
         }
 
-        /// <summary>
-        ///     Gets the last insertion index of the given snippet.
-        /// </summary>
+        /// <summary>Gets the last insertion index of the given snippet.</summary>
         private static int GetLastIndexOfMessage(ChatSnippet snippet)
         {
             return snippet.message?.Length ?? 1;
         }
 
-        /// <summary>
-        ///     Gets the last insertion index of the current snippet.
-        /// </summary>
+        /// <summary>Gets the last insertion index of the current snippet.</summary>
         private int GetLastIndexOfCurrentSnippet()
         {
             return GetLastIndexOfMessage(this.finalText[this.currentSnippetIndex]);
         }
 
-        /// <summary>
-        ///     Add an emoji to the typed text.
-        /// </summary>
+        /// <summary>Add an emoji to the typed text.</summary>
         public void ReceiveEmoji(int emoji)
         {
             if (this.currentWidth + 40.0 > this.Width - 16)
@@ -354,9 +340,7 @@ namespace ChatCommands.ClassReplacements
             this.updateWidth();
         }
 
-        /// <summary>
-        ///     Draws the chat text box.
-        /// </summary>
+        /// <summary>Draws the chat text box.</summary>
         public override void Draw(SpriteBatch spriteBatch, bool drawShadow = true)
         {
             if (this.Selected)
@@ -370,7 +354,7 @@ namespace ChatCommands.ClassReplacements
 
                 if (forceDrawCursor || DateTime.Now.Millisecond % 1000 >= 500)
                     spriteBatch.Draw(Game1.staminaRect,
-                        new Rectangle(this.X + this.toOffset + 16 + (int) this.GetCursorOffset() - 3, this.Y + 8, 4,
+                        new Rectangle(this.X + this.toOffset + 16 + (int)this.GetCursorOffset() - 3, this.Y + 8, 4,
                             32), this._textColor);
 
                 this.lastUpdatecurrentSnippetIndex = this.currentSnippetIndex;
@@ -425,7 +409,7 @@ namespace ChatCommands.ClassReplacements
             this.CurrentRecipientId = id;
             this.CurrentRecipientName = to;
             this.displayTo = $"To: {to}";
-            this.toOffset = (int) ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode)
+            this.toOffset = (int)ChatBox.messageFont(LocalizedContentManager.CurrentLanguageCode)
                 .MeasureString(this.displayTo).X;
             this.toOffset += 16 + 16;
             return true;
@@ -446,9 +430,7 @@ namespace ChatCommands.ClassReplacements
             return id != -1;
         }
 
-        /// <summary>
-        ///     Gets the current offset of the cursor from the left of the textbox.
-        /// </summary>
+        /// <summary>Gets the current offset of the cursor from the left of the textbox.</summary>
         private float GetCursorOffset()
         {
             float offset = 0;
@@ -467,9 +449,7 @@ namespace ChatCommands.ClassReplacements
             return offset;
         }
 
-        /// <summary>
-        ///     Handle the left arrow key being pressed.
-        /// </summary>
+        /// <summary>Handle the left arrow key being pressed.</summary>
         public void OnLeftArrowPress()
         {
             if (!this.finalText.Any())
@@ -496,9 +476,7 @@ namespace ChatCommands.ClassReplacements
             }
         }
 
-        /// <summary>
-        ///     Handle the right arrow key being pressed.
-        /// </summary>
+        /// <summary>Handle the right arrow key being pressed.</summary>
         public void OnRightArrowPress()
         {
             if (!this.finalText.Any())
@@ -523,9 +501,7 @@ namespace ChatCommands.ClassReplacements
             }
         }
 
-        /// <summary>
-        ///     Move the cursor as far right as possible.
-        /// </summary>
+        /// <summary>Move the cursor as far right as possible.</summary>
         private void MoveCursorAllTheWayRight()
         {
             if (!this.finalText.Any())
@@ -534,18 +510,14 @@ namespace ChatCommands.ClassReplacements
             this.currentInsertPosition = this.GetLastIndexOfCurrentSnippet();
         }
 
-        /// <summary>
-        ///     Save the current state, so it can be restored later.
-        /// </summary>
+        /// <summary>Save the current state, so it can be restored later.</summary>
         public CommandChatTextBoxState Save()
         {
             return new CommandChatTextBoxState(this.currentInsertPosition, this.currentSnippetIndex,
                 this.CurrentRecipientId, this.CurrentRecipientName, this.finalText);
         }
 
-        /// <summary>
-        ///     Restored a previously saved state.
-        /// </summary>
+        /// <summary>Restored a previously saved state.</summary>
         public void Load(CommandChatTextBoxState state, bool useSavedPosition = false)
         {
             this.finalText.Clear();

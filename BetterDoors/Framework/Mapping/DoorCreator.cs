@@ -3,8 +3,8 @@ using BetterDoors.Framework.Enums;
 using BetterDoors.Framework.Mapping.Properties;
 using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 using StardewModdingAPI;
+using System.Collections.Generic;
 using xTile;
 using xTile.Layers;
 using xTile.ObjectModel;
@@ -18,6 +18,7 @@ namespace BetterDoors.Framework.Mapping
         /*********
         ** Fields
         *********/
+
         /// <summary>Manages information about the tiles needed to draw doors.</summary>
         private readonly GeneratedDoorTileInfoManager doorTileInfoManager;
 
@@ -33,6 +34,7 @@ namespace BetterDoors.Framework.Mapping
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="doorTileInfoManager">Manages information about the tiles needed to draw doors.</param>
         /// <param name="timer">Callback timer for door animations.</param>
@@ -85,7 +87,7 @@ namespace BetterDoors.Framework.Mapping
                     }
 
                     // Log an error if the version is invalid.
-                    if(!MapDoorVersion.TryParseString(doorVersionValue.ToString(), out string error, out MapDoorVersion version))
+                    if (!MapDoorVersion.TryParseString(doorVersionValue.ToString(), out string error, out MapDoorVersion version))
                     {
                         this.errorQueue.AddError($"The {MapDoorVersion.PropertyKey} property at ({x},{y}) is malformed. Info: {error}.");
                         continue;

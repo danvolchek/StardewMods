@@ -1,6 +1,6 @@
 ﻿namespace Pong.Framework.Messages
 {
-    class ChallengeRequestResponseMessage
+    internal class ChallengeRequestResponseMessage
     {
         public bool Accepted { get; }
         public string Reason { get; }

@@ -1,8 +1,8 @@
-﻿using System;
-using BetterDoors.Framework.Enums;
+﻿using BetterDoors.Framework.Enums;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
+using System;
 
 namespace BetterDoors.Framework.Utility
 {
@@ -12,12 +12,14 @@ namespace BetterDoors.Framework.Utility
         /*********
         ** Accessors
         *********/
+
         /// <summary>The number of pixels in one tile dimension.</summary>
         public const int TileSize = 16;
 
         /*********
         ** Public methods
         *********/
+
         /// <summary>Checks whether the tile index is inside the bounds of the sheet. Assumes that sheetWidth, sheetHeight % tileSize == 0.</summary>
         /// <param name="sheetWidthPixels">The tile sheet width in pixels.</param>
         /// <param name="sheetHeightPixels">The tile sheet height in pixels.</param>
@@ -120,6 +122,7 @@ namespace BetterDoors.Framework.Utility
         /*********
         ** Private methods
         *********/
+
         /// <summary>Converts a door state to an index in the door's animation without knowing how the animation is laid out.</summary>
         /// <param name="state">The door state.</param>
         /// <returns>The x tile offset.</returns>
@@ -129,10 +132,13 @@ namespace BetterDoors.Framework.Utility
             {
                 case State.Closed:
                     return 0;
+
                 case State.SlightlyOpen:
                     return 1;
+
                 case State.MostlyOpen:
                     return 2;
+
                 default:
                 case State.Open:
                     return 3;

@@ -8,6 +8,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Accessors
         *********/
+
         /// <summary>The dimensions of the tile sheet in tiles.</summary>
         public Point TileSheetDimensions { get; }
 
@@ -20,6 +21,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="tileSheetDimensions">The dimensions of the tile sheet in tiles.</param>
         /// <param name="assetKey">The asset key used to load the sheet.</param>

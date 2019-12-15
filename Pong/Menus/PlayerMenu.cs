@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace Pong.Menus
 {
-    class PlayerMenu : Menu
+    internal class PlayerMenu : Menu
     {
         private readonly IList<IMultiplayerPeer> peers;
         private readonly ElementContainer opponentList = new ElementContainer();
@@ -29,7 +29,6 @@ namespace Pong.Menus
             ModEntry.Instance.Helper.Events.Multiplayer.PeerContextReceived += this.Multiplayer_PeerContextReceived;
             ModEntry.Instance.Helper.Events.Multiplayer.PeerDisconnected += this.Multiplayer_PeerDisconnected;
             ModEntry.Instance.Helper.Events.Multiplayer.ModMessageReceived += this.Multiplayer_ModMessageReceived;
-
 
             this.InitDrawables();
         }
@@ -71,7 +70,6 @@ namespace Pong.Menus
                     }
                     else
                         this.SendChallengeResponse(e.FromPlayerID, false, "That player is waiting on another challenge request.");
-
                 }
                 else if (this.multiplayerConnectionState.State == MultiplayerConnectionState.InPlayerLobby)
                 {
@@ -87,7 +85,6 @@ namespace Pong.Menus
             }
             else if (e.Type == typeof(ChallengeRequestResponseMessage).Name)
             {
-
                 if (this.multiplayerConnectionState.State == MultiplayerConnectionState.AwaitingChallengeRequestReponse)
                 {
                     bool accepted = e.ReadAs<ChallengeRequestResponseMessage>().Accepted;
@@ -178,12 +175,10 @@ namespace Pong.Menus
 
         public override void Update()
         {
-
         }
 
         public override void Resize()
         {
-
         }
     }
 }

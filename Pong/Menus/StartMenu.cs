@@ -47,7 +47,7 @@ namespace Pong.Menus
             int escHeight = SpriteText.getHeightOfString("Press Esc to exit");
             yield return new StaticTextElement("Press Esc to exit", 15, ScreenHeight - escHeight - 15, false, false, () => this.OnSwitchToNewMenu(null));
 
-            if(ModEntry.Instance.Helper.ModRegistry.IsLoaded("Platonymous.ArcadePong"))
+            if (ModEntry.Instance.Helper.ModRegistry.IsLoaded("Platonymous.ArcadePong"))
             {
                 int routineWidth = SpriteText.getWidthOfString("< Arcade Pong <");
                 int routineHeight = SpriteText.getHeightOfString("< Arcade Pong <");

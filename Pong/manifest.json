@@ -1,10 +1,10 @@
 {
   "Name": "Pong",
   "Author": "Cat",
-  "Version": "1.1.0",
+  "Version": "1.1.1",
   "Description": "Replaces Stardew Valley with Pong!",
   "UniqueID": "cat.Pong",
   "EntryDll": "Pong.dll",
-  "MinimumApiVersion": "2.9.0",
+  "MinimumApiVersion": "3.0.0",
   "UpdateKeys": [ "Nexus:1994" ]
 }

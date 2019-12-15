@@ -9,6 +9,7 @@ namespace BetterDoors.Framework.Utility
         /*********
         ** Fields
         *********/
+
         /// <summary>The current list of errors.</summary>
         private readonly IList<string> errors = new List<string>();
 
@@ -18,6 +19,7 @@ namespace BetterDoors.Framework.Utility
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="monitor">Encapsulates monitoring and logging for a given module.</param>
         public ErrorQueue(IMonitor monitor)

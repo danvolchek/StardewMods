@@ -5,5 +5,4 @@
         Horizontal,
         Vertical
     };
-
 }

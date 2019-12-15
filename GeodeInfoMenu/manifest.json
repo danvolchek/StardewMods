@@ -1,10 +1,10 @@
 ﻿{
   "Name": "Geode Info Menu",
   "Author": "Cat",
-  "Version": "1.5.1",
+  "Version": "1.5.2",
   "Description": "Press the activation key to open up a menu with information about future geode openings!",
   "UniqueID": "cat.geodeinfomenu",
   "EntryDll": "GeodeInfoMenu.dll",
-  "MinimumApiVersion": "2.9.0",
+  "MinimumApiVersion": "3.0.0",
   "UpdateKeys": [ "Nexus:1448" ]
 }

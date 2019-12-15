@@ -1,9 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pong.Framework.Common;
 using Pong.Framework.Extensions;
-using StardewModdingAPI;
-using StardewValley;
 using StardewValley.BellsAndWhistles;
 using IDrawable = Pong.Framework.Common.IDrawable;
 
@@ -12,6 +9,7 @@ namespace Pong.Framework.Menus.Elements
     internal class StaticTextElement : IDrawable, IHighlightable, IClickable
     {
         private string text;
+
         protected string Text
         {
             get => this.text;
@@ -28,6 +26,7 @@ namespace Pong.Framework.Menus.Elements
         private readonly ClickFunc onClick;
 
         public Rectangle Bounds { get; private set; }
+
         public void Clicked()
         {
             this.onClick?.Invoke();
@@ -71,7 +70,6 @@ namespace Pong.Framework.Menus.Elements
         {
             int width = SpriteText.getWidthOfString(this.Text);
             int height = SpriteText.getHeightOfString(this.Text);
-
 
             this.Bounds = this.centered ? new Rectangle(this.xPos - width / 2, this.yPos, width, height) : new Rectangle(this.xPos, this.yPos, width, height);
         }

@@ -1,8 +1,6 @@
 ﻿namespace BetterFruitTrees.Patches.JunimoHarvester
 {
-    /// <summary>
-    /// If a harvestable fruit tree is nearby, start the harvest timer.
-    /// </summary>
+    /// <summary>If a harvestable fruit tree is nearby, start the harvest timer.</summary>
     internal class TryToHarvestHerePatch
     {
         public static void Postfix(StardewValley.Characters.JunimoHarvester __instance)

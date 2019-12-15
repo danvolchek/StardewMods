@@ -11,18 +11,19 @@ using System.Linq;
 namespace GeodeInfoMenu
 {
     /// <summary>The main geode info menu.</summary>
-    class GeodeMenu : IClickableMenu
+    internal class GeodeMenu : IClickableMenu
     {
         /***
          * New Fields
          ***/
+
         /// <summary>The icons to draw as the tabs.</summary>
         public static Texture2D tabIcons;
 
         /// <summary>The mod config.</summary>
-        private readonly GeodeInfoMenuConfig config;
+        private readonly ModConfig config;
 
-        private readonly GeodeInfoMenuMod modEntry;
+        private readonly ModEntry modEntry;
 
         /***
          * Existing Fields
@@ -30,16 +31,16 @@ namespace GeodeInfoMenu
         private string hoverText = "";
         private readonly List<ClickableComponent> tabs = new List<ClickableComponent>();
         private readonly List<IClickableMenu> pages = new List<IClickableMenu>();
-        //all items, reg geode, frozen geode, magma geode, omni geode
-        //15960    , 15961    , 15962       , 15963      , 15964
+
+        //all items, reg geode, frozen geode, magma geode, omni geode, artifact trove
+        //15960    , 15961    , 15962       , 15963      , 15964     , 15965
         public int currentTab;
+
         public bool invisible;
         public static bool forcePreventClose;
         private bool wasSearchTextBoxSelectedWhenPageLeft;
 
-
-
-        public GeodeMenu(GeodeInfoMenuMod mod, GeodeInfoMenuConfig config, IList<Tuple<int[], bool[]>> items, GeodeMenuStateInfo savedState = null, bool forceReloadState = false)
+        public GeodeMenu(ModEntry mod, ModConfig config, IList<Tuple<int[], bool[]>> items, GeodeMenuStateInfo savedState = null, bool forceReloadState = false)
       : base(Game1.viewport.Width / 2 - (800 + IClickableMenu.borderWidth * 2) / 2, Game1.viewport.Height / 2 - (600 + IClickableMenu.borderWidth * 2) / 2, 800 + IClickableMenu.borderWidth * 2, 600 + IClickableMenu.borderWidth * 2, true)
         {
             this.config = config;
@@ -89,11 +90,21 @@ namespace GeodeInfoMenu
             {
                 myID = 15964,
                 downNeighborID = 4,
+                rightNeighborID = 15965,
                 leftNeighborID = 15963,
                 tryDefaultIfNoDownNeighborExists = true,
                 fullyImmutable = true
             });
             this.pages.Add((IClickableMenu)new GeodeTab("omni geode", items[3], this.xPositionOnScreen, this.yPositionOnScreen, this.width, this.height));
+            this.tabs.Add(new ClickableComponent(new Rectangle(this.xPositionOnScreen + Game1.tileSize * 6, this.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + Game1.tileSize, Game1.tileSize, Game1.tileSize), "trove", "Artifact Trove")
+            {
+                myID = 15965,
+                downNeighborID = 5,
+                leftNeighborID = 15964,
+                tryDefaultIfNoDownNeighborExists = true,
+                fullyImmutable = true
+            });
+            this.pages.Add((IClickableMenu)new GeodeTab("artifact trove", items[4], this.xPositionOnScreen, this.yPositionOnScreen, this.width, this.height));
 
             if (Game1.activeClickableMenu == null)
                 Game1.playSound("bigSelect");
@@ -115,20 +126,16 @@ namespace GeodeInfoMenu
                 this.snapToDefaultClickableComponent();
             }
 
-
             if (savedState != null)
                 this.ChangeTab(savedState.currentTab);
-
         }
 
-        public GeodeMenu(int startingTab, GeodeInfoMenuMod entry, GeodeInfoMenuConfig config, IList<Tuple<int[], bool[]>> items) : this(entry, config, items)
+        public GeodeMenu(int startingTab, ModEntry entry, ModConfig config, IList<Tuple<int[], bool[]>> items) : this(entry, config, items)
         {
             this.ChangeTab(startingTab);
         }
 
-        /// <summary>
-        /// Exists the menu if it was not opened during the geode cracking menu, otherwise opens the geode cracking menu.
-        /// </summary>
+        /// <summary>Exists the menu if it was not opened during the geode cracking menu, otherwise opens the geode cracking menu.</summary>
         private void Exit()
         {
             IClickableMenu lastMenu = this.modEntry.GetLastMenu();
@@ -144,9 +151,8 @@ namespace GeodeInfoMenu
         /***
          * New Public Methods
          ***/
-        /// <summary>
-        /// Saved this menu's state.
-        /// </summary>
+
+        /// <summary>Saved this menu's state.</summary>
         /// <returns>The saved state.</returns>
         public GeodeMenuStateInfo SaveState()
         {
@@ -156,9 +162,7 @@ namespace GeodeInfoMenu
             return new GeodeMenuStateInfo((this.pages[0] as SearchTab).GetSearchBoxText(), this.currentTab, indicies);
         }
 
-        /// <summary>
-        /// Sets whether the search tab search box is selected or not.
-        /// </summary>
+        /// <summary>Sets whether the search tab search box is selected or not.</summary>
         /// <param name="b">Selected or not.</param>
         public void SetSearchTabSearchBoxSelectedStatus(bool b)
         {
@@ -175,14 +179,19 @@ namespace GeodeInfoMenu
             {
                 case 0:
                     return Game1.content.LoadString("Search for Drops");
+
                 case 1:
                     return Game1.content.LoadString("Geode");
+
                 case 2:
                     return Game1.content.LoadString("Frozen Geode");
+
                 case 3:
                     return Game1.content.LoadString("Magma Geode");
+
                 case 4:
                     return Game1.content.LoadString("Omni Geode");
+
                 default:
                     return "";
             }
@@ -194,16 +203,24 @@ namespace GeodeInfoMenu
             {
                 case "search":
                     return 0;
+
                 case "normal":
                     return 1;
+
                 case "frozen":
                     return 2;
+
                 case "magma":
                     return 3;
+
                 case "omni":
                     return 4;
+
+                case "trove":
+                    return 5;
+
                 default:
-                    return -1;
+                    throw new ArgumentException($"Unknown name ${name}");
             }
         }
 
@@ -221,7 +238,6 @@ namespace GeodeInfoMenu
             this.pages[this.currentTab].allClickableComponents.AddRange((IEnumerable<ClickableComponent>)this.tabs);
             this.SetTabNeighborsForCurrentPage();
             this.snapToDefaultClickableComponent();
-
         }
 
         public void SetTabNeighborsForCurrentPage()
@@ -247,19 +263,15 @@ namespace GeodeInfoMenu
             base.receiveGamePadButton(b);
             if (b == Buttons.RightTrigger)
             {
-
                 if (this.currentTab >= 7 || !this.pages[this.currentTab].readyToClose())
                     return;
                 this.ChangeTab(this.currentTab + 1);
-
             }
             else if (b == Buttons.LeftTrigger)
             {
-
                 if (this.currentTab <= 0 || !this.pages[this.currentTab].readyToClose())
                     return;
                 this.ChangeTab(this.currentTab - 1);
-
             }
             else
             {
@@ -430,6 +442,5 @@ namespace GeodeInfoMenu
             else
                 this.pages[this.currentTab].receiveKeyPress(key);
         }
-
     }
 }

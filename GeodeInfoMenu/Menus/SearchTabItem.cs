@@ -1,24 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
-using StardewValley.BellsAndWhistles;
 using System;
 
 namespace GeodeInfoMenu.Menus
 {
-    /// <summary>
-    /// Represents an item show in the search tab.
-    /// </summary>
-    class SearchTabItem : GeodeTabItem
+    /// <summary>Represents an item show in the search tab.</summary>
+    internal class SearchTabItem : GeodeTabItem
     {
-        /// <summary>
-        /// The geodes that can be broken and how many of them it will take to get this item.
-        /// </summary>
-        readonly Tuple<int, int>[] breakableGeodes;
+        /// <summary>The geodes that can be broken and how many of them it will take to get this item.</summary>
+        private readonly Tuple<int, int>[] breakableGeodes;
 
-        /// <summary>
-        /// Construct an instance.
-        /// </summary>
+        /// <summary>Construct an instance.</summary>
         /// <param name="parentSheetIndex">This items item id</param>
         /// <param name="breakableGeodes">The geodes that can be broken to get this item</param>
         /// <param name="drawStar">Whether to draw a star or not</param>
@@ -27,9 +20,7 @@ namespace GeodeInfoMenu.Menus
             this.breakableGeodes = breakableGeodes;
         }
 
-        /// <summary>
-        /// Draws this item on screen.
-        /// </summary>
+        /// <summary>Draws this item on screen.</summary>
         /// <param name="b">The sprite batch to use</param>
         /// <param name="slotX">X position of where to draw the item</param>
         /// <param name="slotY">Y position of where to draw the item</param>
@@ -52,7 +43,6 @@ namespace GeodeInfoMenu.Menus
                 int yPos = slotY + this.bounds.Y;
                 Utility.drawTinyDigits(numItems, b, new Vector2((float)(xPos + Game1.tileSize - Utility.getWidthOfTinyDigitString(numItems, 3f * scaleSize)) + 3f * scaleSize, (float)(yPos + (double)Game1.tileSize - 18.0 * (double)scaleSize + 2.0)), 3f * scaleSize, 1f, Color.White);
             }
-
         }
     }
 }

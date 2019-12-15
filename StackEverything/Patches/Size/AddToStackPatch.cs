@@ -2,19 +2,23 @@
 
 namespace StackEverything.Patches.Size
 {
-    /// <summary>Rewrite the <see cref="Item.addToStack(int)"/> method.</summary>
+    /// <summary>Rewrite the <see cref="Item.addToStack(Item)"/> method.</summary>
     public class AddToStackPatch
     {
-        public static bool Prefix(Item __instance, ref int amount, ref int __result)
+        /*********
+        ** Public methods
+        *********/
+
+        public static bool Prefix(Item __instance, ref Item stack, ref int __result)
         {
             //Handle negative stack amounts from the original game
             if (__instance.Stack == -1 || __instance.Stack == 0)
                 __instance.Stack = 1;
-            if (amount == -1 || amount == 0)
-                amount = 1;
+            if (stack.Stack == -1 || stack.Stack == 0)
+                stack.Stack = 1;
 
             int maxStack = __instance.maximumStackSize();
-            int proposedStack = __instance.Stack + amount;
+            int proposedStack = __instance.Stack + stack.Stack;
             if (proposedStack > maxStack)
             {
                 __instance.Stack = maxStack;

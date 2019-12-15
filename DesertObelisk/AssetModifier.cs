@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -94,7 +93,7 @@ namespace DesertObelisk
 
         public T Load<T>(IAssetInfo asset)
         {
-            return (T) (object) this.obeliskTexture;
+            return (T)(object)this.obeliskTexture;
         }
 
         public void ModifyMap()

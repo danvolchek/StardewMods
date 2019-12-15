@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
+using System.Collections.Generic;
+using System.Linq;
 using xTile.Dimensions;
 using xTile.ObjectModel;
 using xTile.Tiles;
@@ -14,9 +14,7 @@ using SObject = StardewValley.Object;
 
 namespace BetterFruitTrees.Patches
 {
-    /// <summary>
-    ///     Utility class for patching junimo harvester behavior.
-    /// </summary>
+    /// <summary>Utility class for patching junimo harvester behavior.</summary>
     internal class Utils
     {
         internal static IReflectionHelper Reflection;
@@ -45,9 +43,7 @@ namespace BetterFruitTrees.Patches
             return Point.Zero;
         }
 
-        /// <summary>
-        ///     Gets whether the given tile is passable and unnocupied, i.e. could a junimo stand on it.
-        /// </summary>
+        /// <summary>Gets whether the given tile is passable and unnocupied, i.e. could a junimo stand on it.</summary>
         internal static bool IsPassableAndUnoccupied(GameLocation location, int x, int y)
         {
             Rectangle tilePixels =
@@ -57,9 +53,7 @@ namespace BetterFruitTrees.Patches
 
         //Thanks to Pathoschild for these functions (adapted slightly)
         //https://github.com/Pathoschild/StardewMods/blob/data-maps/1.3/DataMaps/DataMaps/AccessibilityMap.cs#L137-L197
-        /// <summary>
-        ///     Is the given tile passable.
-        /// </summary>
+        /// <summary>Is the given tile passable.</summary>
         private static bool IsPassable(GameLocation location, int x, int y, Rectangle tilePixels)
         {
             // check layer properties
@@ -79,9 +73,7 @@ namespace BetterFruitTrees.Patches
             return false;
         }
 
-        /// <summary>
-        ///     Is the given tile occupied.
-        /// </summary>
+        /// <summary>Is the given tile occupied.</summary>
         private static bool IsOccupied(GameLocation location, Vector2 tile, Rectangle tilePixels)
         {
             // show open gate as passable
@@ -107,13 +99,10 @@ namespace BetterFruitTrees.Patches
             if (location.largeTerrainFeatures?.Any(p => p.getBoundingBox().Intersects(tilePixels)) ?? false)
                 return true;
 
-
             return false;
         }
 
-        /// <summary>
-        ///     Gets the first adjacent FruitTree with fruits on it.
-        /// </summary>
+        /// <summary>Gets the first adjacent FruitTree with fruits on it.</summary>
         /// <returns>If a fruit tree was found</returns>
         internal static bool GetAdjacentReadyToHarvestFruitTree(Vector2 position, GameLocation location,
             out KeyValuePair<Vector2, FruitTree> result)
@@ -132,17 +121,13 @@ namespace BetterFruitTrees.Patches
             return true;
         }
 
-        /// <summary>
-        ///     Amount of fruits to harvest at a time.
-        /// </summary>
+        /// <summary>Amount of fruits to harvest at a time.</summary>
         public static int TreeHarvestAmount()
         {
             return HarvestThreeAtOnce ? 3 : 1;
         }
 
-        /// <summary>
-        ///     Harvest fruit from a FruitTree and update the tree accordingly.
-        /// </summary>
+        /// <summary>Harvest fruit from a FruitTree and update the tree accordingly.</summary>
         internal static SObject GetFruitFromTree(FruitTree tree)
         {
             if (tree.fruitsOnTree.Value == 0)
@@ -163,14 +148,13 @@ namespace BetterFruitTrees.Patches
 
             SObject result = new SObject(Vector2.Zero,
                 tree.struckByLightningCountdown.Value > 0 ? 382 : tree.indexOfFruit.Value,
-                harvestAmount) {Quality = num1};
+                harvestAmount)
+            { Quality = num1 };
 
             return result;
         }
 
-        /// <summary>
-        ///     Actually harvest an adjacent fruit tree to the current location.
-        /// </summary>
+        /// <summary>Actually harvest an adjacent fruit tree to the current location.</summary>
         internal static void TryToActuallyHarvestFruitTree(StardewValley.Characters.JunimoHarvester harvester)
         {
             if (harvester.currentLocation == null)
@@ -191,9 +175,7 @@ namespace BetterFruitTrees.Patches
             }
         }
 
-        /// <summary>
-        ///     Whether there is an adjacent FruitTree with fruits on it.
-        /// </summary>
+        /// <summary>Whether there is an adjacent FruitTree with fruits on it.</summary>
         /// <param name="position"></param>
         /// <param name="location"></param>
         /// <returns></returns>
@@ -202,9 +184,7 @@ namespace BetterFruitTrees.Patches
             return GetAdjacentReadyToHarvestFruitTree(position, location, out KeyValuePair<Vector2, FruitTree> p);
         }
 
-        /// <summary>
-        ///     Gets the private harvest timer field of <see cref="StardewValley.Characters.JunimoHarvester" />
-        /// </summary>
+        /// <summary>Gets the private harvest timer field of <see cref="StardewValley.Characters.JunimoHarvester" /></summary>
         internal static IReflectedField<int> GetJunimoHarvesterHarvestTimer(StardewValley.Characters.JunimoHarvester harvester)
         {
             return Reflection.GetField<int>(harvester, "harvestTimer");

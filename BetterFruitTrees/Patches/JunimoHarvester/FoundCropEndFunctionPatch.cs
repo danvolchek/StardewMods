@@ -3,9 +3,7 @@ using StardewValley;
 
 namespace BetterFruitTrees.Patches.JunimoHarvester
 {
-    /// <summary>
-    /// Make fruit trees count as places for the junimo to stop.
-    /// </summary>
+    /// <summary>Make fruit trees count as places for the junimo to stop.</summary>
     internal class FoundCropEndFunctionPatch
     {
         public static void Postfix(ref bool __result, PathNode currentNode, Point endPoint, GameLocation location,

@@ -1,25 +1,23 @@
 ﻿using Harmony;
 using StardewValley;
 using StardewValley.Locations;
+using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using StardewValley.Objects;
 
 namespace CasksEverywhere
 {
     [HarmonyPatch]
-    class CaskPatch
+    internal class CaskPatch
     {
         private static MethodBase TargetMethod()
         {
             return typeof(Cask).GetMethod(nameof(Cask.performObjectDropInAction));
         }
 
-        /// <summary>
-        /// Change the first Cellar operand to be a GameLocation instead - allowing casks everywhere.
-        /// </summary>
+        /// <summary>Change the first Cellar operand to be a GameLocation instead - allowing casks everywhere.</summary>
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             bool changed = false;

@@ -10,6 +10,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Accessors
         *********/
+
         /// <summary>Info about the generated tile sheet.</summary>
         public GeneratedTileSheetInfo TileSheetInfo { get; }
 
@@ -22,12 +23,14 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Fields
         *********/
+
         /// <summary>Whether the first frame is closed or open.</summary>
         private readonly bool isFirstFrameIsClosed;
 
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="info">Info about the generated tile sheet.</param>
         /// <param name="collisionInfo">Collision info about the door when closed.</param>

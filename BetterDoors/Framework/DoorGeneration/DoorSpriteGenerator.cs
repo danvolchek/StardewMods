@@ -1,6 +1,5 @@
 ﻿using BetterDoors.Framework.ContentPacks;
 using BetterDoors.Framework.Enums;
-using BetterDoors.Framework.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -14,6 +13,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Fields
         *********/
+
         /// <summary>The info manager where generated sprite info is stored.</summary>
         private readonly GeneratedDoorTileInfoManager manager;
 
@@ -32,6 +32,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="manager">The info manager where generated sprite info is stored.</param>
         /// <param name="contentPacks">Content packs used to load doors.</param>
@@ -89,7 +90,7 @@ namespace BetterDoors.Framework.DoorGeneration
                     if (hlRequested)
                         this.manager.RegisterGeneratedTileInfo(info.ModId, info.Name, Orientation.Horizontal, OpeningDirection.Left, state.CreateTileInfo(true));
 
-                    if (state.FinishAnimation(out KeyValuePair<string, Texture2D>  finishedTexture))
+                    if (state.FinishAnimation(out KeyValuePair<string, Texture2D> finishedTexture))
                         generatedTextures.Add(finishedTexture);
                 }
             }

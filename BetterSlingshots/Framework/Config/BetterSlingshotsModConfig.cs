@@ -4,7 +4,7 @@
     {
         public bool DisableReverseAiming { get; set; } = true;
         public bool AutoReload { get; set; } = true;
-        public string[] AutomaticSlingshots { get; set; } = {"Galaxy", "Master"};
+        public string[] AutomaticSlingshots { get; set; } = { "Galaxy", "Master" };
         public bool ShowActualMousePositionWhenAiming { get; set; } = true;
 
         public bool CanMoveWhileFiring { get; set; } = false;

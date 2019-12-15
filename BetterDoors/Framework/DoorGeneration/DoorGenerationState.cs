@@ -13,6 +13,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Constants
         *********/
+
         /// <summary>The factor by which sprites are scaled before display.</summary>
         public const int DisplayScaleFactor = 4;
 
@@ -25,6 +26,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Accessors
         *********/
+
         /// <summary>The current number of doors left to be generated.</summary>
         public int NumberOfDoorsLeft { get; private set; }
 
@@ -40,6 +42,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Fields
         *********/
+
         /// <summary>Info about the generated tile sheet.</summary>
         private GeneratedTileSheetInfo tileSheetInfo;
 
@@ -61,6 +64,7 @@ namespace BetterDoors.Framework.DoorGeneration
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="locationName">A unique string used to generate tile sheet ids.</param>
         /// <param name="modId">A unique string used to generate tile sheet ids.</param>

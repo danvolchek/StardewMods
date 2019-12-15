@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using CustomWarpLocations.WarpOverrides;
+﻿using CustomWarpLocations.WarpOverrides;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Tools;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using static CustomWarpLocations.WarpOverrides.WarpOverride;
 
 namespace CustomWarpLocations
 {
+    /// <summary>
+    /// Disclaimer: This mod is very old, and could use a rewrite (a lot of duplication, saving in the mod folder, etc). But it's not very popular, so that's not worth it.
+    /// </summary>
     public class ModEntry : Mod
     {
         /// <summary>The path to the current custom data file, relative to the mod folder.</summary>
@@ -89,17 +92,29 @@ namespace CustomWarpLocations
                     case 688: //Farm Totem
                         this.SetWarpLocation(WarpLocationCategory.Farm, true, location);
                         break;
+
                     case 689: //Mountain Totem
                         this.SetWarpLocation(WarpLocationCategory.Mountains, true, location);
                         break;
+
                     case 690: //Beach Totem
                         this.SetWarpLocation(WarpLocationCategory.Beach, true, location);
                         break;
+
                     case 86: //Earth Crystal
                         this.SetWarpLocation(WarpLocationCategory.Mountains, false, location);
                         break;
+
                     case 372: //Clam
                         this.SetWarpLocation(WarpLocationCategory.Beach, false, location);
+                        break;
+
+                    case 261: //Desert Totem
+                        this.SetWarpLocation(WarpLocationCategory.Desert, true, location);
+                        break;
+
+                    case 768: //Solar essence
+                        this.SetWarpLocation(WarpLocationCategory.Desert, false, location);
                         break;
                 }
 
@@ -116,6 +131,7 @@ namespace CustomWarpLocations
         /**
          * Updates where items warp you to.
          **/
+
         private void SetWarpLocation(WarpLocationCategory locationType, bool fromTotem, WarpLocation newLocation)
         {
             switch (locationType)
@@ -139,6 +155,7 @@ namespace CustomWarpLocations
                     }
 
                     break;
+
                 case WarpLocationCategory.Mountains:
                     if (!this.config.AdvancedMode)
                     {
@@ -158,6 +175,7 @@ namespace CustomWarpLocations
                     }
 
                     break;
+
                 case WarpLocationCategory.Beach:
                     if (!this.config.AdvancedMode)
                     {
@@ -174,6 +192,25 @@ namespace CustomWarpLocations
                     {
                         WarpLocations.BeachWarpLocation_Obelisk = newLocation;
                         Game1.showGlobalMessage("New Beach Warp Obelisk Location Saved!");
+                    }
+
+                    break;
+                case WarpLocationCategory.Desert:
+                    if (!this.config.AdvancedMode)
+                    {
+                        WarpLocations.DesertWarpLocation_Totem = newLocation;
+                        WarpLocations.DesertWarpLocation_Obelisk = newLocation;
+                        Game1.showGlobalMessage("New Desert Warp Location Saved!");
+                    }
+                    else if (fromTotem)
+                    {
+                        WarpLocations.DesertWarpLocation_Totem = newLocation;
+                        Game1.showGlobalMessage("New Desert Warp Totem Location Saved!");
+                    }
+                    else
+                    {
+                        WarpLocations.DesertWarpLocation_Obelisk = newLocation;
+                        Game1.showGlobalMessage("New Desert Warp Obelisk Location Saved!");
                     }
 
                     break;
@@ -209,9 +246,11 @@ namespace CustomWarpLocations
                             case "totemWarpForReal":
                                 newWarp = new TotemWarpOverride(afterFadeFunction.Target);
                                 break;
+
                             case "wandWarpForReal":
                                 newWarp = new WandWarpOverride();
                                 break;
+
                             case "obeliskWarpForReal":
                                 newWarp = new ObeliskWarpOverride(afterFadeFunction.Target);
                                 break;
@@ -227,6 +266,7 @@ namespace CustomWarpLocations
         /**
          * Makes sure that there are no disallowed locations in the given NewWarpLocations.
          **/
+
         private void ValidateWarpLocations(NewWarpLocations locations)
         {
             var defaults = new NewWarpLocations();
@@ -234,22 +274,28 @@ namespace CustomWarpLocations
             if (!AllowedWarpLocations.Contains(locations.FarmWarpLocation_Scepter.locationName))
                 locations.FarmWarpLocation_Scepter = defaults.FarmWarpLocation_Scepter;
             if (!AllowedWarpLocations.Contains(locations.FarmWarpLocation_Totem.locationName))
-                locations.FarmWarpLocation_Scepter = defaults.FarmWarpLocation_Totem;
+                locations.FarmWarpLocation_Totem = defaults.FarmWarpLocation_Totem;
 
             if (!AllowedWarpLocations.Contains(locations.MountainWarpLocation_Obelisk.locationName))
-                locations.FarmWarpLocation_Scepter = defaults.MountainWarpLocation_Obelisk;
+                locations.MountainWarpLocation_Obelisk = defaults.MountainWarpLocation_Obelisk;
             if (!AllowedWarpLocations.Contains(locations.MountainWarpLocation_Totem.locationName))
-                locations.FarmWarpLocation_Scepter = defaults.MountainWarpLocation_Totem;
+                locations.MountainWarpLocation_Totem = defaults.MountainWarpLocation_Totem;
 
             if (!AllowedWarpLocations.Contains(locations.BeachWarpLocation_Obelisk.locationName))
-                locations.FarmWarpLocation_Scepter = defaults.BeachWarpLocation_Obelisk;
+                locations.BeachWarpLocation_Obelisk = defaults.BeachWarpLocation_Obelisk;
             if (!AllowedWarpLocations.Contains(locations.BeachWarpLocation_Totem.locationName))
-                locations.FarmWarpLocation_Scepter = defaults.BeachWarpLocation_Totem;
+                locations.BeachWarpLocation_Totem = defaults.BeachWarpLocation_Totem;
+
+            if (!AllowedWarpLocations.Contains(locations.DesertWarpLocation_Obelisk.locationName))
+                locations.DesertWarpLocation_Obelisk = defaults.DesertWarpLocation_Obelisk;
+            if (!AllowedWarpLocations.Contains(locations.DesertWarpLocation_Totem.locationName))
+                locations.DesertWarpLocation_Totem = defaults.DesertWarpLocation_Totem;
         }
 
         /**
          * Turns the player's current position into a WarpLocation.
          **/
+
         private WarpLocation GetWarpLocation()
         {
             return new WarpLocation(Game1.currentLocation.Name, (int)Game1.player.getTileLocation().X,

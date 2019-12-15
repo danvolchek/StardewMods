@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
+using System.Linq;
 
 namespace CustomizableDeathPenalty
 {
@@ -12,6 +12,8 @@ namespace CustomizableDeathPenalty
         private bool lastDialogueUp;
         private int numberOfSeenDialogues;
         private bool shouldHideInfoDialogueBox;
+        private bool shouldHideLostItemsDialogueBox;
+        private uint multiple = 30;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -21,6 +23,7 @@ namespace CustomizableDeathPenalty
             this.numberOfSeenDialogues = 0;
             var config = helper.ReadConfig<ModConfig>();
             this.shouldHideInfoDialogueBox = config.KeepItems && config.KeepMoney && config.RememberMineLevels;
+            this.shouldHideLostItemsDialogueBox = config.KeepItems;
 
             PlayerStateManager.SetConfig(config);
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
@@ -31,7 +34,7 @@ namespace CustomizableDeathPenalty
         /// <param name="e">The event arguments.</param>
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (e.IsMultipleOf(30)) // half second
+            if (e.IsMultipleOf(this.multiple)) // half second
             {
                 //If the state is not saved, and the player has just died, save the player's state.
                 if (PlayerStateManager.state == null && Game1.killScreen)
@@ -57,16 +60,28 @@ namespace CustomizableDeathPenalty
                 }
 
                 //Count the number of dialogues that have appeared since the player died. Close the fourth box if all the information in is being reset.
-                if (this.shouldHideInfoDialogueBox && PlayerStateManager.state != null &&
-                    Game1.dialogueUp != this.lastDialogueUp)
-                    if (Game1.dialogueUp)
+                if (PlayerStateManager.state != null)
+                {
+                    if (Game1.dialogueUp && Game1.dialogueUp != this.lastDialogueUp)
                     {
+                        this.multiple = 5;
                         this.numberOfSeenDialogues++;
                         this.Monitor.Log($"Dialogue changed! {this.numberOfSeenDialogues}", LogLevel.Trace);
 
-                        if (this.numberOfSeenDialogues == 4 && Game1.activeClickableMenu is DialogueBox dialogueBox)
+                        if (this.shouldHideInfoDialogueBox && this.numberOfSeenDialogues > 2 && Game1.activeClickableMenu is DialogueBox dialogueBox && !dialogueBox.isPortraitBox())
                             dialogueBox.closeDialogue();
                     }
+
+                    if (this.shouldHideLostItemsDialogueBox && this.numberOfSeenDialogues > 2 && Game1.activeClickableMenu is ItemListMenu)
+                    {
+                        //ItemListMenu.okClicked()
+                        Game1.activeClickableMenu = null;
+                        if (Game1.CurrentEvent != null)
+                            ++Game1.CurrentEvent.CurrentCommand;
+                        Game1.player.itemsLostLastDeath.Clear();
+                        this.multiple = 30;
+                    }
+                }
 
                 this.lastDialogueUp = Game1.dialogueUp;
             }

@@ -9,7 +9,7 @@ using IDrawable = Pong.Framework.Common.IDrawable;
 
 namespace Pong.Framework.Menus
 {
-    class Modal : IDrawable, IBoundable, IInputable
+    internal class Modal : IDrawable, IBoundable, IInputable
     {
         public Rectangle Bounds { get; }
 

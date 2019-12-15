@@ -1,8 +1,6 @@
 ﻿namespace CopyInviteCode.ClipboardManagers
 {
-    /// <summary>
-    /// Sets clipboard contents on Linux.
-    /// </summary>
+    /// <summary>Sets clipboard contents on Linux.</summary>
     internal class LinuxClipboardManager : UnixClipboardManager
     {
         protected override string FileName => "xclip";

@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ModUpdateMenu.Updates;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ModUpdateMenu.Menus
 {
@@ -104,10 +104,13 @@ namespace ModUpdateMenu.Menus
             {
                 case ButtonStatus.Updates:
                     return 0;
+
                 case ButtonStatus.NoUpdates:
                     return 16;
+
                 case ButtonStatus.Error:
                     return 32;
+
                 case ButtonStatus.Unknown:
                 default:
                     return 48;

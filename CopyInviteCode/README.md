@@ -5,7 +5,7 @@ See [This link](http://www.nexusmods.com/stardewvalley/mods/2171) for the NexusM
 
 ## Abandoned
 
-This mod will no longer receive updates. This exact functionality was added to SDV in version 1.3.17, so the mod is no longer needed.
+This mod will no longer receive updates. This exact functionality was added to SDV in version 1.3.17, so the mod is no longer needed. The code probably won't compile without fixes.
 
 ## How it works
 

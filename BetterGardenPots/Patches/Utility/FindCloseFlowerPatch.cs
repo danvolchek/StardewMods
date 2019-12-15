@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.TerrainFeatures;
+using System.Collections.Generic;
 using SObject = StardewValley.Object;
 
 namespace BetterGardenPots.Patches.Utility
@@ -34,7 +34,6 @@ namespace BetterGardenPots.Patches.Utility
                     __result = current;
                     break;
                 }
-
 
                 foreach (Vector2 adjacentTileLocation in StardewValley.Utility.getAdjacentTileLocations(index2))
                     if (!vector2Set.Contains(adjacentTileLocation))

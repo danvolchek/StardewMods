@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using BetterGardenPots.APIs;
+﻿using BetterGardenPots.APIs;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using SObject = StardewValley.Object;
 
 namespace BetterGardenPots.Subscribers
@@ -105,7 +105,6 @@ namespace BetterGardenPots.Subscribers
                     foreach (Vector2 pos in this.GetRange(item.Value, item.Key))
                         yield return pos;
         }
-
 
         public IEnumerable<Vector2> GetRange(SObject obj, Vector2 position)
         {

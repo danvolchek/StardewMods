@@ -1,6 +1,6 @@
 ﻿namespace Pong.Framework.Menus.Elements
 {
-    interface IClickable : IBoundable
+    internal interface IClickable : IBoundable
     {
         void Clicked();
     }

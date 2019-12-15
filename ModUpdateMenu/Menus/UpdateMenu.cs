@@ -54,6 +54,7 @@ namespace ModUpdateMenu.Menus
                 this.SMAPIWidth = SpriteText.getWidthOfString(value);
             }
         }
+
         private int SMAPIHeight;
         private int SMAPIWidth;
         private ClickableComponent SMAPIComponent;
@@ -77,7 +78,7 @@ namespace ModUpdateMenu.Menus
 
             if (this.SMAPIText != null)
             {
-                IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(473, 36, 24, 24), 20, ((IClickableMenu)this).height - 25 - this.SMAPIHeight / 2, (int)(this.SMAPIWidth * 1.09), (int)(this.SMAPIHeight*1.5) + 5, Color.White, 4f, true);
+                IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(473, 36, 24, 24), 20, ((IClickableMenu)this).height - 25 - this.SMAPIHeight / 2, (int)(this.SMAPIWidth * 1.09), (int)(this.SMAPIHeight * 1.5) + 5, Color.White, 4f, true);
                 SpriteText.drawString(b, this.SMAPIText, 50, ((IClickableMenu)this).height - 30, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
             }
 
@@ -99,7 +100,6 @@ namespace ModUpdateMenu.Menus
                 xOffset += (int)(width / 2) - SpriteText.getWidthOfString(UpdateMenu.sections[i]) / 2;
                 SpriteText.drawString(b, headerText, startX + xOffset, startY, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
             }
-
 
             SpriteText.drawString(b, this.modDivider, startX, startY + 32, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
 
@@ -129,8 +129,6 @@ namespace ModUpdateMenu.Menus
                     SpriteText.drawString(b, status.UpdateStatus.ToString(), startX + (int)this.GetColumnWidth(0), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", UpdateMenu.GetColorForStatus(status.UpdateStatus));
                     SpriteText.drawString(b, status.UpdateURLType, startX + (int)this.GetColumnWidth(0) + (int)this.GetColumnWidth(1), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
                     yOffset += 64;
-
-
                 }
 
                 if (this.hoverText != null)
@@ -148,14 +146,13 @@ namespace ModUpdateMenu.Menus
                 if (this.statuses != null)
                 {
                     int numSteps = this.originalStatuses.Count - this.numDisplayableMods;
-                    yOffset = (int)((((float)this.displayIndex) / numSteps) * (((IClickableMenu) this).height - 200 + 16));
+                    yOffset = (int)((((float)this.displayIndex) / numSteps) * (((IClickableMenu)this).height - 200 + 16));
 
                     drawTextureBox(b, Game1.mouseCursors, new Rectangle(325, 448, 5, 17),
                         (int)centeringOnScreen.X + this.width,
                         (int)centeringOnScreen.Y + yOffset, 16, 32, Color.White, 4f, false);
                 }
             }
-
         }
 
         private int GetColumnWidth(int i)
@@ -195,7 +192,8 @@ namespace ModUpdateMenu.Menus
                 catch
                 {
                 }
-            }else
+            }
+            else
                 this.CheckPosition(x, y, this.ComponentClicked);
         }
 
@@ -206,13 +204,13 @@ namespace ModUpdateMenu.Menus
                 this.hoverText = "Click to go to: https://smapi.io";
                 this.SplitHoverText();
                 this.hoverTextDimensions = UpdateMenu.GetDimensions(this.hoverText);
-            } else
+            }
+            else
                 this.CheckPosition(x, y, this.ComponentHovered, () => this.hoverText = null);
         }
 
         private void CheckPosition(int x, int y, ComponentAction action, Action onNoMatch = null)
         {
-
             if (this.components.Count == 0)
                 return;
 
@@ -248,9 +246,11 @@ namespace ModUpdateMenu.Menus
                         case 0:
                             this.hoverText += "Name";
                             break;
+
                         case 1:
                             this.hoverText += "Status";
                             break;
+
                         case 2:
                             this.hoverText += "Link";
                             break;
@@ -266,26 +266,28 @@ namespace ModUpdateMenu.Menus
                     case 0:
                         this.hoverText = $"{which.ModName}^By: {which.ModAuthor}";
                         break;
+
                     case 1:
                         switch (which.UpdateStatus)
                         {
-                            case UpdateStatus.VeryNew:
-                                this.hoverText = "Your version is newer than the remote one.";
-                                break;
                             case UpdateStatus.UpToDate:
                                 this.hoverText = $"You have: {which.CurrentVersion}.";
                                 break;
+
                             case UpdateStatus.OutOfDate:
                                 this.hoverText = $"You have: {which.CurrentVersion}^Latest version: {which.NewVersion}";
                                 break;
+
                             case UpdateStatus.Error:
                                 this.hoverText = $"Failed to check updates: ^{which.ErrorReason}";
                                 break;
+
                             case UpdateStatus.Skipped:
                                 this.hoverText = $"Updates not checked: ^{which.ErrorReason}";
                                 break;
                         }
                         break;
+
                     case 2:
                         this.hoverText = which.UpdateURLType != "???" ? $"Click to go to: ^{which.UpdateURL}" : "Unknown update link.";
                         break;
@@ -359,6 +361,7 @@ namespace ModUpdateMenu.Menus
                         case 0:
                             this.currentSortDirection = 1;
                             break;
+
                         case 1:
                             this.currentSortColumn = -1;
                             this.currentSortDirection = 0;
@@ -430,9 +433,11 @@ namespace ModUpdateMenu.Menus
                     case 0:
                         temp = temp.OrderBy(status => status.ModName);
                         break;
+
                     case 1:
                         temp = temp.OrderBy(status => status.UpdateStatus);
                         break;
+
                     case 2:
                         temp = temp.OrderBy(status => status.UpdateURLType);
                         break;
@@ -505,7 +510,6 @@ namespace ModUpdateMenu.Menus
             this.UpdateComponents();
         }
 
-
         public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
         {
             this.SizeMaybeChanged();
@@ -517,10 +521,13 @@ namespace ModUpdateMenu.Menus
             {
                 case 0:
                     return "";
+
                 case 1:
                     return ".";
+
                 case 2:
                     return "..";
+
                 default:
                     return "...";
             }
@@ -556,14 +563,15 @@ namespace ModUpdateMenu.Menus
             {
                 case UpdateStatus.Error:
                     return SpriteText.color_Red;
+
                 case UpdateStatus.OutOfDate:
                     return SpriteText.color_Orange;
+
                 case UpdateStatus.UpToDate:
                     return SpriteText.color_Green;
+
                 case UpdateStatus.Skipped:
                     return SpriteText.color_Purple;
-                case UpdateStatus.VeryNew:
-                    return SpriteText.color_Cyan;
             }
 
             return SpriteText.color_White;

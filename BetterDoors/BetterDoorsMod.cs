@@ -24,6 +24,7 @@ namespace BetterDoors
         /*********
         ** Fields
         *********/
+
         /// <summary>Handles reading and writing door state data from the save file.</summary>
         private DoorPositionSerializer serializer;
 
@@ -58,12 +59,14 @@ namespace BetterDoors
         /*********
         ** Accessors
         *********/
+
         /// <summary>A static reference to the mod for Harmony patches to use.</summary>
         internal static BetterDoorsMod Instance { get; private set; }
 
         /*********
          ** Public methods
          *********/
+
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
@@ -98,6 +101,7 @@ namespace BetterDoors
         /*********
          ** Private methods
          *********/
+
         /// <summary>Enables the mod, attaching necessary event handlers.</summary>
         private void Enable()
         {
@@ -130,9 +134,6 @@ namespace BetterDoors
             this.Helper.Events.Multiplayer.ModMessageReceived -= this.Multiplayer_ModMessageReceived;
         }
 
-        /*********
-         ** Event Handlers
-         *********/
         /// <summary>Raised after the mod context for a peer is received. This happens before the game approves the connection, so the player doesn't yet exist in the game. This is the earliest point where messages can be sent to the peer via SMAPI.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
@@ -167,7 +168,7 @@ namespace BetterDoors
             Point playerTile = Utils.GetPlayerTile();
             Point clickedTile = new Point((int)e.Cursor.Tile.X, (int)e.Cursor.Tile.Y);
 
-            if(Utils.GetTaxiCabDistance(playerTile, clickedTile) <= this.config.DoorToggleRadius)
+            if (Utils.GetTaxiCabDistance(playerTile, clickedTile) <= this.config.DoorToggleRadius)
                 this.manager.MouseToggleDoor(Utils.GetLocationName(Game1.currentLocation), clickedTile);
         }
 
@@ -212,7 +213,7 @@ namespace BetterDoors
                 IDictionary<string, IDictionary<Point, State>> saveData = this.serializer.Load();
                 foreach (GameLocation location in BetterDoorsMod.GetAllLocations())
                 {
-                    if(this.PrepareLocation(location))
+                    if (this.PrepareLocation(location))
                         this.manager.SetDoorStates(Utils.GetLocationName(location), saveData.TryGetValue(Utils.GetLocationName(location), out IDictionary<Point, State> doorStates) ? doorStates : null);
                 }
             }
@@ -245,14 +246,14 @@ namespace BetterDoors
         /// <param name="e">The event arguments.</param>
         private void Multiplayer_ModMessageReceived(object sender, ModMessageReceivedEventArgs e)
         {
-            if(e.FromModID != this.Helper.Multiplayer.ModID)
+            if (e.FromModID != this.Helper.Multiplayer.ModID)
                 return;
 
             // Upon receiving a door state requests as the host with the current state of the doors.
-            if(e.Type == nameof(DoorStateRequest) && Context.IsMainPlayer)
+            if (e.Type == nameof(DoorStateRequest) && Context.IsMainPlayer)
             {
                 DoorStateRequest request = e.ReadAs<DoorStateRequest>();
-                this.Helper.Multiplayer.SendMessage(new DoorStateReply(request.LocationName, this.manager.GetDoorStatesInLocation(request.LocationName)), nameof(DoorStateReply), new []{this.Helper.Multiplayer.ModID}, new []{e.FromPlayerID});
+                this.Helper.Multiplayer.SendMessage(new DoorStateReply(request.LocationName, this.manager.GetDoorStatesInLocation(request.LocationName)), nameof(DoorStateReply), new[] { this.Helper.Multiplayer.ModID }, new[] { e.FromPlayerID });
             }
 
             // Upon receiving a door state reply as a farmhand, update the state of the doors.
@@ -266,14 +267,11 @@ namespace BetterDoors
             if (e.Type == nameof(DoorToggle))
             {
                 DoorToggle toggle = e.ReadAs<DoorToggle>();
-                if(Context.IsMainPlayer || toggle.LocationName == Utils.GetLocationName(Game1.currentLocation))
+                if (Context.IsMainPlayer || toggle.LocationName == Utils.GetLocationName(Game1.currentLocation))
                     this.manager.ToggleDoor(toggle.LocationName, toggle.Position, toggle.StateBeforeToggle);
             }
         }
 
-        /*********
-        ** Private methods
-        *********/
         /// <summary>Action to take when a door is toggled.</summary>
         /// <param name="door">The door that was toggled.</param>
         private void OnDoorToggled(Door door)
@@ -342,6 +340,7 @@ namespace BetterDoors
         /*********
         ** Harmony methods
         *********/
+
         /// <summary>Checks for a closed door.</summary>
         /// <param name="location">The location to check in.</param>
         /// <param name="position">The position to check at.</param>

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using BetterGardenPots.Extensions;
+﻿using BetterGardenPots.Extensions;
 using BetterGardenPots.Patches.IndoorPot;
 using BetterGardenPots.Patches.Utility;
 using BetterGardenPots.Subscribers;
@@ -11,6 +7,10 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Objects;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace BetterGardenPots
 {

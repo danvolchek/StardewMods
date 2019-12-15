@@ -31,9 +31,7 @@ namespace ChatCommands
 
         public override Encoding Encoding => this.original.Encoding;
 
-        /// <summary>
-        ///     When a write is invoked, send the information over to the callback.
-        /// </summary>
+        /// <summary>When a write is invoked, send the information over to the callback.</summary>
         public override void Write(char[] buffer, int index, int count)
         {
             if (this.isNotifying || this.isForceNotifying)

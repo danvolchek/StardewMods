@@ -9,10 +9,8 @@ using System.Collections.Generic;
 
 namespace GeodeInfoMenu
 {
-    /// <summary>
-    /// Represents a tab that shows geode drops in a list.
-    /// </summary>
-    class GeodeTab : IClickableMenu, IScrollableMenu
+    /// <summary>Represents a tab that shows geode drops in a list.</summary>
+    internal class GeodeTab : IClickableMenu, IScrollableMenu
     {
         /***
          * Existing Fields
@@ -32,23 +30,17 @@ namespace GeodeInfoMenu
         /***
          * New Fields
          ***/
-        /// <summary>
-        /// Where to draw the header text.
-        /// </summary>
+
+        /// <summary>Where to draw the header text.</summary>
         private readonly Point headerBounds;
-        /// <summary>
-        /// The header itself.
-        /// </summary>
+
+        /// <summary>The header itself.</summary>
         private readonly OptionsElement header;
 
-        /// <summary>
-        /// The name of the geode this tab represents.
-        /// </summary>
+        /// <summary>The name of the geode this tab represents.</summary>
         private string name;
 
-        /// <summary>
-        /// Constructs an instance.
-        /// </summary>
+        /// <summary>Constructs an instance.</summary>
         /// <param name="name">The name of this tab</param>
         /// <param name="items">The items this tab should show</param>
         /// <param name="x">X position of the tab</param>
@@ -72,7 +64,8 @@ namespace GeodeInfoMenu
                         this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom +
                         (index + 1) * ((height - Game1.tileSize * 2) / (NUM_ITEMS + 1)), width - Game1.tileSize / 2,
                         (height - Game1.tileSize * 2) / (NUM_ITEMS + 1) + Game1.pixelZoom),
-                    string.Concat((object) index)) {myID = index};
+                    string.Concat((object)index))
+                { myID = index };
                 int num1 = index < GeodeTab.NUM_ITEMS - 1 ? index + 1 : -7777;
                 clickableComponent.downNeighborID = num1;
                 int num2 = index > 0 ? index - 1 : -7777;
@@ -85,7 +78,6 @@ namespace GeodeInfoMenu
             if (items != null)
                 for (int i = 0; i < items.Item1.Length; i++)
                     this.options.Add(new GeodeTabItem(items.Item1[i], i + 1, items.Item2[i]));
-
         }
 
         /***
@@ -351,6 +343,4 @@ namespace GeodeInfoMenu
             IClickableMenu.drawHoverText(b, this.hoverText, Game1.smallFont, 0, 0, -1, (string)null, -1, (string[])null, (Item)null, 0, -1, -1, -1, -1, 1f, (CraftingRecipe)null);
         }
     }
-
-
 }

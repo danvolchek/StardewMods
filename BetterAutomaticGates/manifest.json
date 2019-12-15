@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Better Automatic Gates",
+  "Author": "Cat",
+  "Version": "1.0.0-beta",
+  "Description": "Makes gates automatically open and close when you get near them.",
+  "UniqueID": "cat.betterautomaticgates",
+  "EntryDll": "BetterAutomaticGates.dll",
+  "MinimumApiVersion": "3.0.0-beta",
+  "UpdateKeys": []
+}

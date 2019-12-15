@@ -38,6 +38,7 @@ namespace Pong.Game
 
                     orientation = Orientation.Vertical;
                     break;
+
                 case Side.Top:
                     this.Width = Menu.ScreenWidth;
                     this.Height = 10;
@@ -46,6 +47,7 @@ namespace Pong.Game
 
                     orientation = Orientation.Horizontal;
                     break;
+
                 default:
                 case Side.Bottom:
                     this.Width = Menu.ScreenWidth;

@@ -1,10 +1,10 @@
 ﻿{
   "Name": "Removable Horse Hats",
   "Author": "Cat",
-  "Version": "1.1.0",
+  "Version": "1.1.1",
   "Description": "Lets you remove the hat from your horse by holding down a key and clicking it.",
   "UniqueID": "cat.removablehorsehats",
   "EntryDll": "RemovableHorseHats.dll",
-  "MinimumApiVersion": "2.9.0",
+  "MinimumApiVersion": "3.0.0",
   "UpdateKeys": [ "Nexus:2223" ]
 }

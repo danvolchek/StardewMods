@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using PyTK.CustomElementHandler;
 using StardewValley;
 using StardewValley.Objects;
+using System;
+using System.Collections.Generic;
 
 namespace GiantCropRing
 {
@@ -37,7 +37,7 @@ namespace GiantCropRing
         public Dictionary<string, string> getAdditionalSaveData()
         {
             int id = this.uniqueID.Value == default(int) ? Guid.NewGuid().GetHashCode() : this.uniqueID.Value;
-            Dictionary<string, string> savedata = new Dictionary<string, string> { { "name", this.Name }, {"id", $"{id}"} };
+            Dictionary<string, string> savedata = new Dictionary<string, string> { { "name", this.Name }, { "id", $"{id}" } };
             return savedata;
         }
 
@@ -56,9 +56,8 @@ namespace GiantCropRing
             this.indexInTileSheet.Value = this.uniqueID.Value;
         }
 
-
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency,
-            float layerDepth, bool drawStackNumber, Color color, bool drawShadow)
+            float layerDepth, StackDrawType drawStackNumber, Color color, bool drawShadow)
         {
             spriteBatch.Draw(texture, location + new Vector2(Game1.tileSize / 2, Game1.tileSize / 2) * scaleSize,
                 Game1.getSourceRectForStandardTileSheet(texture, 0, 16, 16), color * transparency, 0.0f,

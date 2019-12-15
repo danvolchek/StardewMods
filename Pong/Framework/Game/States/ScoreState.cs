@@ -1,6 +1,6 @@
 ﻿namespace Pong.Framework.Game.States
 {
-    internal class ScoreState: IState<ScoreState>
+    internal class ScoreState : IState<ScoreState>
     {
         public int PlayerOneScore { get; set; }
         public int PlayerTwoScore { get; set; }

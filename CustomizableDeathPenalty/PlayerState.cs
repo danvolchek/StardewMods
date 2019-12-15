@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using StardewValley;
-using StardewValley.Menus;
+﻿using StardewValley;
 using StardewValley.Tools;
+using System.Collections.Generic;
 
 namespace CustomizableDeathPenalty
 {
     /***
      * Represents all the fields that can change due to death.
      ***/
+
     internal class PlayerState
     {
         public int deepestMineLevel;
@@ -42,7 +42,8 @@ namespace CustomizableDeathPenalty
                             slingshotCopy.attachments[0].Stack = slingshot.attachments[0].Stack;
                         }
                         copy = slingshotCopy;
-                    }else if (item is FishingRod rod)
+                    }
+                    else if (item is FishingRod rod)
                     {
                         FishingRod rodCopy = rod.getOne() as FishingRod;
 

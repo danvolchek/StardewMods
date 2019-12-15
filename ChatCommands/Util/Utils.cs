@@ -1,18 +1,16 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using StardewValley;
+using StardewValley.Menus;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Xna.Framework;
-using StardewValley;
-using StardewValley.Menus;
 
 namespace ChatCommands.Util
 {
-    /// <summary>
-    ///     Contains various utility methods.
-    /// </summary>
+    /// <summary>Contains various utility methods.</summary>
     internal static class Utils
     {
         private static readonly Color DefaultCommandColor = new Color(104, 214, byte.MaxValue);
@@ -31,9 +29,7 @@ namespace ChatCommands.Util
             new Regex(@"^DebugOutput: added CLOUD", RegexOptions.Compiled | RegexOptions.CultureInvariant)
         };
 
-        /// <summary>
-        ///     Strips the SMAPI prefix off of the given input.
-        /// </summary>
+        /// <summary>Strips the SMAPI prefix off of the given input.</summary>
         internal static string StripSMAPIPrefix(string input)
         {
             if (input.Length == 0)
@@ -42,9 +38,7 @@ namespace ChatCommands.Util
             return input[0] != '[' ? input : string.Join("", input.Substring(input.IndexOf(']') + 1)).TrimStart();
         }
 
-        /// <summary>
-        ///     Converts a <see cref="ConsoleColor" /> to a <see cref="Color" />.
-        /// </summary>
+        /// <summary>Converts a <see cref="ConsoleColor" /> to a <see cref="Color" />.</summary>
         internal static Color ConvertConsoleColorToColor(ConsoleColor color)
         {
             if (color == ConsoleColor.White || color == ConsoleColor.Black)
@@ -56,7 +50,7 @@ namespace ChatCommands.Util
                 // ReSharper disable once AssignNullToNotNullAttribute
                 PropertyInfo colorInfo = typeof(Color).GetProperty(name, BindingFlags.Static | BindingFlags.Public);
                 // ReSharper disable once PossibleNullReferenceException
-                return (Color) colorInfo.GetValue(typeof(Color));
+                return (Color)colorInfo.GetValue(typeof(Color));
             }
             catch
             {
@@ -64,17 +58,13 @@ namespace ChatCommands.Util
             }
         }
 
-        /// <summary>
-        ///     Whether the given input should be ignored.
-        /// </summary>
+        /// <summary>Whether the given input should be ignored.</summary>
         internal static bool ShouldIgnore(string input)
         {
             return SuppressConsolePatterns.Any(p => p.IsMatch(input));
         }
 
-        /// <summary>
-        ///     Parses a string into an array of arguments.
-        /// </summary>
+        /// <summary>Parses a string into an array of arguments.</summary>
         /// <remarks> The same as SMAPI's argument parsing, which I also wrote :)</remarks>
         internal static string[] ParseArgs(string input)
         {
@@ -107,28 +97,39 @@ namespace ChatCommands.Util
                 : new ChatSnippet(snippet.message, LocalizedContentManager.CurrentLanguageCode);
         }
 
-        /// <summary>
-        ///     Garble up visible text so users without the mod can't read it at a glance.
-        /// </summary>
+        /// <summary>Garble up visible text so users without the mod can't read it at a glance.</summary>
         internal static string EncipherText(string text, long key)
         {
-            Random r = new Random((int) key);
+            Random r = new Random((int)key);
             StringBuilder curr = new StringBuilder();
             foreach (char c in text)
-                curr.Append((char) (c + (char) r.Next(-32, 32)));
+                curr.Append((char)(c + (char)r.Next(-32, 32)));
             return string.Concat(curr.ToString().Reverse());
         }
 
-        /// <summary>
-        ///     Ungarble up visible text so users without the mod can't read it at a glance.
-        /// </summary>
+        /// <summary>Ungarble up visible text so users without the mod can't read it at a glance.</summary>
         internal static string DecipherText(string text, long key)
         {
-            Random r = new Random((int) key);
+            Random r = new Random((int)key);
             StringBuilder curr = new StringBuilder();
             foreach (char c in text.Reverse())
-                curr.Append((char) (c - (char) r.Next(-32, 32)));
+                curr.Append((char)(c - (char)r.Next(-32, 32)));
             return curr.ToString();
+        }
+
+        /// <summary>Whether color info should be included based on a message.</summary>
+        /// <remarks>Almost equivalent to the vanilla flow.</remarks>
+        /// <param name="finalText">The message.</param>
+        /// <returns>Whether color info should be included.</returns>
+        internal static bool ShouldIncludeColorInfo(List<ChatSnippet> finalText)
+        {
+            if (!string.IsNullOrEmpty(finalText[0].message) && finalText[0].message[0] == '/')
+            {
+                if (finalText[0].message.Split(' ')[0].Length > 1)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

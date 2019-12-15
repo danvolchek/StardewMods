@@ -2,9 +2,7 @@
 
 namespace CopyInviteCode.ClipboardManagers
 {
-    /// <summary>
-    /// Sets clipboard contents on Windows.
-    /// </summary>
+    /// <summary>Sets clipboard contents on Windows.</summary>
     internal class WindowsClipboardManager : IClipboardManager
     {
         public void SetText(string text)

@@ -15,15 +15,17 @@ namespace BetterArtisanGoodIcons
         private static readonly IList<ArtisanGoodTextureProvider> TextureProviders = new List<ArtisanGoodTextureProvider>();
 
         /// <summary>Mod config.</summary>
-        private static BetterArtisanGoodIconsConfig config;
+        private static ModConfig config;
 
         /// <summary>Initializes the manager.</summary>
         internal static void Init(IModHelper helper, IMonitor monitor)
         {
-            config = helper.ReadConfig<BetterArtisanGoodIconsConfig>();
+            config = helper.ReadConfig<ModConfig>();
 
             foreach (ArtisanGoodTextureProvider provider in ContentSourceManager.GetTextureProviders(helper, monitor))
+            {
                 TextureProviders.Add(provider);
+            }
         }
 
         /// <summary>Gets the info needed to draw the correct texture.</summary>
@@ -38,7 +40,9 @@ namespace BetterArtisanGoodIcons
                 if (manager.GetDrawInfo(output, ref textureSheet, ref mainPosition, ref iconPosition))
                 {
                     if (config.DisableSmallSourceIcons)
+                    {
                         iconPosition = Rectangle.Empty;
+                    }
                     return true;
                 }
             }

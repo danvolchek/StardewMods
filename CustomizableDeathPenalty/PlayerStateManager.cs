@@ -11,6 +11,7 @@ namespace CustomizableDeathPenalty
         /***
         * Save the current values of fields that can change due to death.
         ***/
+
         public static void SaveState()
         {
             state = new PlayerState(Game1.player.Money, Game1.player.deepestMineLevel,
@@ -20,10 +21,13 @@ namespace CustomizableDeathPenalty
         /***
          * Reset fields that could have change due to death according to the config file.
          ***/
+
         public static void LoadState()
         {
             if (config.KeepMoney)
+            {
                 Game1.player.Money = state.money;
+            }
 
             if (config.RememberMineLevels)
             {
@@ -32,9 +36,15 @@ namespace CustomizableDeathPenalty
                     MineShaft.lowestLevelReached = state.lowestLevelReached;
             }
 
-            if (config.RestoreStamina) Game1.player.Stamina = Game1.player.MaxStamina;
+            if (config.RestoreStamina)
+            {
+                Game1.player.Stamina = Game1.player.MaxStamina;
+            }
 
-            if (config.RestoreHealth) Game1.player.health = Game1.player.maxHealth;
+            if (config.RestoreHealth)
+            {
+                Game1.player.health = Game1.player.maxHealth;
+            }
 
             if (config.KeepItems)
             {

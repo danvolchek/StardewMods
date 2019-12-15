@@ -15,6 +15,7 @@ namespace BetterDoors.Framework
         /*********
          ** Fields
          *********/
+
         /// <summary>Mod configuration.</summary>
         private readonly BetterDoorsModConfig config;
 
@@ -30,6 +31,7 @@ namespace BetterDoors.Framework
         /*********
         ** Public methods
         *********/
+
         /// <summary>Constructs an instance.</summary>
         /// <param name="config">Mod configuration.</param>
         /// <param name="onToggledDoor">The action to take when a door is toggled.</param>
@@ -104,7 +106,7 @@ namespace BetterDoors.Framework
             if (!this.doors.TryGetValue(locationName, out IDictionary<Point, Door> doorsInLocation))
                 return;
 
-            if(DoorManager.TryGetDoorFromMouse(mouseTile, doorsInLocation, out Door door))
+            if (DoorManager.TryGetDoorFromMouse(mouseTile, doorsInLocation, out Door door))
                 foreach (Door toggleDoor in this.TryToggleDoor(door, doorsInLocation, false))
                     this.onToggledDoor(toggleDoor);
         }
@@ -184,7 +186,7 @@ namespace BetterDoors.Framework
         /// <summary>Resets the manager, removing each door from its map.</summary>
         public void Reset()
         {
-            foreach(Door door in this.doors.SelectMany(doorsByLoc => doorsByLoc.Value.Values))
+            foreach (Door door in this.doors.SelectMany(doorsByLoc => doorsByLoc.Value.Values))
                 door.RemoveFromMap();
             this.doors.Clear();
         }
@@ -192,6 +194,7 @@ namespace BetterDoors.Framework
         /*********
         ** Private methods
         *********/
+
         /// <summary>Tries to toggle a door, also toggling the accompanying double door if successful.</summary>
         /// <param name="door">The door to toggle.</param>
         /// <param name="doorsInLocation">The other doors in the location</param>

@@ -5,6 +5,7 @@ namespace BetterDoors.Framework.ContentPacks
     /*********
     ** Accessors
     *********/
+
     /// <summary> The format content packs that provide door animations must follow.</summary>
     internal class ContentPack
     {

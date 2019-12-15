@@ -1,10 +1,11 @@
-﻿using System.Linq;
-using StardewValley;
+﻿using StardewValley;
 using StardewValley.Tools;
+using System.Linq;
 using SObject = StardewValley.Object;
 
 namespace StackEverything.Patches
 {
+    /// <summary>Handle tackle being stacked correctly after it runs out of uses.</summary>
     internal class DoDoneFishingPatch
     {
         private static SObject tackle;
@@ -28,8 +29,7 @@ namespace StackEverything.Patches
                     __instance.attachments[1] = tackle;
 
                     string displayedMessage = new HUDMessage(Game1.content.LoadString("Strings\\StringsFromCSFiles:FishingRod.cs.14086"), "").Message;
-                    Game1.hudMessages.Remove(Game1.hudMessages.FirstOrDefault(item =>
-                        item.Message == displayedMessage));
+                    Game1.hudMessages.Remove(Game1.hudMessages.FirstOrDefault(item => item.Message == displayedMessage));
                 }
             }
         }

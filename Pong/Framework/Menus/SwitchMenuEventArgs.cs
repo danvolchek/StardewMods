@@ -10,6 +10,5 @@ namespace Pong.Framework.Menus
         {
             this.NewMenu = newMenu;
         }
-
     }
 }

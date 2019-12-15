@@ -9,6 +9,7 @@ namespace BetterDoors.Framework.Multiplayer
         /*********
         ** Accessors
         *********/
+
         /// <summary>The position to look for a door at.</summary>
         public Point Position { get; }
 
@@ -21,6 +22,7 @@ namespace BetterDoors.Framework.Multiplayer
         /*********
         ** Public methods
         *********/
+
         /// <summary>Constructs an instance.</summary>
         /// <param name="position">The position to look for a door at.</param>
         /// <param name="stateBeforeToggle">The state before the door was toggled.</param>

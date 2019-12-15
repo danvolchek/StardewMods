@@ -23,6 +23,4 @@ namespace BetterHay
             Game1.createObjectDebris(which, (int)tileLocation.X, (int)tileLocation.Y);
         }
     }
-
-
 }

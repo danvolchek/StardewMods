@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ChatCommands.ClassReplacements;
+﻿using ChatCommands.ClassReplacements;
 using ChatCommands.Commands;
 using ChatCommands.Util;
 using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ChatCommands
 {
@@ -138,9 +138,7 @@ namespace ChatCommands
             this.Monitor.Log("Replaced Chatbox", LogLevel.Trace);
         }
 
-        /// <summary>
-        ///     When a line is written to the console, add it to the chatbox.
-        /// </summary>
+        /// <summary>When a line is written to the console, add it to the chatbox.</summary>
         private void OnLineWritten(char[] buffer, int index, int count)
         {
             string toWrite = string.Join("", buffer.Skip(index).Take(count)).Trim();

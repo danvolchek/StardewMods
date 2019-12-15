@@ -8,12 +8,21 @@ namespace CustomWarpLocations.WarpOverrides
 
         internal ObeliskWarpOverride(object target)
         {
-            this.obeliskType = ((Building) target).buildingType.Value;
+            this.obeliskType = ((Building)target).buildingType.Value;
         }
 
         internal override WarpLocation GetWarpLocation()
         {
-            return this.obeliskType == "Earth Obelisk" ? WarpLocations.MountainWarpLocation_Obelisk : WarpLocations.BeachWarpLocation_Obelisk;
+            switch (this.obeliskType)
+            {
+                case "Earth Obelisk":
+                    return WarpLocations.MountainWarpLocation_Obelisk;
+                case "Water Obelisk":
+                    return WarpLocations.BeachWarpLocation_Obelisk;
+                default:
+                case "Desert Obelisk":
+                    return WarpLocations.DesertWarpLocation_Obelisk;
+            }
         }
     }
 }

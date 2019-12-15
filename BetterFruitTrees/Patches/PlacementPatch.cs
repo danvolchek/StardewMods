@@ -14,7 +14,7 @@ namespace BetterFruitTrees.Patches
             if (!__instance.Name.Contains("Sapling"))
                 return true;
 
-            Vector2 index1 = new Vector2((float) (x / 64), (float) (y / 64));
+            Vector2 index1 = new Vector2((float)(x / 64), (float)(y / 64));
 
             //The original code has a check for this, but execution never actually reaches here because saplings aren't allowed to be placed on dirt
             //Terrain feature at the position
@@ -25,15 +25,14 @@ namespace BetterFruitTrees.Patches
                     return true;
             }
 
-
             bool nearbyTree = false;
             Vector2 key = new Vector2();
             for (int index2 = x / 64 - 2; index2 <= x / 64 + 2; ++index2)
             {
                 for (int index3 = y / 64 - 2; index3 <= y / 64 + 2; ++index3)
                 {
-                    key.X = (float) index2;
-                    key.Y = (float) index3;
+                    key.X = (float)index2;
+                    key.Y = (float)index3;
                     if (location.terrainFeatures.ContainsKey(key) &&
                         (location.terrainFeatures[key] is Tree || location.terrainFeatures[key] is FruitTree))
                     {
@@ -46,20 +45,20 @@ namespace BetterFruitTrees.Patches
                     break;
             }
 
-            bool correctTileProperties = location is Farm ? ((location.doesTileHaveProperty((int) index1.X, (int) index1.Y, "Diggable",
+            bool correctTileProperties = location is Farm ? ((location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable",
                                               "Back") != null ||
-                                          location.doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "Type",
+                                          location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type",
                                               "Back").Equals("Grass")) &&
-                                         !location.doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y,
-                                             "NoSpawn", "Back").Equals("Tree")) : (location.IsGreenhouse && (location.doesTileHaveProperty((int) index1.X, (int) index1.Y, "Diggable",
+                                         !location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y,
+                                             "NoSpawn", "Back").Equals("Tree")) : (location.IsGreenhouse && (location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable",
                                                                                                                 "Back") != null ||
-                                                                                                            location.doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "Type",
+                                                                                                            location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type",
                                                                                                                 "Back").Equals("Stone")));
-            
+
             bool gameValidLocation = location is Farm || location.IsGreenhouse;
 
             //If the game would return true, let it run
-            if (gameValidLocation && correctTileProperties  && !nearbyTree)
+            if (gameValidLocation && correctTileProperties && !nearbyTree)
                 return true;
 
             //If not at farm or greenhouse and not allowed to plant outside farm, show an error
@@ -70,7 +69,6 @@ namespace BetterFruitTrees.Patches
             bool failedBecauseDangerousPlant = gameValidLocation && !correctTileProperties &&
                                                !BetterFruitTreesMod.Instance.Config.Allow_Dangerous_Planting;
 
-            
             if (failedBecauseOutsideFarm || failedBecauseDangerousPlant)
             {
                 Game1.showRedMessage(Game1.content.LoadString("Strings\\StringsFromCSFiles:Object.cs.13068"));
@@ -87,7 +85,7 @@ namespace BetterFruitTrees.Patches
             location.terrainFeatures.Add(index1, new FruitTree(__instance.ParentSheetIndex)
             {
                 GreenHouseTree = location.IsGreenhouse,
-                GreenHouseTileTree = location.doesTileHavePropertyNoNull((int) index1.X, (int) index1.Y, "Type", "Back")
+                GreenHouseTileTree = location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type", "Back")
                     .Equals("Stone")
             });
 

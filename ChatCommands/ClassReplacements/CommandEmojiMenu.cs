@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
+using System.Collections.Generic;
 
 namespace ChatCommands.ClassReplacements
 {
@@ -33,9 +33,7 @@ namespace ChatCommands.ClassReplacements
             this.bDownArrowPressed = reflection.GetMethod(this, "downArrowPressed");
         }
 
-        /// <summary>
-        ///     Handle a left click properly.
-        /// </summary>
+        /// <summary>Handle a left click properly.</summary>
         public void LeftClick(int x, int y, ChatBox cb)
         {
             if (!this.isWithinBounds(x, y))

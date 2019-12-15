@@ -9,12 +9,12 @@ namespace BetterHay
     [HarmonyPatch]
     internal class HopperPatch
     {
-        static MethodBase TargetMethod()
+        private static MethodBase TargetMethod()
         {
             return typeof(StardewValley.Object).GetMethod("checkForAction");
         }
 
-        static bool Prefix(SObject __instance, ref bool __result, Farmer who, bool justCheckingForActivity)
+        private static bool Prefix(SObject __instance, ref bool __result, Farmer who, bool justCheckingForActivity)
         {
             if (!__instance.name.Contains("Hopper") || who.ActiveObject != null)
                 return true;
@@ -45,7 +45,7 @@ namespace BetterHay
                         if (Game1.player.couldInventoryAcceptThisObject(178, num2, 0))
                         {
                             Game1.getFarm().piecesOfHay.Value -= Math.Max(1, num2);
-                            who.addItemToInventoryBool((Item) new SObject(178, num2, false, -1, 0), false);
+                            who.addItemToInventoryBool((Item)new SObject(178, num2, false, -1, 0), false);
                             Game1.playSound("shwip");
                             if (Game1.getFarm().piecesOfHay.Value <= 0)
                                 instance.showNextIndex.Value = false;
@@ -55,7 +55,7 @@ namespace BetterHay
                     else if (Game1.player.couldInventoryAcceptThisObject(178, 1, 0))
                     {
                         --Game1.getFarm().piecesOfHay.Value;
-                        who.addItemToInventoryBool((Item) new SObject(178, 1, false, -1, 0), false);
+                        who.addItemToInventoryBool((Item)new SObject(178, 1, false, -1, 0), false);
                         Game1.playSound("shwip");
                     }
 

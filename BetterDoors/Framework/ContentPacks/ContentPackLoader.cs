@@ -1,11 +1,11 @@
 ﻿using BetterDoors.Framework.Utility;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Xna.Framework;
 using SemanticVersion = StardewModdingAPI.Toolkit.SemanticVersion;
 
 namespace BetterDoors.Framework.ContentPacks
@@ -16,6 +16,7 @@ namespace BetterDoors.Framework.ContentPacks
         /*********
         ** Fields
         *********/
+
         /// <summary>Provides simplified APIs for writing mods.</summary>
         private readonly IModHelper helper;
 
@@ -28,6 +29,7 @@ namespace BetterDoors.Framework.ContentPacks
         /*********
         ** Public methods
         *********/
+
         /// <summary>Construct an instance.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         /// <param name="monitor">Encapsulates monitoring and logging for a given module.</param>
@@ -95,7 +97,6 @@ namespace BetterDoors.Framework.ContentPacks
                         {
                             imageError = $"The dimensions of the sprite sheet are invalid. Must be a multiple of 64 x 48. Instead, they are {spriteSheet.Width} x {spriteSheet.Height}";
                         }
-
                     }
                     catch (ContentLoadException)
                     {
@@ -134,7 +135,7 @@ namespace BetterDoors.Framework.ContentPacks
                             continue;
                         }
 
-                        data.Add(new ContentPackDoor(contentPack.Manifest.UniqueID, spriteSheet, doorName, Utils.ConvertTileIndexToPosition(spriteSheet.Width, Utils.TileSize, count*4)));
+                        data.Add(new ContentPackDoor(contentPack.Manifest.UniqueID, spriteSheet, doorName, Utils.ConvertTileIndexToPosition(spriteSheet.Width, Utils.TileSize, count * 4)));
 
                         count++;
                     }
@@ -159,6 +160,7 @@ namespace BetterDoors.Framework.ContentPacks
         /*********
         ** Private methods
         *********/
+
         /// <summary>Queues an error.</summary>
         /// <param name="contentPack">The content pack the error is for.</param>
         /// <param name="id">An id to use when displaying the error.</param>
@@ -166,7 +168,7 @@ namespace BetterDoors.Framework.ContentPacks
         /// <param name="forIndividualDoor">Whether the error is for one door or an entire image.</param>
         private void QueueError(IContentPack contentPack, string id, string info, bool forIndividualDoor)
         {
-            this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - {id} - Found an error. Info: {info}. {(forIndividualDoor ? "This door": "Every door in this image")} won't be loaded.");
+            this.errorQueue.AddError($"{contentPack.Manifest.Name} ({contentPack.Manifest.UniqueID}) - {id} - Found an error. Info: {info}. {(forIndividualDoor ? "This door" : "Every door in this image")} won't be loaded.");
         }
     }
 }
