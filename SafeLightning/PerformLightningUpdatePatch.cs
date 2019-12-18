@@ -111,7 +111,7 @@ namespace SafeLightning
                             lightningStrikeEvent.boltPosition = keyValuePair.Key * 64f + new Vector2(32f, (float)sbyte.MinValue);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                     }
                 }

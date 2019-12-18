@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Safe Lightning",
   "Author": "Cat",
-  "Version": "2.0.0",
+  "Version": "2.1.0",
   "Description": "Lightning won't harm your farm.",
   "UniqueID": "cat.safelightning",
   "EntryDll": "SafeLightning.dll",
