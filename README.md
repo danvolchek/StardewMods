@@ -20,6 +20,7 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Geode Info Menu](/GeodeInfoMenu): Adds a menu which displays what will drop from geodes you break open in the future.
 - [Desert Obelisk](/DesertObelisk): Adds a desert obelisk to the game that lets you warp to the desert whenever you want.
 - [Giant Crop Ring](/GiantCropRing): Adds a wearable ring that increases the chance of giant crops growing.
+- [Hats on Cats](/HatsOnCats): Lets you put hats on NPCs, animals, monsters, and other things. Unfinished.
 - [Hold to Break Geodes](/HoldToBreakGeodes): Lets you hold your mouse down to continously break geodes.
 - [Mod Update Menu](/ModUpdateMenu): Adds an in game menu that notifies users about mod updates.
 - [No Crows](/NoCrows): Stops crows from eating crops permanently.
