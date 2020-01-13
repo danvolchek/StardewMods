@@ -1,43 +1,43 @@
-﻿using Microsoft.Xna.Framework;
-using StardewValley;
+﻿using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
+using System;
 
 namespace StackEverything.Patches
 {
     /// <summary>Pick up furniture correctly instead of overwriting items in the player's inventory.</summary>
-    internal class FurniturePickupPatch
+    internal class RemoveQueuedFurniturePatch
     {
-        public static bool Prefix(DecoratableLocation __instance, ref bool __result, int x, int y, Farmer who)
+        public static bool Prefix(DecoratableLocation __instance, Guid guid)
         {
-            if (Game1.activeClickableMenu != null)
+            removeQueuedFurniture(__instance, guid);
+            return false;
+        }
+
+        private static void removeQueuedFurniture(DecoratableLocation instance, Guid guid)
+        {
+            Farmer player = Game1.player;
+            if (!instance.furniture.ContainsGuid(guid))
+                return;
+            Furniture furniture = instance.furniture[guid];
+            if (!player.couldInventoryAcceptThisItem((Item)furniture))
+                return;
+            furniture.performRemoveAction(furniture.TileLocation, instance);
+            instance.furniture.Remove(guid);
+
+            Item result = player.addItemToInventory(furniture);
+
+            if (result != null)
             {
-                __result = false;
-                return false;
+                // Something went very wrong - between the time we checked if the player could accept the item and when we did the placement, the inventory changed.
+                // Drop the furniture on the ground so it isn't lost.
+                Game1.createItemDebris(result, player.position, player.facingDirection);
             }
-
-            for (int index1 = __instance.furniture.Count - 1; index1 >= 0; --index1)
+            else
             {
-                Furniture current = __instance.furniture[index1];
-                if (current.boundingBox.Value.Contains(x, y) && current.clicked(who))
-                {
-                    if (current.flaggedForPickUp && who.couldInventoryAcceptThisItem(current))
-                    {
-                        current.flaggedForPickUp = false;
-                        current.performRemoveAction(new Vector2(x / Game1.tileSize, y / Game1.tileSize), __instance);
-
-                        Item item = who.addItemToInventory(current);
-
-                        __instance.furniture.RemoveAt(index1);
-                        Game1.playSound("coin");
-                    }
-
-                    __result = true;
-                    return false;
-                }
+                player.CurrentToolIndex = player.getIndexOfInventoryItem(furniture);
             }
-
-            return true;
+            instance.localSound("coin");
         }
     }
 }

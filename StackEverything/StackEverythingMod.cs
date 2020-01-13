@@ -81,9 +81,10 @@ namespace StackEverything
             //fix furniture pickup in decoratable locations and item placement putting down the whole furniture stack
             IDictionary<string, Tuple<Type, Type>> otherReplacements = new Dictionary<string, Tuple<Type, Type>>()
             {
-                {nameof(DecoratableLocation.leftClick), new Tuple<Type, Type>(typeof(DecoratableLocation), typeof(FurniturePickupPatch))},
+                {"removeQueuedFurniture", new Tuple<Type, Type>(typeof(DecoratableLocation), typeof(RemoveQueuedFurniturePatch))},
                 {nameof(Utility.tryToPlaceItem), new Tuple<Type, Type>(typeof(Utility), typeof(TryToPlaceItemPatch))},
-                {"doDoneFishing", new Tuple<Type, Type>(typeof(FishingRod), typeof(DoDoneFishingPatch))}
+                {"doDoneFishing", new Tuple<Type, Type>(typeof(FishingRod), typeof(DoDoneFishingPatch))},
+                {nameof(Item.canStackWith), new Tuple<Type, Type>(typeof(Item), typeof(CanStackWithPatch))}
             };
 
             foreach (KeyValuePair<string, Tuple<Type, Type>> replacement in otherReplacements)
@@ -171,6 +172,7 @@ namespace StackEverything
                         Furniture f = decLoc.furniture[i];
                         if (!this.lastKnownFurniture.Contains(f) && Game1.player.Items.Contains(f))
                         {
+                            this.Monitor.Log("Found a chair both in the world and in the inventory!", LogLevel.Error);
                             Furniture copy = this.furnitureCopier.Copy(f);
                             if (copy != null)
                             {
