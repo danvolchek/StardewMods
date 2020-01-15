@@ -44,19 +44,6 @@ namespace StackEverything
 
             IList<Type> typesToPatch = PatchedTypes.ToList();
 
-            if (helper.ModRegistry.IsLoaded("Platonymous.CustomFarming"))
-            {
-                try
-                {
-                    typesToPatch.Add(Type.GetType("CustomFarmingRedux.CustomMachine, CustomFarmingRedux"));
-                }
-                catch (Exception e)
-                {
-                    this.Monitor.Log("Failed to add support for CFR machines.");
-                    this.Monitor.Log(e.ToString());
-                }
-            }
-
             foreach (Type t in typesToPatch)
             {
                 foreach (KeyValuePair<string, Type> replacement in patchedTypeReplacements)
