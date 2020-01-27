@@ -43,13 +43,22 @@ namespace RangeDisplay.Framework.RangeHandling.RangeCreators
         /// <returns>The created range.</returns>
         public IEnumerable<Vector2> CreateRange(SObject obj, Vector2 position, GameLocation location)
         {
-            for (int x = -9; x < 10; x++)
-                for (int y = -9; y < 10; y++)
-                {
-                    Vector2 item = new Vector2(position.X + x, position.Y + y);
-                    if (Vector2.Distance(item, position) < 9.0)
-                        yield return item;
-                }
+            if(obj.Name.ToLower().Contains("deluxe"))
+                for (int x = -17; x < 18; x++)
+                    for (int y = -17; y < 18; y++)
+                    {
+                        Vector2 item = new Vector2(position.X + x, position.Y + y);
+                        if (Vector2.Distance(item, position) < 17.0)
+                            yield return item;
+                    }
+            else
+                for (int x = -9; x < 10; x++)
+                    for (int y = -9; y < 10; y++)
+                    {
+                        Vector2 item = new Vector2(position.X + x, position.Y + y);
+                        if (Vector2.Distance(item, position) < 9.0)
+                            yield return item;
+                    }
         }
 
         /// <summary>Called when the mod registry is ready.</summary>
