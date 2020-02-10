@@ -1,4 +1,4 @@
-﻿namespace BetterArtisanGoodIcons
+﻿namespace BetterArtisanGoodIcons.Framework
 {
     internal class ModConfig
     {
