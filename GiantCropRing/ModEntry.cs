@@ -64,12 +64,10 @@ namespace GiantCropRing
                 ShopMenu shop = (ShopMenu)Game1.activeClickableMenu;
                 if (shop.portraitPerson != null && shop.portraitPerson.Name == "Pierre") // && Game1.dayOfMonth % 7 == )
                 {
-                    var items = this.Helper.Reflection.GetField<Dictionary<Item, int[]>>(shop, "itemPriceAndStock").GetValue();
-                    var selling = this.Helper.Reflection.GetField<List<Item>>(shop, "forSale").GetValue();
-
                     var ring = new GiantRing();
-                    items.Add(ring, new[] { this.config.cropRingPrice, int.MaxValue });
-                    selling.Add(ring);
+
+                    shop.itemPriceAndStock.Add(ring, new []{this.config.cropRingPrice, int.MaxValue} );
+                    shop.forSale.Add(ring);
                 }
             }
         }

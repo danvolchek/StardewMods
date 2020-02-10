@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.0.0" />
-    <PackageReference Include="Platonymous.PyTK" Version="1.9.3" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.1.0" />
+    <PackageReference Include="Platonymous.PyTK" Version="1.12.15" />
   </ItemGroup>
 
 </Project>
