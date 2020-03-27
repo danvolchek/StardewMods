@@ -10,7 +10,7 @@ namespace CasksEverywhere
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            HarmonyInstance instance = HarmonyInstance.Create("cat.caskseverywhere");
+            HarmonyInstance instance = HarmonyInstance.Create(helper.ModRegistry.ModID);
 
             instance.PatchAll(Assembly.GetExecutingAssembly());
         }
