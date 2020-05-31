@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Flowery Tools",
+  "Author": "Cat",
+  "Version": "1.0.0",
+  "Description": "Makes all your tools have flowery particle effects.",
+  "UniqueID": "cat.flowerytools",
+  "EntryDll": "FloweryTools.dll",
+  "MinimumApiVersion": "3.5.0",
+  "UpdateKeys": ["Nexus:6203"]
+}

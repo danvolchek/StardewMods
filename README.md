@@ -17,6 +17,7 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Custom Transparency](/CustomTransparency): Lets you choose how transparent buildings/trees are when you walk behind them.
 - [Custom Warp Locations](/CustomWarpLocations): Allows you to change where warp totems/obelisks/the return scepter warp you to.
 - [Customizable Death Penalty](/CustomizableDeathPenalty): Allows you to choose to keep items, money, or mine levels upon death.
+- [Flowery Tools](/FloweryTools): Makes unique flower patterns burst from your tools when you use them.
 - [Geode Info Menu](/GeodeInfoMenu): Adds a menu which displays what will drop from geodes you break open in the future.
 - [Desert Obelisk](/DesertObelisk): Adds a desert obelisk to the game that lets you warp to the desert whenever you want.
 - [Giant Crop Ring](/GiantCropRing): Adds a wearable ring that increases the chance of giant crops growing.
