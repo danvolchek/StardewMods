@@ -3,7 +3,7 @@ using BetterArtisanGoodIcons.Framework.Data.Caching;
 using BetterArtisanGoodIcons.Framework.Data.Format.Cached;
 using BetterArtisanGoodIcons.Framework.Data.Format.Loaded;
 using BetterArtisanGoodIcons.Framework.Data.Loading;
-using Harmony;
+using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -41,7 +41,7 @@ namespace BetterArtisanGoodIcons
             this.loadedData = this.LoadDataSources();
             this.cachedData = this.cacher.Cache(this.loadedData);
 
-            HarmonyInstance harmony = HarmonyInstance.Create(this.Helper.ModRegistry.ModID);
+            Harmony harmony = new Harmony(this.Helper.ModRegistry.ModID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             this.Helper.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
