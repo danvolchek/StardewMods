@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HatsOnCats.Framework.Configuration;
-using HatsOnCats.Framework.Debug;
+using HatsOnCats.Framework.DebugHats;
 using HatsOnCats.Framework.Offsets;
 using HatsOnCats.Framework.Storage;
 using Microsoft.Xna.Framework;
@@ -84,6 +84,7 @@ namespace HatsOnCats
                     }
                 }else if (Game1.player.CurrentItem is Hat newHat)
                 {
+                    // return value of whther hat could be added is ignored - right now deletes new hat if alrady wearing
                     this.storageProvider.AddHat(character, newHat);
                     Game1.player.Items[Game1.player.CurrentToolIndex] = null;
                 }
