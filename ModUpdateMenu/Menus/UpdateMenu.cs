@@ -126,7 +126,7 @@ namespace ModUpdateMenu.Menus
                     if (modName != status.ModName)
                         modName = modName.Substring(0, modName.Length - 3) + "...";
                     SpriteText.drawString(b, modName, startX, yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
-                    SpriteText.drawString(b, status.UpdateStatus.ToString(), startX + (int)this.GetColumnWidth(0), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", UpdateMenu.GetColorForStatus(status.UpdateStatus));
+                    SpriteText.drawString(b, status.UpdateStatus.ToString(), startX + (int)this.GetColumnWidth(0), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", UpdateMenu.GetColorForStatus(status));
                     SpriteText.drawString(b, status.UpdateURLType, startX + (int)this.GetColumnWidth(0) + (int)this.GetColumnWidth(1), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
                     yOffset += 64;
                 }
@@ -272,14 +272,14 @@ namespace ModUpdateMenu.Menus
                         {
                             case UpdateStatus.UpToDate:
                                 this.hoverText = $"You have: {which.CurrentVersion}.";
+                                if (which.ErrorReason != null)
+                                {
+                                    this.hoverText += "^Some update errors happened,^see log for more info.";
+                                }
                                 break;
 
                             case UpdateStatus.OutOfDate:
                                 this.hoverText = $"You have: {which.CurrentVersion}^Latest version: {which.NewVersion}";
-                                break;
-
-                            case UpdateStatus.Error:
-                                this.hoverText = $"Failed to check updates: ^{which.ErrorReason}";
                                 break;
 
                             case UpdateStatus.Skipped:
@@ -554,21 +554,18 @@ namespace ModUpdateMenu.Menus
         private static Point GetDimensions(string input)
         {
             Point p = GetHalfDimensions(input);
-            return new Point(p.X * 2, p.Y * 2);
+            return new Point((int)(p.X * (2 + (input.Contains("^") ? 0.1 : 0))), p.Y * 2);
         }
 
-        private static int GetColorForStatus(UpdateStatus status)
+        private static int GetColorForStatus(ModStatus status)
         {
-            switch (status)
+            switch (status.UpdateStatus)
             {
-                case UpdateStatus.Error:
-                    return SpriteText.color_Red;
-
                 case UpdateStatus.OutOfDate:
                     return SpriteText.color_Orange;
 
                 case UpdateStatus.UpToDate:
-                    return SpriteText.color_Green;
+                    return status.ErrorReason != null ? SpriteText.color_Cyan : SpriteText.color_Green;
 
                 case UpdateStatus.Skipped:
                     return SpriteText.color_Purple;

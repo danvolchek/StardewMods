@@ -74,8 +74,16 @@ namespace ModUpdateMenu.Updates
                 {
                     if (result.Errors.Length != 0)
                     {
-                        // Return the first error. That's not perfect, but generally users don't care why each different update failed, they just want to know there was an error.
-                        statuses.Add(new ModStatus(UpdateStatus.Error, manifest, fallbackURL, null, result.Errors[0]));
+                        string error = result.Errors[0];
+
+                        if (result.Errors.Any(err => err.Contains("???")))
+                        {
+                            statuses.Add(new ModStatus(UpdateStatus.Skipped, manifest, fallbackURL, null, "This mod intentionally doesn't have an update key"));
+                        } else
+                        {
+                            // Return the first error. That's not perfect, but generally users don't care why each different update failed, they just want to know there was an error.
+                            statuses.Add(new ModStatus(UpdateStatus.UpToDate, manifest, fallbackURL, null, result.Errors[0]));
+                        }
                     }
                     else
                     {

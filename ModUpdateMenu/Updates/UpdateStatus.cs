@@ -10,9 +10,6 @@
         UpToDate,
 
         /// <summary>The mod version is less than the remote version.</summary>
-        OutOfDate,
-
-        /// <summary>There was an error getting the remote version.</summary>
-        Error
+        OutOfDate
     }
 }
