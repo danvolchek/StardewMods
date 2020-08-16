@@ -1,0 +1,10 @@
+﻿{
+  "Name": "Wind Effects",
+  "Author": "Cat",
+  "Version": "1.0.1",
+  "Description": "Wind blows through Stardew Valley!",
+  "UniqueID": "cat.windeffects",
+  "EntryDll": "WindEffects.dll",
+  "MinimumApiVersion": "3.6.0",
+  "UpdateKeys": [ "Nexus:6647" ]
+}
