@@ -31,4 +31,5 @@ This repo contains the mods I've created for Stardew Valley. Each folder contain
 - [Removable Horse Hats](/RemovableHorseHats): Lets you remove the hat from your horse.
 - [Safe Lightning](/SafeLightning): Stops lightning from hitting anything in your farm except lightning rods.
 - [Stack Everything](/StackEverything): Lets you stack BigCraftables, Furniture, Wallpapers, and bobbers up to 999 like every other item.
+- [Wind Effects](/WindEffects): Causes gusts of wind to blow through the valley. Grass, trees, crops, and bushes sway in the breeze.
 - [Winter Grass](/WinterGrass): Allows grass to persist through winter.
