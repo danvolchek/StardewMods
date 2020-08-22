@@ -60,7 +60,7 @@ namespace WindEffects
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (!Context.IsWorldReady || (!Game1.shouldTimePass() || (!Game1.game1.IsActive && Game1.options.pauseWhenOutOfFocus)))
+            if (!Context.IsWorldReady || (!Game1.shouldTimePass() || (!Game1.game1.IsActive && Game1.options.pauseWhenOutOfFocus)) || Game1.currentLocation == null)
                 return;
 
             this.manager.Update(Game1.currentLocation);
