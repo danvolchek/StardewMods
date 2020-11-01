@@ -31,7 +31,7 @@ namespace CactiHurtYou
         /// <param name="e">Event arguments.</param>
         private void GameLoop_UpdateTicking(object sender, StardewModdingAPI.Events.UpdateTickingEventArgs e)
         {
-            if (!Context.IsWorldReady || !e.IsMultipleOf(10))
+            if (!Context.IsWorldReady || Game1.currentLocation == null || !e.IsMultipleOf(10))
             {
                 return;
             }
@@ -57,7 +57,7 @@ namespace CactiHurtYou
         /// <param name="e">Event arguments.</param>
         private void Input_ButtonPressed(object sender, StardewModdingAPI.Events.ButtonPressedEventArgs e)
         {
-            if (!Context.IsWorldReady)
+            if (!Context.IsWorldReady || Game1.currentLocation == null)
             {
                 return;
             }

@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Cacti Hurt You",
   "Author": "Cat",
-  "Version": "1.1.1",
+  "Version": "1.1.3",
   "Description": "Touching cacti will hurt you. Ouch!",
   "UniqueID": "cat.cactihurtyou",
   "EntryDll": "CactiHurtYou.dll",
