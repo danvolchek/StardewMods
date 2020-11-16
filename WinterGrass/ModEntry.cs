@@ -95,7 +95,7 @@ namespace WinterGrass
         private void Player_InventoryChanged(object sender, InventoryChangedEventArgs e)
         {
             // After the user places down a grass starter, fix the color of the newly placed grass
-            if (e.IsLocalPlayer && Game1.IsWinter && e.Removed.Any(item => item.ParentSheetIndex == 297))
+            if (e.IsLocalPlayer && Game1.IsWinter && (e.Removed.Any(item => item.ParentSheetIndex == 297) || e.QuantityChanged.Any(change => change.Item.ParentSheetIndex == 297)))
             {
                 this.FixGrassColor();
             }
