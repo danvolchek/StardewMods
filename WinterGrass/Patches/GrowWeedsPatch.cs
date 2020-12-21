@@ -25,10 +25,10 @@ namespace WinterGrass.Patches
         /// <returns>Whether to run the original method or not.</returns>
         [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Argument names are defined by Harmony.")]
         [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Method names are defined by Harmony.")]
-        private static bool Prefix()
+        private static bool Prefix(GameLocation __instance)
         {
-            // Don't run the grow grass method if disabling winter grass growth is enabled
-            return !Game1.IsWinter || !ModEntry.Instance.Config.DisableWinterGrassGrowth;
+            // Grow grass if the season in the current location is not winter, or it is winter and winter grass growth is enabled
+            return Game1.GetSeasonForLocation(__instance) != "winter" || !ModEntry.Instance.Config.DisableWinterGrassGrowth;
         }
     }
 }

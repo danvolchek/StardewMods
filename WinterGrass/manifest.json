@@ -1,10 +1,10 @@
 ﻿{
   "Name": "Winter Grass",
   "Author": "Cat",
-  "Version": "2.0.2",
+  "Version": "2.0.3",
   "Description": "Grass will stay around in winter.",
   "UniqueID": "cat.wintergrass",
-  "MinimumApiVersion": "2.9.0",
+  "MinimumApiVersion": "3.8.0",
   "EntryDll": "WinterGrass.dll",
   "UpdateKeys": [ "Nexus:1601" ]
 }
