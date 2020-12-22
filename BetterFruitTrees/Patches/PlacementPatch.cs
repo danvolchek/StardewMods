@@ -14,22 +14,22 @@ namespace BetterFruitTrees.Patches
             if (!__instance.Name.Contains("Sapling"))
                 return true;
 
-            Vector2 index1 = new Vector2((float)(x / 64), (float)(y / 64));
+            var index1 = new Vector2((float)(x / 64), (float)(y / 64));
 
             //The original code has a check for this, but execution never actually reaches here because saplings aren't allowed to be placed on dirt
             //Terrain feature at the position
-            if (location.terrainFeatures.TryGetValue(index1, out TerrainFeature feature))
+            if (location.terrainFeatures.TryGetValue(index1, out var feature))
             {
                 //Not dirt or the dirt has a crop
                 if (!(feature is HoeDirt dirt) || dirt.crop != null)
                     return true;
             }
 
-            bool nearbyTree = false;
-            Vector2 key = new Vector2();
-            for (int index2 = x / 64 - 2; index2 <= x / 64 + 2; ++index2)
+            var nearbyTree = false;
+            var key = new Vector2();
+            for (var index2 = x / 64 - 2; index2 <= x / 64 + 2; ++index2)
             {
-                for (int index3 = y / 64 - 2; index3 <= y / 64 + 2; ++index3)
+                for (var index3 = y / 64 - 2; index3 <= y / 64 + 2; ++index3)
                 {
                     key.X = (float)index2;
                     key.Y = (float)index3;
@@ -45,29 +45,29 @@ namespace BetterFruitTrees.Patches
                     break;
             }
 
-            bool correctTileProperties = location is Farm ? ((location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable",
-                                              "Back") != null ||
-                                          location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type",
-                                              "Back").Equals("Grass")) &&
-                                         !location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y,
-                                             "NoSpawn", "Back").Equals("Tree")) : (location.IsGreenhouse && (location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable",
+            var correctTileProperties = location is Farm ? ((location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable",
+                                                                 "Back") != null ||
+                                                             location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type",
+                                                                 "Back").Equals("Grass")) &&
+                                                            !location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y,
+                                                                "NoSpawn", "Back").Equals("Tree")) : (location.IsGreenhouse && (location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable",
                                                                                                                 "Back") != null ||
                                                                                                             location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type",
                                                                                                                 "Back").Equals("Stone")));
 
-            bool gameValidLocation = location is Farm || location.IsGreenhouse;
+            var gameValidLocation = location is Farm || location.IsGreenhouse;
 
             //If the game would return true, let it run
             if (gameValidLocation && correctTileProperties && !nearbyTree)
                 return true;
 
             //If not at farm or greenhouse and not allowed to plant outside farm, show an error
-            bool failedBecauseOutsideFarm = !gameValidLocation &&
-                                            !BetterFruitTreesMod.Instance.Config.Allow_Placing_Fruit_Trees_Outside_Farm;
+            var failedBecauseOutsideFarm = !gameValidLocation &&
+                                           !BetterFruitTreesMod.Instance.Config.AllowPlacingFruitTreesOutsideFarm;
 
             //If at farm or greenhouse and tile properties are wrong and no dangerous planting allowed, show an error
-            bool failedBecauseDangerousPlant = gameValidLocation && !correctTileProperties &&
-                                               !BetterFruitTreesMod.Instance.Config.Allow_Dangerous_Planting;
+            var failedBecauseDangerousPlant = gameValidLocation && !correctTileProperties &&
+                                              !BetterFruitTreesMod.Instance.Config.AllowDangerousPlanting;
 
             if (failedBecauseOutsideFarm || failedBecauseDangerousPlant)
             {

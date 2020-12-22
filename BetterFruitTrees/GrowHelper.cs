@@ -3,7 +3,6 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace BetterFruitTrees
@@ -21,8 +20,8 @@ namespace BetterFruitTrees
         /// <summary>Before a save, check every fruit tree to see if it can grow. If not, make it grow.</summary>
         private void OnSaving(object sender, SavingEventArgs e)
         {
-            foreach (GameLocation l in Game1.locations)
-                foreach (KeyValuePair<Vector2, TerrainFeature> fruitTree in l.terrainFeatures.Pairs.Where(
+            foreach (var l in Game1.locations)
+                foreach (var fruitTree in l.terrainFeatures.Pairs.Where(
                     item => item.Value is FruitTree))
                     if (!this.CanFruitTreeGrow(l, fruitTree.Key))
                         this.SimulateFruitTreeDayUpdate(l, fruitTree.Value as FruitTree);
@@ -34,7 +33,7 @@ namespace BetterFruitTrees
             if (tree.daysUntilMature.Value > 28)
                 tree.daysUntilMature.Value = 28;
             tree.daysUntilMature.Value--;
-            int oldGrowthStage = tree.growthStage.Value;
+            var oldGrowthStage = tree.growthStage.Value;
             tree.growthStage.Value = tree.daysUntilMature.Value > 0
                 ? (tree.daysUntilMature.Value > 7
                     ? (tree.daysUntilMature.Value > 14 ? (tree.daysUntilMature.Value > 21 ? 0 : 1) : 2)
@@ -55,17 +54,15 @@ namespace BetterFruitTrees
         /// <summary>Whether a fruit tree at the given tile and game location could grow.</summary>
         private bool CanFruitTreeGrow(GameLocation l, Vector2 tileLocation)
         {
-            bool cannotGrow = false;
-            foreach (Vector2 surroundingTileLocations in Utility.getSurroundingTileLocationsArray(tileLocation))
+            var cannotGrow = false;
+            foreach (var surroundingTileLocations in Utility.getSurroundingTileLocationsArray(tileLocation))
             {
-                bool flag2 = l.terrainFeatures.ContainsKey(surroundingTileLocations) &&
-                             l.terrainFeatures[surroundingTileLocations] is HoeDirt &&
-                             (l.terrainFeatures[surroundingTileLocations] as HoeDirt).crop == null;
-                if (l.isTileOccupied(surroundingTileLocations, "") && !flag2)
-                {
-                    cannotGrow = true;
-                    break;
-                }
+                var flag2 = l.terrainFeatures.ContainsKey(surroundingTileLocations) &&
+                            l.terrainFeatures[surroundingTileLocations] is HoeDirt &&
+                            (l.terrainFeatures[surroundingTileLocations] as HoeDirt)?.crop == null;
+                if (!l.isTileOccupied(surroundingTileLocations) || flag2) continue;
+                cannotGrow = true;
+                break;
             }
 
             return !cannotGrow;

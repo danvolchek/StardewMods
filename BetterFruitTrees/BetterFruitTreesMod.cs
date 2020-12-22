@@ -39,16 +39,16 @@ namespace BetterFruitTrees
 
             new GrowHelper(helper.Events);
 
-            HarmonyInstance harmony = HarmonyInstance.Create("cat.betterfruittrees");
+            var harmony = HarmonyInstance.Create("cat.betterfruittrees");
 
-            Utils.HarvestThreeAtOnce = this.Config.Wait_To_Harvest_Fruit_Trees_Until_They_Have_Three_Fruits__Then_Harvest_All_Three_At_Once;
+            Utils.HarvestThreeAtOnce = this.Config.WaitToHarvestFruitTreesUntilTheyHaveThreeFruitsThenHarvestAllThreeAtOnce;
 
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>
             {
                 { nameof(SObject.placementAction), typeof(SObject), typeof(PlacementPatch)}
             };
 
-            Type junimoHarvesterType = typeof(JunimoHarvester);
+            var junimoHarvesterType = typeof(JunimoHarvester);
             IList<Tuple<string, Type, Type>> junimoReplacements = new List<Tuple<string, Type, Type>>
             {
                 { nameof(JunimoHarvester.tryToHarvestHere), junimoHarvesterType, typeof(TryToHarvestHerePatch) },
@@ -56,19 +56,19 @@ namespace BetterFruitTrees
                 { "areThereMatureCropsWithinRadius", typeof(JunimoHut), typeof(AreThereMatureCropsWithinRadiusPatch) }
             };
 
-            if (!this.Config.Disable_Fruit_Tree_Junimo_Harvesting)
-                foreach (Tuple<string, Type, Type> item in junimoReplacements)
+            if (!this.Config.DisableFruitTreeJunimoHarvesting)
+                foreach (var item in junimoReplacements)
                     replacements.Add(item);
 
-            foreach (Tuple<string, Type, Type> replacement in replacements)
+            foreach (var replacement in replacements)
             {
-                MethodInfo original = replacement.Item2
+                var original = replacement.Item2
                     .GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).ToList()
                     .Find(m => m.Name == replacement.Item1);
 
-                MethodInfo prefix = replacement.Item3.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                var prefix = replacement.Item3.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     .FirstOrDefault(item => item.Name == "Prefix");
-                MethodInfo postfix = replacement.Item3.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                var postfix = replacement.Item3.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     .FirstOrDefault(item => item.Name == "Postfix");
 
                 harmony.Patch(original, prefix == null ? null : new HarmonyMethod(prefix),

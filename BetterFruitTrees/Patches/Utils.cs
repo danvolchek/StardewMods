@@ -1,14 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.Buildings;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
 using System.Collections.Generic;
 using System.Linq;
 using xTile.Dimensions;
-using xTile.ObjectModel;
-using xTile.Tiles;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using SObject = StardewValley.Object;
 
@@ -46,7 +43,7 @@ namespace BetterFruitTrees.Patches
         /// <summary>Gets whether the given tile is passable and unnocupied, i.e. could a junimo stand on it.</summary>
         internal static bool IsPassableAndUnoccupied(GameLocation location, int x, int y)
         {
-            Rectangle tilePixels =
+            var tilePixels =
                 new Rectangle(x * Game1.tileSize, y * Game1.tileSize, Game1.tileSize, Game1.tileSize);
             return IsPassable(location, x, y, tilePixels) && !IsOccupied(location, new Vector2(x, y), tilePixels);
         }
@@ -63,10 +60,10 @@ namespace BetterFruitTrees.Patches
             // allow bridges
             if (location.doesTileHaveProperty(x, y, "Passable", "Buildings") != null)
             {
-                Tile backTile = location.map.GetLayer("Back")
+                var backTile = location.map.GetLayer("Back")
                     .PickTile(new Location(tilePixels.X, tilePixels.Y), Game1.viewport.Size);
                 if (backTile == null ||
-                    !backTile.TileIndexProperties.TryGetValue("Passable", out PropertyValue value) || value != "F")
+                    !backTile.TileIndexProperties.TryGetValue("Passable", out var value) || value != "F")
                     return true;
             }
 
@@ -77,7 +74,7 @@ namespace BetterFruitTrees.Patches
         private static bool IsOccupied(GameLocation location, Vector2 tile, Rectangle tilePixels)
         {
             // show open gate as passable
-            if (location.objects.TryGetValue(tile, out SObject obj) && obj is Fence fence && fence.isGate.Value &&
+            if (location.objects.TryGetValue(tile, out var obj) && obj is Fence fence && fence.isGate.Value &&
                 fence.gatePosition.Value == Fence.gateOpenedPosition)
                 return false;
 
@@ -87,9 +84,9 @@ namespace BetterFruitTrees.Patches
 
             // buildings
             if (location is BuildableGameLocation buildableLocation)
-                foreach (Building building in buildableLocation.buildings)
+                foreach (var building in buildableLocation.buildings)
                 {
-                    Rectangle buildingArea = new Rectangle(building.tileX.Value, building.tileY.Value,
+                    var buildingArea = new Rectangle(building.tileX.Value, building.tileY.Value,
                         building.tilesWide.Value, building.tilesHigh.Value);
                     if (buildingArea.Contains((int)tile.X, (int)tile.Y))
                         return true;
@@ -107,7 +104,7 @@ namespace BetterFruitTrees.Patches
         internal static bool GetAdjacentReadyToHarvestFruitTree(Vector2 position, GameLocation location,
             out KeyValuePair<Vector2, FruitTree> result)
         {
-            Vector2 treePos = Utility
+            var treePos = Utility
                 .getAdjacentTileLocations(position).FirstOrDefault(pos =>
                     location.terrainFeatures.ContainsKey(pos) && location.terrainFeatures[pos] is FruitTree tree &&
                     CanTreeBeHarvested(tree));
@@ -133,7 +130,7 @@ namespace BetterFruitTrees.Patches
             if (tree.fruitsOnTree.Value == 0)
                 return null;
 
-            int num1 = 0;
+            var num1 = 0;
             if (tree.daysUntilMature.Value <= -112)
                 num1 = 1;
             if (tree.daysUntilMature.Value <= -224)
@@ -143,10 +140,10 @@ namespace BetterFruitTrees.Patches
             if (tree.struckByLightningCountdown.Value > 0)
                 num1 = 0;
 
-            int harvestAmount = TreeHarvestAmount();
+            var harvestAmount = TreeHarvestAmount();
             tree.fruitsOnTree.Value -= harvestAmount;
 
-            SObject result = new SObject(Vector2.Zero,
+            var result = new SObject(Vector2.Zero,
                 tree.struckByLightningCountdown.Value > 0 ? 382 : tree.indexOfFruit.Value,
                 harvestAmount)
             { Quality = num1 };
@@ -160,16 +157,16 @@ namespace BetterFruitTrees.Patches
             if (harvester.currentLocation == null)
                 return;
 
-            bool found = GetAdjacentReadyToHarvestFruitTree(harvester.getTileLocation(), harvester.currentLocation,
-                out KeyValuePair<Vector2, FruitTree> tree);
+            var found = GetAdjacentReadyToHarvestFruitTree(harvester.getTileLocation(), harvester.currentLocation,
+                out var tree);
             if (found)
             {
                 //shake the tree without it releasing any fruit
-                int fruitsOnTree = tree.Value.fruitsOnTree.Value;
+                var fruitsOnTree = tree.Value.fruitsOnTree.Value;
                 tree.Value.fruitsOnTree.Value = 0;
                 tree.Value.performUseAction(tree.Key, harvester.currentLocation);
                 tree.Value.fruitsOnTree.Value = fruitsOnTree;
-                SObject result = GetFruitFromTree(tree.Value);
+                var result = GetFruitFromTree(tree.Value);
                 if (result != null)
                     harvester.tryToAddItemToHut(result);
             }
@@ -181,7 +178,7 @@ namespace BetterFruitTrees.Patches
         /// <returns></returns>
         internal static bool IsAdjacentReadyToHarvestFruitTree(Vector2 position, GameLocation location)
         {
-            return GetAdjacentReadyToHarvestFruitTree(position, location, out KeyValuePair<Vector2, FruitTree> p);
+            return GetAdjacentReadyToHarvestFruitTree(position, location, out var p);
         }
 
         /// <summary>Gets the private harvest timer field of <see cref="StardewValley.Characters.JunimoHarvester" /></summary>

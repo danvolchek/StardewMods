@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Netcode;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Objects;
 using System.Threading.Tasks;
@@ -20,20 +19,20 @@ namespace BetterFruitTrees.Patches.JunimoHarvester
         public static void Postfix(StardewValley.Characters.JunimoHarvester __instance, GameTime time,
             GameLocation location)
         {
-            Task backgroundTask = Utils.Reflection.GetField<Task>(__instance, "backgroundTask").GetValue();
+            var backgroundTask = Utils.Reflection.GetField<Task>(__instance, "backgroundTask").GetValue();
             if ((backgroundTask != null && !backgroundTask.IsCompleted) || !Game1.IsMasterGame)
                 return;
             if (!Game1.IsMasterGame)
                 return;
 
-            int harvestTimer = Utils.GetJunimoHarvesterHarvestTimer(__instance).GetValue();
+            var harvestTimer = Utils.GetJunimoHarvesterHarvestTimer(__instance).GetValue();
 
             harvestTimer += time.ElapsedGameTime.Milliseconds;
 
             if (harvestTimer <= 0)
                 return;
 
-            int newTimer = harvestTimer - time.ElapsedGameTime.Milliseconds;
+            var newTimer = harvestTimer - time.ElapsedGameTime.Milliseconds;
 
             if (newTimer > 1000)
                 return;
@@ -41,7 +40,7 @@ namespace BetterFruitTrees.Patches.JunimoHarvester
             if (!(harvestTimer >= 1000 && newTimer < 1000))
                 return;
 
-            IReflectedField<Item> flastItemHarvested = Utils.Reflection.GetField<Item>(__instance, "lastItemHarvested");
+            var flastItemHarvested = Utils.Reflection.GetField<Item>(__instance, "lastItemHarvested");
 
             if (__instance.currentLocation != null && !Utils.Reflection.GetProperty<StardewValley.Buildings.JunimoHut>(__instance, "home").GetValue().noHarvest.Value &&
                 Utils.IsAdjacentReadyToHarvestFruitTree(__instance.getTileLocation(), __instance.currentLocation) && (flastItemHarvested.GetValue() == null || flastItemHarvested.GetValue() == lastHarvestedItem))
@@ -50,11 +49,11 @@ namespace BetterFruitTrees.Patches.JunimoHarvester
 
                 Utils.TryToActuallyHarvestFruitTree(__instance);
 
-                Item lastItemHarvested = flastItemHarvested.GetValue();
+                var lastItemHarvested = flastItemHarvested.GetValue();
 
                 if (lastItemHarvested != null && __instance.currentLocation.farmers.Any())
                 {
-                    Multiplayer multiplayer =
+                    var multiplayer =
                         Utils.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
                     multiplayer.broadcastSprites(__instance.currentLocation, new TemporaryAnimatedSprite(
                         "Maps\\springobjects",
