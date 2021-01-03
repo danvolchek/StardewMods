@@ -19,9 +19,9 @@ namespace ChatCommands
 
         private readonly TextWriter original;
 
-        private bool isForceNotifying;
+        public bool ForceNotify { get; set; }
 
-        private bool isNotifying;
+        public bool Notify { get; set; }
 
         public NotifyingTextWriter(TextWriter original, OnLineWritten callback)
         {
@@ -34,7 +34,7 @@ namespace ChatCommands
         /// <summary>When a write is invoked, send the information over to the callback.</summary>
         public override void Write(char[] buffer, int index, int count)
         {
-            if (this.isNotifying || this.isForceNotifying)
+            if (this.Notify || this.ForceNotify)
                 this.callback(buffer, index, count);
             this.original.Write(buffer, index, count);
         }
@@ -44,24 +44,5 @@ namespace ChatCommands
             this.original.Write(ch);
         }
 
-        public bool IsForceNotifying()
-        {
-            return this.isForceNotifying;
-        }
-
-        public bool IsNotifying()
-        {
-            return this.isNotifying;
-        }
-
-        public void Notify(bool b)
-        {
-            this.isNotifying = b;
-        }
-
-        public void ToggleForceNotify()
-        {
-            this.isForceNotifying = !this.isForceNotifying;
-        }
     }
 }

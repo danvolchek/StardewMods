@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 using System;
@@ -39,23 +40,68 @@ namespace ChatCommands.Util
         }
 
         /// <summary>Converts a <see cref="ConsoleColor" /> to a <see cref="Color" />.</summary>
-        internal static Color ConvertConsoleColorToColor(ConsoleColor color)
+        internal static Color ConvertConsoleColorToColor(ConsoleColor color, IDictionary<string, string> overrides)
         {
+            string colorName = Enum.GetName(typeof(ConsoleColor), color);
+
+            if (overrides.TryGetValue(colorName, out string newName))
+            {
+                return ColorFromNameOrDefault(newName);
+            }
+
             if (color == ConsoleColor.White || color == ConsoleColor.Black)
                 return DefaultCommandColor;
 
+            return ColorFromNameOrDefault(colorName);
+        }
+
+        internal static void Validate(IDictionary<string, string> overrides, IMonitor monitor)
+        {
+            bool anyInvalid = false;
+            string[] validConsoleColors = Enum.GetNames(typeof(ConsoleColor));
+
+            foreach (KeyValuePair<string, string> mapping in overrides)
+            {
+                if (!validConsoleColors.Any(v => v == mapping.Key))
+                {
+                    monitor.Log($"Color override key {mapping.Key} is invalid.", LogLevel.Warn);
+                    anyInvalid = true;
+                }
+
+                if (!ColorFromName(mapping.Value, out Color _))
+                {
+                    monitor.Log($"Color override value {mapping.Value} is invalid.", LogLevel.Warn);
+                    anyInvalid = true;
+                }
+            }
+
+            if (anyInvalid)
+            {
+                monitor.Log("See the mod page for a list of valid colors.", LogLevel.Warn);
+            }
+        }
+
+        private static bool ColorFromName(string name, out Color color)
+        {
             try
             {
-                string name = Enum.GetName(typeof(ConsoleColor), color);
                 // ReSharper disable once AssignNullToNotNullAttribute
                 PropertyInfo colorInfo = typeof(Color).GetProperty(name, BindingFlags.Static | BindingFlags.Public);
                 // ReSharper disable once PossibleNullReferenceException
-                return (Color)colorInfo.GetValue(typeof(Color));
+                color = (Color)colorInfo.GetValue(typeof(Color));
+                return true;
             }
             catch
             {
-                return DefaultCommandColor;
+                color = DefaultCommandColor;
+                return false;
             }
+        }
+
+        private static Color ColorFromNameOrDefault(string name)
+        {
+            ColorFromName(name, out Color color);
+            return color;
         }
 
         /// <summary>Whether the given input should be ignored.</summary>

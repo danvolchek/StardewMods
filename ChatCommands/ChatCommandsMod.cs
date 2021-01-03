@@ -41,9 +41,9 @@ namespace ChatCommands
             if (parts[0] == "halp")
                 parts[0] = "help";
 
-            this.consoleNotifier.Notify(true);
+            this.consoleNotifier.Notify = true;
             this.Helper.ConsoleCommands.Trigger(parts[0], parts.Skip(1).ToArray());
-            this.consoleNotifier.Notify(false);
+            this.consoleNotifier.Notify = false;
         }
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
@@ -61,6 +61,12 @@ namespace ChatCommands
             helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
 
             this.modConfig = helper.ReadConfig<ChatCommandsConfig>();
+            if (this.modConfig.ColorOverrides == null)
+            {
+                this.modConfig.ColorOverrides = new Dictionary<string, string>();
+            }
+
+            Utils.Validate(this.modConfig.ColorOverrides, this.Monitor);
 
             IEnumerable<ICommand> commands = new ICommand[]
             {
@@ -142,16 +148,21 @@ namespace ChatCommands
         private void OnLineWritten(char[] buffer, int index, int count)
         {
             string toWrite = string.Join("", buffer.Skip(index).Take(count)).Trim();
+            if (toWrite[0] == 0x200b)
+            {
+                toWrite = toWrite.Substring(1);
+            }
+
             string noPrefix = Utils.StripSMAPIPrefix(toWrite).Trim();
 
             if (Utils.ShouldIgnore(noPrefix))
                 return;
-            if (this.consoleNotifier.IsNotifying())
+
+            if (this.modConfig.RemoveSMAPIMessagePrefix && !this.consoleNotifier.ForceNotify)
                 toWrite = noPrefix;
 
             if (!string.IsNullOrWhiteSpace(toWrite))
-                (Game1.chatBox as CommandChatBox)?.AddConsoleMessage(toWrite,
-                    Utils.ConvertConsoleColorToColor(Console.ForegroundColor));
+                (Game1.chatBox as CommandChatBox)?.AddConsoleMessage(toWrite, Utils.ConvertConsoleColorToColor(Console.ForegroundColor, this.modConfig.ColorOverrides));
         }
     }
 }

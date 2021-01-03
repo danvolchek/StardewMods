@@ -24,9 +24,9 @@ namespace ChatCommands.Commands
         /// <summary>Handles the command.</summary>
         private void Handle(string name, string[] args)
         {
-            this.writer.ToggleForceNotify();
+            this.writer.ForceNotify = !this.writer.ForceNotify;
             this.Monitor.Log(
-                this.writer.IsForceNotifying()
+                this.writer.ForceNotify
                     ? "Listening to console output..."
                     : "Stopped listening to console output.", LogLevel.Info);
         }
