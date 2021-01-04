@@ -148,7 +148,7 @@ namespace ChatCommands
         private void OnLineWritten(char[] buffer, int index, int count)
         {
             string toWrite = string.Join("", buffer.Skip(index).Take(count)).Trim();
-            if (toWrite[0] == 0x200b)
+            if (toWrite.Length > 0 && toWrite[0] == 0x200b)
             {
                 toWrite = toWrite.Substring(1);
             }
