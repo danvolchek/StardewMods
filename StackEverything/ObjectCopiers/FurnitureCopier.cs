@@ -14,11 +14,11 @@ namespace StackEverything.ObjectCopiers
         /// <returns>A copy of the object.</returns>
         public Furniture Copy(Furniture obj)
         {
-            Furniture furniture = obj.getOne() as Furniture;
+            var furniture = obj.getOne() as Furniture;
 
             // Attempting to copy the rotation of the placed object is awful.
             // Try to match up the bounding boxes, giving up after 8 failed attempts.
-            int attempts = 0;
+            var attempts = 0;
             while (!furniture.boundingBox.Value.Equals(obj.boundingBox.Value) && attempts < 8)
             {
                 furniture.rotate();

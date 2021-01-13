@@ -1,4 +1,8 @@
-﻿using Harmony;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Harmony;
 using StackEverything.ObjectCopiers;
 using StackEverything.Patches;
 using StackEverything.Patches.Size;
@@ -8,10 +12,6 @@ using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.Tools;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using SObject = StardewValley.Object;
 
 namespace StackEverything
@@ -19,17 +19,17 @@ namespace StackEverything
     public class StackEverythingMod : Mod
     {
         public static readonly Type[] PatchedTypes = { typeof(Furniture), typeof(Wallpaper) };
-        private readonly ICopier<Furniture> furnitureCopier = new FurnitureCopier();
-        private bool isInDecoratableLocation;
+        private readonly ICopier<Furniture> _furnitureCopier = new FurnitureCopier();
+        private bool _isInDecoratableLocation;
 
-        private IList<Furniture> lastKnownFurniture;
+        private IList<Furniture> _lastKnownFurniture;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            this.lastKnownFurniture = new List<Furniture>();
-            HarmonyInstance harmony = HarmonyInstance.Create(this.ModManifest.UniqueID);
+            _lastKnownFurniture = new List<Furniture>();
+            var harmony = HarmonyInstance.Create(ModManifest.UniqueID);
 
             //This only works if the class' Item.Stack property is not overriden to get {1}, set {}
             //Which means boots, hats, rings, and special items can't be stacked.
@@ -44,11 +44,11 @@ namespace StackEverything
 
             IList<Type> typesToPatch = PatchedTypes.ToList();
 
-            foreach (Type t in typesToPatch)
+            foreach (var t in typesToPatch)
             {
-                foreach (KeyValuePair<string, Type> replacement in patchedTypeReplacements)
+                foreach (var replacement in patchedTypeReplacements)
                 {
-                    this.Patch(harmony, replacement.Key, t, BindingFlags.Instance | BindingFlags.Public, replacement.Value);
+                    Patch(harmony, replacement.Key, t, BindingFlags.Instance | BindingFlags.Public, replacement.Value);
                 }
             }
 
@@ -56,17 +56,17 @@ namespace StackEverything
             {
                 try
                 {
-                    this.Patch(harmony, nameof(SObject.drawInMenu), Type.GetType("CustomFurniture.CustomFurniture, CustomFurniture"), BindingFlags.Instance | BindingFlags.Public, typeof(DrawInMenuPatch));
+                    Patch(harmony, nameof(SObject.drawInMenu), Type.GetType("CustomFurniture.CustomFurniture, CustomFurniture"), BindingFlags.Instance | BindingFlags.Public, typeof(DrawInMenuPatch));
                 }
                 catch (Exception e)
                 {
-                    this.Monitor.Log("Failed to add support for Custom Furniture.");
-                    this.Monitor.Log(e.ToString());
+                    Monitor.Log("Failed to add support for Custom Furniture.");
+                    Monitor.Log(e.ToString());
                 }
             }
 
             //fix furniture pickup in decoratable locations and item placement putting down the whole furniture stack
-            IDictionary<string, Tuple<Type, Type>> otherReplacements = new Dictionary<string, Tuple<Type, Type>>()
+            IDictionary<string, Tuple<Type, Type>> otherReplacements = new Dictionary<string, Tuple<Type, Type>>
             {
                 {"removeQueuedFurniture", new Tuple<Type, Type>(typeof(DecoratableLocation), typeof(RemoveQueuedFurniturePatch))},
                 {nameof(Utility.tryToPlaceItem), new Tuple<Type, Type>(typeof(Utility), typeof(TryToPlaceItemPatch))},
@@ -74,15 +74,15 @@ namespace StackEverything
                 {nameof(Item.canStackWith), new Tuple<Type, Type>(typeof(Item), typeof(CanStackWithPatch))}
             };
 
-            foreach (KeyValuePair<string, Tuple<Type, Type>> replacement in otherReplacements)
+            foreach (var replacement in otherReplacements)
             {
-                this.Patch(harmony, replacement.Key, replacement.Value.Item1, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, replacement.Value.Item2);
+                Patch(harmony, replacement.Key, replacement.Value.Item1, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, replacement.Value.Item2);
             }
 
             // Make tackle stack
-            this.Patch(harmony, nameof(SObject.maximumStackSize), typeof(SObject), BindingFlags.Instance | BindingFlags.Public, typeof(MaximumStackSizePatch));
+            Patch(harmony, nameof(SObject.maximumStackSize), typeof(SObject), BindingFlags.Instance | BindingFlags.Public, typeof(MaximumStackSizePatch));
 
-            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         }
 
         /// <summary>Patches a method with a prefix and/or postfix.</summary>
@@ -103,32 +103,32 @@ namespace StackEverything
                 throw new ArgumentException("Patch type can't be null.");
             }
 
-            MethodInfo original = originalType.GetMethods(originalSearch).FirstOrDefault(m => m.Name == originalName);
+            var original = originalType.GetMethods(originalSearch).FirstOrDefault(m => m.Name == originalName);
 
             if (original == null)
             {
-                this.Monitor.Log($"Failed to patch {originalType.Name}::{originalName}: could not find original method.", LogLevel.Error);
+                Monitor.Log($"Failed to patch {originalType.Name}::{originalName}: could not find original method.", LogLevel.Error);
                 return;
             }
 
-            MethodInfo[] patchMethods = patchType.GetMethods(BindingFlags.Static | BindingFlags.Public);
-            MethodInfo prefix = patchMethods.FirstOrDefault(m => m.Name == "Prefix");
-            MethodInfo postfix = patchMethods.FirstOrDefault(m => m.Name == "Postfix");
+            var patchMethods = patchType.GetMethods(BindingFlags.Static | BindingFlags.Public);
+            var prefix = patchMethods.FirstOrDefault(m => m.Name == "Prefix");
+            var postfix = patchMethods.FirstOrDefault(m => m.Name == "Postfix");
 
             if (prefix == null && postfix == null)
             {
-                this.Monitor.Log($"Failed to patch {originalType.Name}::{originalName}: both prefix and postfix are null.", LogLevel.Error);
+                Monitor.Log($"Failed to patch {originalType.Name}::{originalName}: both prefix and postfix are null.", LogLevel.Error);
             }
             else
             {
                 try
                 {
                     harmony.Patch(original, prefix == null ? null : new HarmonyMethod(prefix), postfix == null ? null : new HarmonyMethod(postfix));
-                    this.Monitor.Log($"Patched {originalType}::{originalName} with{(prefix == null ? "" : $" {patchType.Name}::{prefix.Name}")}{(postfix == null ? "" : $" {patchType.Name}::{postfix.Name}")}", LogLevel.Trace);
+                    Monitor.Log($"Patched {originalType}::{originalName} with{(prefix == null ? "" : $" {patchType.Name}::{prefix.Name}")}{(postfix == null ? "" : $" {patchType.Name}::{postfix.Name}")}");
                 }
                 catch (Exception e)
                 {
-                    this.Monitor.Log($"Failed to patch {originalType.Name}::{originalName}: {e.Message}", LogLevel.Error);
+                    Monitor.Log($"Failed to patch {originalType.Name}::{originalName}: {e.Message}", LogLevel.Error);
                 }
             }
         }
@@ -140,50 +140,46 @@ namespace StackEverything
         {
             // Placed down furniture is the same instance as furniture in the inventory, leading to really weird behavior.
             // Instead, we'll copy them.
-            if (e.IsMultipleOf(15)) // quarter second
+            if (!e.IsMultipleOf(15)) return;
+            var wasInDecoratableLocation = _isInDecoratableLocation;
+
+            if (!(Game1.currentLocation is DecoratableLocation decLoc))
             {
-                bool wasInDecoratableLocation = this.isInDecoratableLocation;
+                _isInDecoratableLocation = false;
+                return;
+            }
 
-                if (!(Game1.currentLocation is DecoratableLocation decLoc))
+            _isInDecoratableLocation = true;
+
+            if (wasInDecoratableLocation)
+            {
+                for (var i = 0; i < decLoc.furniture.Count; i++)
                 {
-                    this.isInDecoratableLocation = false;
-                    return;
-                }
-
-                this.isInDecoratableLocation = true;
-
-                if (wasInDecoratableLocation)
-                {
-                    for (int i = 0; i < decLoc.furniture.Count; i++)
+                    var f = decLoc.furniture[i];
+                    if (_lastKnownFurniture.Contains(f) || !Game1.player.Items.Contains(f)) continue;
+                    Monitor.Log("Found a chair both in the world and in the inventory!", LogLevel.Error);
+                    var copy = _furnitureCopier.Copy(f);
+                    if (copy != null)
                     {
-                        Furniture f = decLoc.furniture[i];
-                        if (!this.lastKnownFurniture.Contains(f) && Game1.player.Items.Contains(f))
-                        {
-                            this.Monitor.Log("Found a chair both in the world and in the inventory!", LogLevel.Error);
-                            Furniture copy = this.furnitureCopier.Copy(f);
-                            if (copy != null)
-                            {
-                                decLoc.furniture[i] = copy;
+                        decLoc.furniture[i] = copy;
 
-                                // Custom Furniture sets the location of copied furniture to 0 - this fixes that bug.
-                                copy.TileLocation = f.TileLocation;
-                                copy.boundingBox.Value = f.boundingBox.Value;
-                                copy.defaultBoundingBox.Value = f.defaultBoundingBox.Value;
-                                copy.updateDrawPosition();
-                            }
-                            else
-                            {
-                                this.Monitor.Log($"Failed to make copy of furniture: {f.Name} - {f.GetType().Name}.", LogLevel.Error);
-                            }
-                        }
+                        // Custom Furniture sets the location of copied furniture to 0 - this fixes that bug.
+                        copy.TileLocation = f.TileLocation;
+                        copy.boundingBox.Value = f.boundingBox.Value;
+                        copy.defaultBoundingBox.Value = f.defaultBoundingBox.Value;
+                        copy.updateDrawPosition();
+                    }
+                    else
+                    {
+                        Monitor.Log($"Failed to make copy of furniture: {f.Name} - {f.GetType().Name}.", LogLevel.Error);
                     }
                 }
+            }
 
-                this.lastKnownFurniture.Clear();
-                foreach (Furniture f in decLoc.furniture)
-                {
-                    this.lastKnownFurniture.Add(f);
-                }
+            _lastKnownFurniture.Clear();
+            foreach (var f in decLoc.furniture)
+            {
+                _lastKnownFurniture.Add(f);
             }
         }
     }

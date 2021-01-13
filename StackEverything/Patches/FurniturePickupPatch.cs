@@ -1,31 +1,30 @@
-﻿using StardewValley;
+﻿using System;
+using StardewValley;
 using StardewValley.Locations;
-using StardewValley.Objects;
-using System;
 
 namespace StackEverything.Patches
 {
     /// <summary>Pick up furniture correctly instead of overwriting items in the player's inventory.</summary>
     internal class RemoveQueuedFurniturePatch
     {
-        public static bool Prefix(DecoratableLocation __instance, Guid guid)
+        public static bool Prefix(DecoratableLocation instance, Guid guid)
         {
-            removeQueuedFurniture(__instance, guid);
+            RemoveQueuedFurniture(instance, guid);
             return false;
         }
 
-        private static void removeQueuedFurniture(DecoratableLocation instance, Guid guid)
+        private static void RemoveQueuedFurniture(DecoratableLocation instance, Guid guid)
         {
-            Farmer player = Game1.player;
+            var player = Game1.player;
             if (!instance.furniture.ContainsGuid(guid))
                 return;
-            Furniture furniture = instance.furniture[guid];
-            if (!player.couldInventoryAcceptThisItem((Item)furniture))
+            var furniture = instance.furniture[guid];
+            if (!player.couldInventoryAcceptThisItem(furniture))
                 return;
             furniture.performRemoveAction(furniture.TileLocation, instance);
             instance.furniture.Remove(guid);
 
-            Item result = player.addItemToInventory(furniture);
+            var result = player.addItemToInventory(furniture);
 
             if (result != null)
             {

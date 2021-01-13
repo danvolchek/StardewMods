@@ -9,25 +9,25 @@ namespace StackEverything.Patches.Size
         ** Public methods
         *********/
 
-        public static bool Prefix(Item __instance, ref Item stack, ref int __result)
+        public static bool Prefix(Item instance, ref Item stack, ref int result)
         {
             //Handle negative stack amounts from the original game
-            if (__instance.Stack == -1 || __instance.Stack == 0)
-                __instance.Stack = 1;
+            if (instance.Stack == -1 || instance.Stack == 0)
+                instance.Stack = 1;
             if (stack.Stack == -1 || stack.Stack == 0)
                 stack.Stack = 1;
 
-            int maxStack = __instance.maximumStackSize();
-            int proposedStack = __instance.Stack + stack.Stack;
+            var maxStack = instance.maximumStackSize();
+            var proposedStack = instance.Stack + stack.Stack;
             if (proposedStack > maxStack)
             {
-                __instance.Stack = maxStack;
-                __result = proposedStack - maxStack;
+                instance.Stack = maxStack;
+                result = proposedStack - maxStack;
             }
             else
             {
-                __instance.Stack = proposedStack;
-                __result = 0;
+                instance.Stack = proposedStack;
+                result = 0;
             }
 
             return false;

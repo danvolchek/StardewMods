@@ -1,6 +1,6 @@
-﻿using StardewValley;
+﻿using System.Linq;
+using StardewValley;
 using StardewValley.Tools;
-using System.Linq;
 using SObject = StardewValley.Object;
 
 namespace StackEverything.Patches
@@ -8,30 +8,26 @@ namespace StackEverything.Patches
     /// <summary>Handle tackle being stacked correctly after it runs out of uses.</summary>
     internal class DoDoneFishingPatch
     {
-        private static SObject tackle;
+        private static SObject _tackle;
 
-        public static void Prefix(FishingRod __instance)
+        public static void Prefix(FishingRod instance)
         {
-            tackle = __instance.attachments?.Count > 1 ? __instance.attachments[1] : null;
+            _tackle = instance.attachments?.Count > 1 ? instance.attachments[1] : null;
         }
 
-        public static void Postfix(FishingRod __instance)
+        public static void Postfix(FishingRod instance)
         {
-            if (__instance.attachments == null || __instance.attachments?.Count <= 1)
+            if (instance.attachments[1] == null || instance.attachments?.Count <= 1)
                 return;
 
-            if (tackle != null && __instance.attachments[1] == null)
-            {
-                if (tackle.Stack > 1)
-                {
-                    tackle.Stack--;
-                    tackle.uses.Value = 0;
-                    __instance.attachments[1] = tackle;
+            if (_tackle == null || instance.attachments[1] != null) return;
+            if (_tackle.Stack <= 1) return;
+            _tackle.Stack--;
+            _tackle.uses.Value = 0;
+            instance.attachments[1] = _tackle;
 
-                    string displayedMessage = new HUDMessage(Game1.content.LoadString("Strings\\StringsFromCSFiles:FishingRod.cs.14086"), "").Message;
-                    Game1.hudMessages.Remove(Game1.hudMessages.FirstOrDefault(item => item.Message == displayedMessage));
-                }
-            }
+            var displayedMessage = new HUDMessage(Game1.content.LoadString("Strings\\StringsFromCSFiles:FishingRod.cs.14086"), "").Message;
+            Game1.hudMessages.Remove(Game1.hudMessages.FirstOrDefault(item => item.Message == displayedMessage));
         }
     }
 }
