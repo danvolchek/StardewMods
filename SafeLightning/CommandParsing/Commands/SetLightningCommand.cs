@@ -23,7 +23,7 @@ namespace SafeLightning.CommandParsing.Commands
             Game1.weatherForTomorrow = Game1.weather_lightning;
             Game1.isLightning = true;
 
-            this.monitor.Log("Okay, set weather for today and tomorrow as lightning.", LogLevel.Info);
+            Monitor.Log("Okay, set weather for today and tomorrow as lightning.", LogLevel.Info);
         }
     }
 }

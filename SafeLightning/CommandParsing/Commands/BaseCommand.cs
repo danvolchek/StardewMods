@@ -10,10 +10,10 @@ namespace SafeLightning.CommandParsing.Commands
         *********/
 
         /// <summary>The command description.</summary>
-        private readonly string description;
+        private readonly string _description;
 
         /// <summary>The monitor used for command output.</summary>
-        protected readonly IMonitor monitor;
+        protected readonly IMonitor Monitor;
 
         /*********
         ** Accessors
@@ -26,7 +26,7 @@ namespace SafeLightning.CommandParsing.Commands
         public string ShortName { get; }
 
         /// <summary>The command description.</summary>
-        public string Description => this.Dangerous ? this.description : $"{this.FullName} ({this.ShortName})\n    - {this.description}";
+        public string Description => Dangerous ? _description : $"{FullName} ({ShortName})\n    - {_description}";
 
         /// <summary>Whether the command is dangerous or not.</summary>
         public bool Dangerous { get; }
@@ -42,11 +42,11 @@ namespace SafeLightning.CommandParsing.Commands
         /// <param name="desc">The command description.</param>
         protected BaseCommand(IMonitor monitor, string fullName, string shortName, string desc)
         {
-            this.monitor = monitor;
-            this.ShortName = shortName.ToLowerInvariant();
-            this.FullName = fullName.ToLowerInvariant();
-            this.description = desc;
-            this.Dangerous = shortName == "";
+            Monitor = monitor;
+            ShortName = shortName.ToLowerInvariant();
+            FullName = fullName.ToLowerInvariant();
+            _description = desc;
+            Dangerous = shortName == "";
         }
 
         /// <summary>Construct an instance.</summary>

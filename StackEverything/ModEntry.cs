@@ -16,7 +16,7 @@ using SObject = StardewValley.Object;
 
 namespace StackEverything
 {
-    public class StackEverythingMod : Mod
+    public class ModEntry : Mod
     {
         public static readonly Type[] PatchedTypes = { typeof(Furniture), typeof(Wallpaper) };
         private readonly ICopier<Furniture> _furnitureCopier = new FurnitureCopier();
@@ -30,7 +30,7 @@ namespace StackEverything
         {
             _lastKnownFurniture = new List<Furniture>();
             var harmony = HarmonyInstance.Create(ModManifest.UniqueID);
-
+            
             //This only works if the class' Item.Stack property is not overriden to get {1}, set {}
             //Which means boots, hats, rings, and special items can't be stacked.
 
@@ -52,7 +52,7 @@ namespace StackEverything
                 }
             }
 
-            if (helper.ModRegistry.IsLoaded("Platonymous.CustomFurniture"))
+            /*if (helper.ModRegistry.IsLoaded("Platonymous.CustomFurniture"))
             {
                 try
                 {
@@ -63,7 +63,7 @@ namespace StackEverything
                     Monitor.Log("Failed to add support for Custom Furniture.");
                     Monitor.Log(e.ToString());
                 }
-            }
+            }*/
 
             //fix furniture pickup in decoratable locations and item placement putting down the whole furniture stack
             IDictionary<string, Tuple<Type, Type>> otherReplacements = new Dictionary<string, Tuple<Type, Type>>

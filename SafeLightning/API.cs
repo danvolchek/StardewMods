@@ -2,13 +2,13 @@
 
 namespace SafeLightning
 {
-    public class API
+    public class Api
     {
-        internal ModEntry.StrikeLightningDelegate methodToCall;
+        private readonly ModEntry.StrikeLightningDelegate _methodToCall;
 
-        public API(ModEntry.StrikeLightningDelegate methodToCall)
+        public Api(ModEntry.StrikeLightningDelegate methodToCall)
         {
-            this.methodToCall = methodToCall;
+            _methodToCall = methodToCall;
         }
 
         /// <summary>
@@ -18,7 +18,7 @@ namespace SafeLightning
         /// <param name="effects">Whether to create appropriate sound and visual effects</param>
         public void StrikeLightningSafely(Vector2 position, bool effects = true)
         {
-            this.methodToCall(position, effects);
+            _methodToCall(position, effects);
         }
     }
 }

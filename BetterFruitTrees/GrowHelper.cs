@@ -1,9 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.TerrainFeatures;
-using System;
-using System.Linq;
 
 namespace BetterFruitTrees
 {
@@ -14,7 +14,7 @@ namespace BetterFruitTrees
         /// <param name="events">The available mod events.</param>
         public GrowHelper(IModEvents events)
         {
-            events.GameLoop.Saving += this.OnSaving;
+            events.GameLoop.Saving += OnSaving;
         }
 
         /// <summary>Before a save, check every fruit tree to see if it can grow. If not, make it grow.</summary>
@@ -23,8 +23,8 @@ namespace BetterFruitTrees
             foreach (var l in Game1.locations)
                 foreach (var fruitTree in l.terrainFeatures.Pairs.Where(
                     item => item.Value is FruitTree))
-                    if (!this.CanFruitTreeGrow(l, fruitTree.Key))
-                        this.SimulateFruitTreeDayUpdate(l, fruitTree.Value as FruitTree);
+                    if (IsGrowthBlocked(fruitTree.Key, l))
+                        SimulateFruitTreeDayUpdate(l, fruitTree.Value as FruitTree);
         }
 
         /// <summary>Simulates a day of growth on a fruit tree.</summary>
@@ -35,24 +35,43 @@ namespace BetterFruitTrees
             tree.daysUntilMature.Value--;
             var oldGrowthStage = tree.growthStage.Value;
             tree.growthStage.Value = tree.daysUntilMature.Value > 0
-                ? (tree.daysUntilMature.Value > 7
-                    ? (tree.daysUntilMature.Value > 14 ? (tree.daysUntilMature.Value > 21 ? 0 : 1) : 2)
-                    : 3)
+                ? tree.daysUntilMature.Value > 7
+                    ? tree.daysUntilMature.Value > 14 ? tree.daysUntilMature.Value > 21 ? 0 : 1 : 2
+                    : 3
                 : 4;
 
             //We only want to add a fruit to the tree if our simulated growth caused the tree to fully mature. If it is already mature, the game would have already added a fruit.
             if (oldGrowthStage != 4 && !tree.stump.Value && tree.growthStage.Value == 4 &&
                 (tree.struckByLightningCountdown.Value > 0 && !Game1.IsWinter ||
-                 Game1.currentSeason.Equals(tree.fruitSeason.Value) || l.Name.ToLower().Contains("greenhouse")))
+                tree.IsInSeasonHere(l) || l.SeedsIgnoreSeasonsHere()))
             {
                 tree.fruitsOnTree.Value = Math.Min(3, tree.fruitsOnTree.Value + 1);
-                if (l.Name.ToLower().Contains("greenhouse"))
+                if (l.IsGreenhouse)
                     tree.GreenHouseTree = true;
             }
         }
 
         /// <summary>Whether a fruit tree at the given tile and game location could grow.</summary>
-        private bool CanFruitTreeGrow(GameLocation l, Vector2 tileLocation)
+        private static bool IsGrowthBlocked(Vector2 tileLocation, GameLocation environment)
+        {
+            var surroundingTileLocationsArray = Utility.getSurroundingTileLocationsArray(tileLocation);
+            foreach (var v in surroundingTileLocationsArray)
+            {
+                var isClearHoeDirt = environment.terrainFeatures.ContainsKey(v) && environment.terrainFeatures[v] is HoeDirt && ((HoeDirt) environment.terrainFeatures[v]).crop == null;
+                if (!environment.isTileOccupied(v, "", ignoreAllCharacters: true) || isClearHoeDirt) continue;
+                var o = environment.getObjectAtTile((int)v.X, (int)v.Y);
+                if (o == null)
+                {
+                    return true;
+                }
+                if (!Utility.IsNormalObjectAtParentSheetIndex(o, 590))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        /*private bool CanFruitTreeGrow(GameLocation l, Vector2 tileLocation)
         {
             var cannotGrow = false;
             foreach (var surroundingTileLocations in Utility.getSurroundingTileLocationsArray(tileLocation))
@@ -66,6 +85,6 @@ namespace BetterFruitTrees
             }
 
             return !cannotGrow;
-        }
+        }*/
     }
 }

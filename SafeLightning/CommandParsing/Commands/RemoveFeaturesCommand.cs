@@ -21,7 +21,7 @@ namespace SafeLightning.CommandParsing.Commands
         public override void Invoke(string[] args)
         {
             Game1.getFarm().terrainFeatures.Clear();
-            this.monitor.Log("Okay, removed all terrain features from your farm.", LogLevel.Info);
+            Monitor.Log("Okay, removed all terrain features from your farm.", LogLevel.Info);
         }
     }
 }

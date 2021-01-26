@@ -1,9 +1,9 @@
-﻿using SafeLightning.CommandParsing.Commands;
-using StardewModdingAPI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using SafeLightning.CommandParsing.Commands;
+using StardewModdingAPI;
 
 namespace SafeLightning.CommandParsing
 {
@@ -15,16 +15,16 @@ namespace SafeLightning.CommandParsing
         *********/
 
         /// <summary>The monitor used for command output.</summary>
-        private readonly IMonitor monitor;
+        private readonly IMonitor _monitor;
 
         /// <summary>The command helper used to register commands.</summary>
-        private readonly ICommandHelper commandHelper;
+        private readonly ICommandHelper _commandHelper;
 
         /// <summary>All known commands</summary>
-        private readonly IList<BaseCommand> commands = new List<BaseCommand>();
+        private readonly IList<BaseCommand> _commands = new List<BaseCommand>();
 
         /// <summary>All known command descriptions</summary>
-        private readonly IDictionary<string, string> descriptions = new Dictionary<string, string>();
+        private readonly IDictionary<string, string> _descriptions = new Dictionary<string, string>();
 
         /*********
         ** Public methods
@@ -35,12 +35,12 @@ namespace SafeLightning.CommandParsing
         /// <param name="commandHelper">The command helper used to register commands.</param>
         public CommandParser(IMonitor monitor, ICommandHelper commandHelper)
         {
-            this.monitor = monitor;
-            this.commandHelper = commandHelper;
+            _monitor = monitor;
+            _commandHelper = commandHelper;
 
-            foreach (Type commandType in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseCommand))))
+            foreach (var commandType in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseCommand))))
             {
-                this.commands.Add(Activator.CreateInstance(commandType, this.monitor) as BaseCommand);
+                _commands.Add(Activator.CreateInstance(commandType, _monitor) as BaseCommand);
             }
         }
 
@@ -48,12 +48,12 @@ namespace SafeLightning.CommandParsing
         public void RegisterCommands()
         {
             //Register both a long and short command, hiding dangerous commands
-            foreach (string s in new[] { "safe_lightning", "sl" })
+            foreach (var s in new[] { "safe_lightning", "sl" })
             {
-                string helpString = this.commands.Where(command => !command.Dangerous).Aggregate("Safe lightning related debug commands.\n\nUsage:\n", (current, command) => current + $"   {s} {command.Description} \n");
+                var helpString = _commands.Where(command => !command.Dangerous).Aggregate("Safe lightning related debug commands.\n\nUsage:\n", (current, command) => current + $"   {s} {command.Description} \n");
 
-                this.descriptions.Add(s, helpString);
-                this.commandHelper.Add(s, helpString, this.ParseCommand);
+                _descriptions.Add(s, helpString);
+                _commandHelper.Add(s, helpString, ParseCommand);
             }
         }
 
@@ -68,17 +68,17 @@ namespace SafeLightning.CommandParsing
         {
             if (args.Length == 0)
             {
-                this.monitor.Log(this.descriptions[commandName], LogLevel.Info);
+                _monitor.Log(_descriptions[commandName], LogLevel.Info);
             }
             else if (!Context.IsWorldReady)
             {
-                this.monitor.Log("Commands require a save to be loaded.", LogLevel.Error);
+                _monitor.Log("Commands require a save to be loaded.", LogLevel.Error);
             }
             else
             {
-                string name = args[0].ToLowerInvariant();
+                var name = args[0].ToLowerInvariant();
 
-                BaseCommand toInvoke = this.commands.FirstOrDefault(command => command.Dangerous ? name == command.FullName : name == command.FullName || name == command.ShortName);
+                var toInvoke = _commands.FirstOrDefault(command => command.Dangerous ? name == command.FullName : name == command.FullName || name == command.ShortName);
 
                 if (toInvoke != null)
                 {
@@ -86,7 +86,7 @@ namespace SafeLightning.CommandParsing
                 }
                 else
                 {
-                    this.PrintInvalidUsageError(commandName, $"Unrecognized command '{args[0]}'.");
+                    PrintInvalidUsageError(commandName, $"Unrecognized command '{args[0]}'.");
                 }
             }
         }
@@ -96,8 +96,8 @@ namespace SafeLightning.CommandParsing
         /// <param name="message"></param>
         private void PrintInvalidUsageError(string commandName, string message)
         {
-            this.monitor.Log(message, LogLevel.Error);
-            this.monitor.Log($"Run help {commandName} for more info.", LogLevel.Error);
+            _monitor.Log(message, LogLevel.Error);
+            _monitor.Log($"Run help {commandName} for more info.", LogLevel.Error);
         }
     }
 }

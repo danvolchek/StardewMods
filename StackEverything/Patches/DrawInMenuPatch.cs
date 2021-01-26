@@ -10,7 +10,7 @@ namespace StackEverything.Patches
     {
         public static void Postfix(Item instance, SpriteBatch spriteBatch, Vector2 location, float scaleSize, bool drawStackNumber)
         {
-            if (!StackEverythingMod.PatchedTypes.Any(item => item.IsInstanceOfType(instance)))
+            if (!ModEntry.PatchedTypes.Any(item => item.IsInstanceOfType(instance)))
                 return;
 
             if (drawStackNumber && instance.maximumStackSize() > 1 && scaleSize > 0.3 && instance.Stack != int.MaxValue && instance.Stack > 1)

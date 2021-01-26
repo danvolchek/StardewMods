@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.TerrainFeatures;
-using System.Collections.Generic;
 
 namespace SafeLightning.CommandParsing.Commands
 {
@@ -23,7 +23,7 @@ namespace SafeLightning.CommandParsing.Commands
         /// <param name="args">The command arguments</param>
         public override void Invoke(string[] args)
         {
-            foreach (KeyValuePair<Vector2, TerrainFeature> item in Game1.getFarm().terrainFeatures.Pairs)
+            foreach (var item in Game1.getFarm().terrainFeatures.Pairs)
             {
                 switch (item.Value)
                 {
@@ -38,7 +38,7 @@ namespace SafeLightning.CommandParsing.Commands
                 }
             }
 
-            this.monitor.Log("Okay, grew trees and fruit trees in your farm.", LogLevel.Info);
+            Monitor.Log("Okay, grew trees and fruit trees in your farm.", LogLevel.Info);
         }
     }
 }

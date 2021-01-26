@@ -20,7 +20,7 @@ namespace SafeLightning.CommandParsing.Commands
         /// <param name="args">The command arguments</param>
         public override void Invoke(string[] args)
         {
-            this.monitor.Log($"Okay, player is at {Game1.player.getTileLocation()}.", LogLevel.Info);
+            Monitor.Log($"Okay, player is at {Game1.player.getTileLocation()}.", LogLevel.Info);
         }
     }
 }
