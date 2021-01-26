@@ -6,14 +6,14 @@ namespace BetterFruitTrees.Patches.JunimoHut
 {
     internal class AreThereMatureCropsWithinRadiusPatch
     {
-        public static void Postfix(ref bool result, StardewValley.Buildings.JunimoHut instance)
+        public static void Postfix(ref bool __result, StardewValley.Buildings.JunimoHut __instance)
         {
-            if (result)
+            if (__result)
                 return;
 
             var farm = Game1.getFarm();
-            for (var index1 = instance.tileX.Value + 1 - 8; index1 < instance.tileX.Value + 2 + 8; ++index1)
-                for (var index2 = instance.tileY.Value - 8 + 1; index2 < instance.tileY.Value + 2 + 8; ++index2)
+            for (var index1 = __instance.tileX.Value + 1 - 8; index1 < __instance.tileX.Value + 2 + 8; ++index1)
+                for (var index2 = __instance.tileY.Value - 8 + 1; index2 < __instance.tileY.Value + 2 + 8; ++index2)
                 {
                     var possiblePos = new Vector2(index1, index2);
 
@@ -23,8 +23,8 @@ namespace BetterFruitTrees.Patches.JunimoHut
                         var cropLocation = Utils.GetUnnocupiedAdjacentLocation(index1, index2, farm);
                         if (cropLocation == Point.Zero)
                             continue;
-                        instance.lastKnownCropLocation = cropLocation;
-                        result = true;
+                        __instance.lastKnownCropLocation = cropLocation;
+                        __result = true;
                         return;
                     }
                 }

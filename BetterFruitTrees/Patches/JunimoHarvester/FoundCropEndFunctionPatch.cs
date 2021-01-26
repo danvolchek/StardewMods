@@ -6,12 +6,12 @@ namespace BetterFruitTrees.Patches.JunimoHarvester
     /// <summary>Make fruit trees count as places for the junimo to stop.</summary>
     internal class FoundCropEndFunctionPatch
     {
-        public static void Postfix(ref bool result, PathNode currentNode, Point endPoint, GameLocation location,
+        public static void Postfix(ref bool __result, PathNode currentNode, Point endPoint, GameLocation location,
             Character c)
         {
-            if (result)
+            if (__result)
                 return;
-            result = Utils.IsAdjacentReadyToHarvestFruitTree(new Vector2(currentNode.x, currentNode.y), location);
+            __result = Utils.IsAdjacentReadyToHarvestFruitTree(new Vector2(currentNode.x, currentNode.y), location);
         }
     }
 }
