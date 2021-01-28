@@ -7,11 +7,11 @@ using System.Reflection.Emit;
 namespace CustomTransparency.Patches
 {
     [HarmonyPatch]
-    internal class TreePatch
+    internal class FruitTreePatch
     {
         private static MethodBase TargetMethod()
         {
-            return typeof(Tree).GetMethod(nameof(Tree.tickUpdate));
+            return typeof(FruitTree).GetMethod(nameof(FruitTree.tickUpdate));
         }
 
         /// <summary>Change the first 0.4 in the method to the specified transparency in the config.</summary>

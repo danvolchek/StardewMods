@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Hold To Break Geodes",
   "Author": "Cat",
-  "Version": "1.3.1",
+  "Version": "1.3.2",
   "Description": "Hold left click/<gamepad key> to continuously break geodes.",
   "UniqueID": "cat.holdtobreakgeodes",
   "EntryDll": "HoldToBreakGeodes.dll",
