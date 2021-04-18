@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StardewValley;
 using System;
+using StardewModdingAPI;
+using StardewValley.SDKs;
 using static GeodeInfoMenu.Menus.SearchTab;
 
 namespace GeodeInfoMenu.Menus
@@ -25,7 +27,7 @@ namespace GeodeInfoMenu.Menus
         private bool _selected;
 
         /***
-         * Changes from orignal class
+         * Changes from original class
          ***/
 
         public string Text
@@ -45,7 +47,8 @@ namespace GeodeInfoMenu.Menus
                     if (this._font.Characters.Contains(ch))
                         words += ch.ToString();
                 }
-                this._text = Program.sdk.FilterDirtyWords(words);
+                SDKHelper sdk = reflection.GetProperty<SDKHelper>(typeof(Program), "sdk").GetValue();
+                this._text = sdk.FilterDirtyWords(words);
                 if (!(!this.limitWidth || (double)this._font.MeasureString(this._text).X <= (double)(this.Width - Game1.tileSize / 3)))
                 {
                     this.Text = this._text.Substring(0, this._text.Length - 1);
@@ -56,6 +59,7 @@ namespace GeodeInfoMenu.Menus
         }
 
         private readonly TextChangedDelegate callback;
+        private readonly IReflectionHelper reflection;
 
         /***
          * Existing Properties
@@ -105,10 +109,11 @@ namespace GeodeInfoMenu.Menus
 
         public delegate void UpdatingTextBoxEvent(UpdatingTextBox sender);
 
-        public UpdatingTextBox(TextChangedDelegate callback, Texture2D textBoxTexture, Texture2D caretTexture, SpriteFont font, Color textColor)
+        public UpdatingTextBox(TextChangedDelegate callback, Texture2D textBoxTexture, Texture2D caretTexture, SpriteFont font, Color textColor, IReflectionHelper reflection)
         {
             this._textBoxTexture = textBoxTexture;
             this.callback = callback;
+            this.reflection = reflection;
             if (textBoxTexture != null)
             {
                 this.Width = textBoxTexture.Width;

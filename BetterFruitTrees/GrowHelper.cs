@@ -24,7 +24,7 @@ namespace BetterFruitTrees
             foreach (GameLocation l in Game1.locations)
                 foreach (KeyValuePair<Vector2, TerrainFeature> fruitTree in l.terrainFeatures.Pairs.Where(
                     item => item.Value is FruitTree))
-                    if (!this.CanFruitTreeGrow(l, fruitTree.Key))
+                    if (FruitTree.IsGrowthBlocked(fruitTree.Key, l))
                         this.SimulateFruitTreeDayUpdate(l, fruitTree.Value as FruitTree);
         }
 
@@ -44,31 +44,12 @@ namespace BetterFruitTrees
             //We only want to add a fruit to the tree if our simulated growth caused the tree to fully mature. If it is already mature, the game would have already added a fruit.
             if (oldGrowthStage != 4 && !tree.stump.Value && tree.growthStage.Value == 4 &&
                 (tree.struckByLightningCountdown.Value > 0 && !Game1.IsWinter ||
-                 Game1.currentSeason.Equals(tree.fruitSeason.Value) || l.Name.ToLower().Contains("greenhouse")))
+                 tree.IsInSeasonHere(l) || l.SeedsIgnoreSeasonsHere()))
             {
                 tree.fruitsOnTree.Value = Math.Min(3, tree.fruitsOnTree.Value + 1);
-                if (l.Name.ToLower().Contains("greenhouse"))
+                if (l.IsGreenhouse)
                     tree.GreenHouseTree = true;
             }
-        }
-
-        /// <summary>Whether a fruit tree at the given tile and game location could grow.</summary>
-        private bool CanFruitTreeGrow(GameLocation l, Vector2 tileLocation)
-        {
-            bool cannotGrow = false;
-            foreach (Vector2 surroundingTileLocations in Utility.getSurroundingTileLocationsArray(tileLocation))
-            {
-                bool flag2 = l.terrainFeatures.ContainsKey(surroundingTileLocations) &&
-                             l.terrainFeatures[surroundingTileLocations] is HoeDirt &&
-                             (l.terrainFeatures[surroundingTileLocations] as HoeDirt).crop == null;
-                if (l.isTileOccupied(surroundingTileLocations, "") && !flag2)
-                {
-                    cannotGrow = true;
-                    break;
-                }
-            }
-
-            return !cannotGrow;
         }
     }
 }

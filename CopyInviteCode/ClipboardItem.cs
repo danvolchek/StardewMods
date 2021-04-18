@@ -22,7 +22,7 @@ namespace CopyInviteCode
 
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency,
             float layerDepth,
-            bool drawStackNumber, Color color, bool drawShadow)
+            StackDrawType drawStackNumber, Color color, bool drawShadow)
         {
             spriteBatch.Draw(this.clipboardTexture, new Rectangle((int)(location.X + 8 * scaleSize), (int)(location.Y + 8 * scaleSize), 64, 64), new Rectangle(0, 0, 64, 64), color * transparency, 0.0f, new Vector2(8f, 8f) * scaleSize, SpriteEffects.None,
                 layerDepth);
@@ -39,14 +39,9 @@ namespace CopyInviteCode
             return -1;
         }
 
-        public override int getStack()
+        public override int addToStack(Item stack)
         {
-            return -1;
-        }
-
-        public override int addToStack(int amount)
-        {
-            return amount;
+            return stack.Stack;
         }
 
         public override string getDescription()

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using System;
+using StardewValley.Menus;
 
 namespace GeodeInfoMenu.Menus
 {
@@ -24,7 +25,8 @@ namespace GeodeInfoMenu.Menus
         /// <param name="b">The sprite batch to use</param>
         /// <param name="slotX">X position of where to draw the item</param>
         /// <param name="slotY">Y position of where to draw the item</param>
-        public override void draw(SpriteBatch b, int slotX, int slotY)
+        /// <param name="context">The menu in which the item is being drawn, if applicable</param>
+        public override void draw(SpriteBatch b, int slotX, int slotY, IClickableMenu context = null)
         {
             base.draw(b, slotX, slotY);
             float scaleSize = 1.5f;

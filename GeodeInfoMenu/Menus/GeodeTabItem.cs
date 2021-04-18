@@ -52,7 +52,8 @@ namespace GeodeInfoMenu.Menus
         /// <param name="b">The sprite batch to use</param>
         /// <param name="slotX">The x position of where to draw it</param>
         /// <param name="slotY">The y position of where to draw it</param>
-        public override void draw(SpriteBatch b, int slotX, int slotY)
+        /// <param name="context">The menu in which the item is being drawn, if applicable</param>
+        public override void draw(SpriteBatch b, int slotX, int slotY, IClickableMenu context = null)
         {
             if (this.numInFront != -1)
             {

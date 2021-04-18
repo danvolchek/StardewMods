@@ -67,7 +67,7 @@ namespace GeodeInfoMenu.Menus
             this.visibleSearchResults = new List<ClickableComponent>();
             this.headerText = new OptionsElement("Search for a drop: ");
             this.headerBounds = new Point(this.xPositionOnScreen + Game1.tileSize / 4, this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom);
-            this.searchBox = new UpdatingTextBox(new TextChangedDelegate(this.SearchBoxTextChanged), Game1.content.Load<Texture2D>("LooseSprites\\textBox"), (Texture2D)null, Game1.smallFont, Game1.textColor)
+            this.searchBox = new UpdatingTextBox(new TextChangedDelegate(this.SearchBoxTextChanged), Game1.content.Load<Texture2D>("LooseSprites\\textBox"), (Texture2D)null, Game1.smallFont, Game1.textColor, mod.Helper.Reflection)
             {
                 X = this.xPositionOnScreen + Game1.tileSize / 4 + Game1.tileSize * 8,
                 Y = this.yPositionOnScreen + Game1.tileSize * 5 / 4 + Game1.pixelZoom + Game1.tileSize / 2,

@@ -41,7 +41,7 @@ namespace GeodeInfoMenu
         private bool wasSearchTextBoxSelectedWhenPageLeft;
 
         public GeodeMenu(ModEntry mod, ModConfig config, IList<Tuple<int[], bool[]>> items, GeodeMenuStateInfo savedState = null, bool forceReloadState = false)
-      : base(Game1.viewport.Width / 2 - (800 + IClickableMenu.borderWidth * 2) / 2, Game1.viewport.Height / 2 - (600 + IClickableMenu.borderWidth * 2) / 2, 800 + IClickableMenu.borderWidth * 2, 600 + IClickableMenu.borderWidth * 2, true)
+      : base(Game1.uiViewport.Width / 2 - (800 + IClickableMenu.borderWidth * 2) / 2, Game1.uiViewport.Height / 2 - (600 + IClickableMenu.borderWidth * 2) / 2, 800 + IClickableMenu.borderWidth * 2, 600 + IClickableMenu.borderWidth * 2, true)
         {
             this.config = config;
             this.modEntry = mod;
