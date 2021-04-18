@@ -1,15 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <AssemblyName>DesertObelisk</AssemblyName>
-    <RootNamespace>DesertObelisk</RootNamespace>
     <Version>1.6.0</Version>
     <TargetFramework>net452</TargetFramework>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.3.0" />
   </ItemGroup>
-
 </Project>

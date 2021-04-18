@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <AssemblyName>RemovableHorseHats</AssemblyName>
-    <RootNamespace>RemovableHorseHats</RootNamespace>
     <Version>1.1.0</Version>
     <TargetFramework>net452</TargetFramework>
-    <PlatformTarget>x86</PlatformTarget>
 
     <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
@@ -13,5 +9,4 @@
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.3.0" />
   </ItemGroup>
-
 </Project>

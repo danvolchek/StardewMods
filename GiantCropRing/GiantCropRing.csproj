@@ -1,16 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <AssemblyName>GiantCropRing</AssemblyName>
-    <RootNamespace>GiantCropRing</RootNamespace>
     <Version>1.4.0</Version>
     <TargetFramework>net452</TargetFramework>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.3.0" />
     <PackageReference Include="Platonymous.PyTK" Version="1.12.40" />
   </ItemGroup>
-
 </Project>

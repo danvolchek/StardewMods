@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <AssemblyName>BetterArtisanGoodIcons</AssemblyName>
-    <RootNamespace>BetterArtisanGoodIcons</RootNamespace>
     <Version>1.5.0</Version>
     <TargetFramework>net452</TargetFramework>
-    <PlatformTarget>x86</PlatformTarget>
 
     <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
@@ -17,5 +13,4 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json" HintPath="$(GamePath)\smapi-internal\Newtonsoft.Json.dll" />
   </ItemGroup>
-
 </Project>

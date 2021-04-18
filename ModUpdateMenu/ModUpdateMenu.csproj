@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <AssemblyName>ModUpdateMenu</AssemblyName>
-    <RootNamespace>ModUpdateMenu</RootNamespace>
     <Version>1.4.1</Version>
     <TargetFramework>net452</TargetFramework>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,5 +11,4 @@
   <ItemGroup>
     <Reference Include="SMAPI.Toolkit" HintPath="$(GamePath)\smapi-internal\SMAPI.Toolkit.dll" />
   </ItemGroup>
-
 </Project>

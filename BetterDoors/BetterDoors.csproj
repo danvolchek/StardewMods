@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <AssemblyName>BetterDoors</AssemblyName>
-    <RootNamespace>BetterDoors</RootNamespace>
     <Version>1.0.0</Version>
     <TargetFramework>net452</TargetFramework>
-    <PlatformTarget>x86</PlatformTarget>
 
     <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
@@ -17,5 +13,4 @@
   <ItemGroup>
     <Reference Include="SMAPI.Toolkit" HintPath="$(GamePath)\smapi-internal\SMAPI.Toolkit.dll" />
   </ItemGroup>
-
 </Project>
