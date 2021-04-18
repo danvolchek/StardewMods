@@ -53,7 +53,7 @@ namespace Pong
             if (this.currentMenu == null)
                 return;
 
-            //e.SuppressButton();
+            this.Helper.Input.Suppress(e.Button);
             if (this.currentMenu.OnButtonPressed(e))
                 SoundManager.PlayKeyPressSound();
         }
