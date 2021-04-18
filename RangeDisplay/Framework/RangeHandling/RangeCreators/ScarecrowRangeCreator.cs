@@ -41,15 +41,20 @@ namespace RangeDisplay.Framework.RangeHandling.RangeCreators
         /// <param name="position">The position the object is at.</param>
         /// <param name="location">The location the object is in.</param>
         /// <returns>The created range.</returns>
+        /// <remarks>Derived from <see cref="Farm.addCrows"/>.</remarks>
         public IEnumerable<Vector2> CreateRange(SObject obj, Vector2 position, GameLocation location)
         {
-            for (int x = -9; x < 10; x++)
-                for (int y = -9; y < 10; y++)
+            int radius = obj.Name.Contains("Deluxe") ? 17 : 9;
+
+            for (int x = -radius; x <= radius; x++)
+            {
+                for (int y = -radius; y <= radius; y++)
                 {
-                    Vector2 item = new Vector2(position.X + x, position.Y + y);
-                    if (Vector2.Distance(item, position) < 9.0)
-                        yield return item;
+                    Vector2 tile = new Vector2(position.X + x, position.Y + y);
+                    if (Vector2.Distance(tile, position) < radius)
+                        yield return tile;
                 }
+            }
         }
 
         /// <summary>Called when the mod registry is ready.</summary>
