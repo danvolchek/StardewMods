@@ -13,9 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Sprites\tabs.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Update="Sprites\tabs.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

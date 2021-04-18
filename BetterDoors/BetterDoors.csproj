@@ -15,9 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="SMAPI.Toolkit">
-      <HintPath>D:\Steam\SteamApps\common\Stardew Valley\smapi-internal\SMAPI.Toolkit.dll</HintPath>
-    </Reference>
+    <Reference Include="SMAPI.Toolkit" HintPath="$(GamePath)\smapi-internal\SMAPI.Toolkit.dll" />
   </ItemGroup>
 
 </Project>
