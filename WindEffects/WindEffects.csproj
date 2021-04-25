@@ -1,19 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
-		<AssemblyName>WindEffects</AssemblyName>
-		<RootNamespace>WindEffects</RootNamespace>
 		<Version>1.0.0</Version>
 		<TargetFramework>net452</TargetFramework>
-		<PlatformTarget>x86</PlatformTarget>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.1.0" />
+		<PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.3.0" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="assets\" />
-	</ItemGroup>
-
 </Project>

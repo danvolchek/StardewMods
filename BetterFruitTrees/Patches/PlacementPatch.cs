@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewValley;
+using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
 using SObject = StardewValley.Object;
 
@@ -11,10 +12,12 @@ namespace BetterFruitTrees.Patches
             Farmer who)
         {
             //Not a sapling
-            if (!__instance.Name.Contains("Sapling"))
+            if (!__instance.isSapling() || __instance.ParentSheetIndex == 251) // 251: tea sapling
                 return true;
 
-            Vector2 index1 = new Vector2((float)(x / 64), (float)(y / 64));
+            int tileX = x / 64;
+            int tileY = y / 64;
+            Vector2 index1 = new Vector2(tileX, tileY);
 
             //The original code has a check for this, but execution never actually reaches here because saplings aren't allowed to be placed on dirt
             //Terrain feature at the position
@@ -26,13 +29,12 @@ namespace BetterFruitTrees.Patches
             }
 
             bool nearbyTree = false;
-            Vector2 key = new Vector2();
-            for (int index2 = x / 64 - 2; index2 <= x / 64 + 2; ++index2)
+
+            for (int index2 = tileX - 2; index2 <= tileX + 2; ++index2)
             {
-                for (int index3 = y / 64 - 2; index3 <= y / 64 + 2; ++index3)
+                for (int index3 = tileY - 2; index3 <= tileY + 2; ++index3)
                 {
-                    key.X = (float)index2;
-                    key.Y = (float)index3;
+                    Vector2 key = new Vector2(index2, index3);
                     if (location.terrainFeatures.ContainsKey(key) &&
                         (location.terrainFeatures[key] is Tree || location.terrainFeatures[key] is FruitTree))
                     {
@@ -45,7 +47,7 @@ namespace BetterFruitTrees.Patches
                     break;
             }
 
-            bool correctTileProperties = location is Farm ? ((location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable",
+            bool correctTileProperties = IsFarm(location) ? ((location.doesTileHaveProperty((int)index1.X, (int)index1.Y, "Diggable",
                                               "Back") != null ||
                                           location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type",
                                               "Back").Equals("Grass")) &&
@@ -55,7 +57,7 @@ namespace BetterFruitTrees.Patches
                                                                                                             location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type",
                                                                                                                 "Back").Equals("Stone")));
 
-            bool gameValidLocation = location is Farm || location.IsGreenhouse;
+            bool gameValidLocation = IsFarm(location) || location.IsGreenhouse;
 
             //If the game would return true, let it run
             if (gameValidLocation && correctTileProperties && !nearbyTree)
@@ -81,16 +83,22 @@ namespace BetterFruitTrees.Patches
             DelayedAction.playSoundAfterDelay("coin", 100);
 
             //If the game was going to place a tree, it removed anything at the tree index, so we do the same
+            bool actAsGreenhouse = location.IsGreenhouse || ((__instance.ParentSheetIndex == 69 || __instance.ParentSheetIndex == 835) && location is IslandWest); // 69: banana sapling, 835: mango sapling
             location.terrainFeatures.Remove(index1);
             location.terrainFeatures.Add(index1, new FruitTree(__instance.ParentSheetIndex)
             {
-                GreenHouseTree = location.IsGreenhouse,
+                GreenHouseTree = actAsGreenhouse,
                 GreenHouseTileTree = location.doesTileHavePropertyNoNull((int)index1.X, (int)index1.Y, "Type", "Back")
                     .Equals("Stone")
             });
 
             __result = true;
             return false;
+        }
+
+        private static bool IsFarm(GameLocation location)
+        {
+            return location is Farm || location is IslandWest;
         }
     }
 }

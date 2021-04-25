@@ -46,10 +46,10 @@ namespace WindEffects.Framework.Shakers
                             leaves.Add(new Leaf(new Vector2((float)Game1.random.Next((int)((double)tile.X * 64.0 - 64.0), (int)((double)tile.X * 64.0 + 128.0)), (float)Game1.random.Next((int)((double)tile.Y * 64.0 - 256.0), (int)((double)tile.Y * 64.0 - 192.0))), (float)Game1.random.Next(-10, 10) / 100f, Game1.random.Next(4), (float)Game1.random.Next(5) / 10f));
                     }
 
-                    if (Game1.random.NextDouble() < 0.01 && (Game1.currentSeason.Equals("spring") || Game1.currentSeason.Equals("summer")))
+                    if (Game1.random.NextDouble() < 0.01 && (this.tree.currentLocation.GetSeasonForLocation().Equals("spring") || this.tree.currentLocation.GetSeasonForLocation().Equals("summer") || this.tree.currentLocation.GetLocationContext() == GameLocation.LocationContext.Island))
                     {
                         while (Game1.random.NextDouble() < 0.8)
-                            location.addCritter((Critter)new Butterfly(new Vector2(tile.X + (float)Game1.random.Next(1, 3), tile.Y - 2f + (float)Game1.random.Next(-1, 2))));
+                            location.addCritter((Critter)new Butterfly(new Vector2(tile.X + (float)Game1.random.Next(1, 3), tile.Y - 2f + (float)Game1.random.Next(-1, 2)), this.tree.currentLocation.GetLocationContext() == GameLocation.LocationContext.Island));
                     }
                 }
                 else

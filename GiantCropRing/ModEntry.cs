@@ -152,12 +152,24 @@ namespace GiantCropRing
 
         private List<Tuple<Vector2, Crop>> GetValidCrops()
         {
-            return Game1.locations.Where(gl => gl is Farm).SelectMany(gl => (gl as Farm).terrainFeatures.Pairs.Where(
-                    tf =>
-                        tf.Value is HoeDirt hd && hd.crop != null
-                                               && hd.state.Value == 1).Select(hd =>
-                    new Tuple<Vector2, Crop>(hd.Key, (hd.Value as HoeDirt).crop))
-                .Where(c => !(c.Item2.dead.Value || !c.Item2.seasonsToGrowIn.Contains(Game1.currentSeason)))).ToList();
+            return (
+                from location in Game1.locations.OfType<Farm>()
+                from feature in location.terrainFeatures.Pairs
+
+                let tile = feature.Key
+                let dirt = feature.Value as HoeDirt
+                let crop = dirt?.crop
+                where
+                    dirt.state.Value == HoeDirt.watered
+                    && crop != null
+                    && !crop.dead.Value
+                    && (
+                        location.SeedsIgnoreSeasonsHere()
+                        || crop.seasonsToGrowIn.Contains(location.GetSeasonForLocation())
+                    )
+
+                select Tuple.Create(tile, crop)
+            ).ToList();
         }
     }
 }

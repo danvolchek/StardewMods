@@ -2,7 +2,6 @@
 using RangeDisplay.Framework.APIs;
 using StardewModdingAPI;
 using StardewValley;
-using System;
 using System.Collections.Generic;
 using SObject = StardewValley.Object;
 
@@ -57,7 +56,7 @@ namespace RangeDisplay.Framework.RangeHandling.RangeCreators
             {
                 if (this.betterSprinklersAPI == null)
                 {
-                    foreach (Vector2 pos in this.CreateVanillaRange(obj, position))
+                    foreach (Vector2 pos in obj.GetSprinklerTiles())
                     {
                         yield return pos;
                     }
@@ -75,42 +74,6 @@ namespace RangeDisplay.Framework.RangeHandling.RangeCreators
                     foreach (Vector2 extraPos in sExtra)
                     {
                         yield return extraPos + position;
-                    }
-                }
-            }
-        }
-
-        /// <summary>Creates the vanilla range for sprinklers.</summary>
-        /// <param name="obj">The sprinkler.</param>
-        /// <param name="position">The position the sprinkler is at.</param>
-        /// <returns>The range.</returns>
-        public IEnumerable<Vector2> CreateVanillaRange(SObject obj, Vector2 position)
-        {
-            string objectName = obj.Name.ToLower();
-
-            yield return new Vector2(position.X - 1, position.Y);
-            yield return new Vector2(position.X + 1, position.Y);
-            yield return new Vector2(position.X, position.Y - 1);
-            yield return new Vector2(position.X, position.Y + 1);
-
-            if (objectName.Contains("quality") || objectName.Contains("iridium"))
-            {
-                yield return new Vector2(position.X - 1, position.Y - 1);
-                yield return new Vector2(position.X + 1, position.Y - 1);
-                yield return new Vector2(position.X - 1, position.Y + 1);
-                yield return new Vector2(position.X + 1, position.Y + 1);
-
-                if (objectName.Contains("iridium"))
-                {
-                    for (int i = -2; i < 3; i++)
-                    {
-                        for (int j = -2; j < 3; j++)
-                        {
-                            if (Math.Abs(i) == 2 || Math.Abs(j) == 2)
-                            {
-                                yield return new Vector2(position.X + i, position.Y + j);
-                            }
-                        }
                     }
                 }
             }

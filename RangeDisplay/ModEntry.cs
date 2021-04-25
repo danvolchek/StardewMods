@@ -91,7 +91,7 @@ namespace RangeDisplay
 
             this.config = helper.ReadConfig<ModConfig>();
 
-            helper.Events.Display.RenderingHud += this.OnRenderingHud;
+            helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
 
@@ -243,10 +243,10 @@ namespace RangeDisplay
             }
         }
 
-        /// <summary>Raised after drawing the HUD (item toolbar, clock, etc) to the sprite batch, but before it's rendered to the screen. The vanilla HUD may be hidden at this point (e.g. because a menu is open).</summary>
+        /// <summary>Raised after the game world is drawn to the sprite patch, before it's rendered to the screen. Content drawn to the sprite batch at this point will be drawn over the world, but under any active menu, HUD elements, or cursor.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
-        private void OnRenderingHud(object sender, RenderingHudEventArgs e)
+        private void OnRenderedWorld(object sender, RenderedWorldEventArgs e)
         {
             if (!Context.IsWorldReady)
                 return;
