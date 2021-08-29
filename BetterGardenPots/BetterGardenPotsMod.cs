@@ -2,7 +2,7 @@
 using BetterGardenPots.Patches.IndoorPot;
 using BetterGardenPots.Patches.Utility;
 using BetterGardenPots.Subscribers;
-using Harmony;
+using HarmonyLib;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -22,7 +22,7 @@ namespace BetterGardenPots
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            HarmonyInstance harmony = HarmonyInstance.Create("cat.bettergardenpots");
+            Harmony harmony = new Harmony("cat.bettergardenpots");
 
             BetterGardenPotsModConfig config = helper.ReadConfig<BetterGardenPotsModConfig>();
 
@@ -33,7 +33,12 @@ namespace BetterGardenPots
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>();
 
             if (config.MakeBeeHousesNoticeFlowersInGardenPots)
-                replacements.Add(nameof(Utility.findCloseFlower), typeof(Utility), typeof(FindCloseFlowerPatch));
+            {
+                // I'm assuming it used to not have an overload: Thus this. There's probably a saner option, but meh.
+                var methodList = typeof(Utility).GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).ToList();
+                replacements.Add(methodList.Find(m => (m.Name == "findCloseFlower" && m.GetParameters().Length == 4)).ToString(), typeof(Utility), typeof(FindCloseFlowerPatch));
+            }
+                
 
             if (config.HarvestMatureCropsWhenGardenPotBreaks)
                 replacements.Add(nameof(IndoorPot.performToolAction), indoorPotType, typeof(PerformToolActionPatch));
@@ -49,7 +54,12 @@ namespace BetterGardenPots
 
             foreach (Tuple<string, Type, Type> replacement in replacements)
             {
-                MethodInfo original = replacement.Item2.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).ToList().Find(m => m.Name == replacement.Item1);
+                MethodInfo original = null;
+                // If there's a space, assume it's a full method signature, not just a name.
+                if (replacement.Item1.Contains(" "))
+                    original = replacement.Item2.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).ToList().Find(m => m.ToString() == replacement.Item1);
+                else
+                    original = replacement.Item2.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).ToList().Find(m => m.Name == replacement.Item1);
 
                 MethodInfo prefix = replacement.Item3.GetMethods(BindingFlags.Static | BindingFlags.Public).FirstOrDefault(item => item.Name == "Prefix");
                 MethodInfo postfix = replacement.Item3.GetMethods(BindingFlags.Static | BindingFlags.Public).FirstOrDefault(item => item.Name == "Postfix");
