@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Leclair.Stardew.ThemeManager;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ModUpdateMenu.Updates;
 using StardewModdingAPI;
@@ -22,10 +23,10 @@ namespace ModUpdateMenu.Menus
 
         private Point mousePosition = Point.Zero;
 
-        public UpdateButton(IModHelper helper)
+        public UpdateButton(IModHelper helper, ThemeManager<BaseThemeData> themeManager)
         {
-            Texture2D buttonTexture = helper.Content.Load<Texture2D>("assets/updateButton.png");
-            this.statusTexture = helper.Content.Load<Texture2D>("assets/statusIcons.png");
+            Texture2D buttonTexture = themeManager.Load<Texture2D>("updateButton.png");
+            this.statusTexture = themeManager.Load<Texture2D>("statusIcons.png");
 
             this.updateButton = new ClickableTextureComponent(
                 new Rectangle(36, Game1.viewport.Height - 150 - 48, 81, 75), buttonTexture, new Rectangle(0, 0, 27, 25),

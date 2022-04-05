@@ -1,4 +1,5 @@
-﻿using ModUpdateMenu.Menus;
+﻿using Leclair.Stardew.ThemeManager;
+using ModUpdateMenu.Menus;
 using ModUpdateMenu.Updates;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -28,6 +29,7 @@ namespace ModUpdateMenu
         /// <summary>The current mod statuses.</summary>
         private IList<ModStatus> currentStatuses;
 
+        private ThemeManager<BaseThemeData> themeManager;
 
         /*********
         ** Public methods
@@ -37,7 +39,11 @@ namespace ModUpdateMenu
         public override void Entry(IModHelper helper)
         {
             this.config = this.Helper.ReadConfig<ModConfig>();
-            this.button = new UpdateButton(helper);
+
+            this.themeManager = new ThemeManager<BaseThemeData>(this);
+            this.themeManager.Discover();
+
+            this.button = new UpdateButton(helper, this.themeManager);
 
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
