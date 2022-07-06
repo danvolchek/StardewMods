@@ -1,7 +1,6 @@
-# Mod Update Menu
+# Unofficial Mod Update Menu
 
-
-See [This link](https://www.nexusmods.com/stardewvalley/mods/2536/) for the NexusMods mod page, which has a description, screenshots, and a download of the built mod.
+[ModUpdateMenu 1.6.1.zip](https://github.com/Dphill10827/StardewMods/files/9058976/ModUpdateMenu.1.6.1.zip)
 
 ## How it works
 
