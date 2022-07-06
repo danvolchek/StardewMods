@@ -50,7 +50,7 @@ namespace ModUpdateMenu
         internal void NotifySMAPI(ISemanticVersion version)
         {
             //Debug Info
-            //this.Monitor.Log($"SMAPI: {version}");
+            this.Monitor.Log($"SMAPI: {version}");
             this.menu.NotifySMAPI(version);
             this.button.NotifySMAPI(version);
         }
@@ -102,10 +102,12 @@ namespace ModUpdateMenu
 
                                 try
                                 {
+                                    //this.Monitor.Log(statusRetriever.GetSMAPIUpdateVersion().ToString());
                                     this.NotifySMAPI(statusRetriever.GetSMAPIUpdateVersion());
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
+                                    this.Monitor.Log($"Exception{ex}");
                                     this.NotifySMAPI(null);
                                 }
 

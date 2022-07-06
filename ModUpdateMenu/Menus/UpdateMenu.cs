@@ -187,7 +187,12 @@ namespace ModUpdateMenu.Menus
             {
                 try
                 {
-                    Process.Start("https://smapi.io");
+                    var ps = new ProcessStartInfo("https://smapi.io")
+                    {
+                        UseShellExecute = true,
+                        Verb = "open"
+                    };
+                    Process.Start(ps);
                 }
                 catch
                 {
@@ -289,7 +294,7 @@ namespace ModUpdateMenu.Menus
                         break;
 
                     case 2:
-                        this.hoverText = which.UpdateURLType != "???" ? $"Click to go to: ^{which.UpdateURL}" : "Unknown update link.";
+                        this.hoverText = which.UpdateURL != null ? $"Click to go to: ^{which.UpdateURL}" : "Unknown update link.";
                         break;
                 }
 
@@ -383,15 +388,20 @@ namespace ModUpdateMenu.Menus
             }
             else if (offset == 2)
             {
-                Game1.playSound("bigSelect");
-                if (which.UpdateURLType != "???")
-                    try
+                try
+                {
+                    var ps = new ProcessStartInfo(which.UpdateURL)
                     {
-                        Process.Start(which.UpdateURL);
-                    }
-                    catch
-                    {
-                    }
+                        UseShellExecute = true,
+                        Verb = "open"
+                    };
+                    Process.Start(ps);
+                    Game1.playSound("bigSelect");
+                }
+                catch
+                {
+                    Game1.playSound("toyPiano");
+                }
             }
         }
 
