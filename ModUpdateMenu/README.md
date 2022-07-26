@@ -1,6 +1,6 @@
 # Unofficial Mod Update Menu
 
-[ModUpdateMenu.zip](https://github.com/Dphill10827/StardewMods/files/9193686/ModUpdateMenu.zip)
+[ModUpdateMenu-unofficial-1.6.zip](https://github.com/Dphill10827/StardewMods/files/9193686/ModUpdateMenu.zip)
 
 ## How it works
 
