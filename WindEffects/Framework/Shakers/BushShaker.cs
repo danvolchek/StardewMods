@@ -21,7 +21,7 @@ namespace WindEffects.Framework.Shakers
             // can't just call shake because it drops items. We don't want to drop items.
             // see Bush::shake for the logic this replicates
             
-            // Outdoor check inserted here
+            // not outdoors
             If (!Game1.player.currentLocation.IsOutdoors)
                 return;
 
