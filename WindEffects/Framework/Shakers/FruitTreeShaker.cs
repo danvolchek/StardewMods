@@ -25,7 +25,7 @@ namespace WindEffects.Framework.Shakers
             // see FruitTree::shake for the logic this replicates
             
             // not outdoors
-            If (!Game1.player.currentLocation.IsOutdoors)
+            if (!Game1.player.currentLocation.IsOutdoors)
                 return;
 
             // already shaking
