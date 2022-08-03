@@ -17,6 +17,10 @@ namespace WindEffects.Framework.Shakers
         }
         public void Shake(IReflectionHelper helper, Vector2 tile)
         {
+            // not outdoors
+            if (!Game1.player.currentLocation.IsOutdoors)
+                return;
+              
             if (dirt.crop == null)
                 return;
 
