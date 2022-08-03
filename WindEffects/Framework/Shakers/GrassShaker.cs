@@ -18,6 +18,11 @@ namespace WindEffects.Framework.Shakers
 
         public void Shake(IReflectionHelper helper, Vector2 tile)
         {
+        
+            // not outdoors
+            if (!Game1.player.currentLocation.IsOutdoors)
+                return;
+                
             helper.GetMethod(grass, "shake").Invoke(3f * (float)Math.PI / 32f, (float)Math.PI / 80f, this.left);
             
             // works, but too loud
