@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using StardewValley.TerrainFeatures;
 using System;
+using StardewValley;
 
 namespace WindEffects.Framework.Shakers
 {
