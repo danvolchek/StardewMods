@@ -12,7 +12,7 @@ namespace WindEffects
         internal static bool debug;
 
         private Random rand = new Random();
-        private ModConfig config;
+        public static ModConfig config;
 
         public override void Entry(IModHelper helper)
         {
@@ -20,7 +20,7 @@ namespace WindEffects
 
             this.manager = new WaveManager(this.Helper, this.Monitor);
 
-            this.config = this.Helper.ReadConfig<ModConfig>();
+            config = this.Helper.ReadConfig<ModConfig>();
 
             this.Helper.Events.Display.Rendered += Display_Rendered;
             this.Helper.Events.Input.ButtonPressed += Input_ButtonPressed;
@@ -48,7 +48,7 @@ namespace WindEffects
             this.manager.ChangeWavePattern(Game1.isDebrisWeather);
 
             if (!Game1.isDebrisWeather)
-                this.manager.DisableAutoSpawning = this.rand.NextDouble() > this.config.WindyDayChance;
+                this.manager.DisableAutoSpawning = this.rand.NextDouble() > config.WindyDayChance;
 
             this.Monitor.Log($"Wind Effects are {(this.manager.DisableAutoSpawning ? "disabled" : "enabled")} for today.", LogLevel.Info);
         }
@@ -113,7 +113,7 @@ namespace WindEffects
                 return;
             }
 
-            this.Monitor.Log($"Uknown sub command {args[0]}. See help {name} for more info.", LogLevel.Error);
+            this.Monitor.Log($"Unknown sub command {args[0]}. See help {name} for more info.", LogLevel.Error);
         }
     }
 }

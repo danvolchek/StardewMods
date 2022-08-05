@@ -19,6 +19,9 @@ namespace WindEffects.Framework.Shakers
 
         public void Shake(IReflectionHelper helper, Vector2 tile)
         {
+            // deactivated via config
+	    if (!ModEntry.config.ShakeGrass)
+		return;
         
             // not outdoors
             if (!Game1.player.currentLocation.IsOutdoors)

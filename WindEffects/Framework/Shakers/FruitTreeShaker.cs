@@ -23,6 +23,10 @@ namespace WindEffects.Framework.Shakers
             // can't just call shake because it drops items. We don't want to drop items.
             // unfortunately almost identical, but different from, TreeShaker
             // see FruitTree::shake for the logic this replicates
+
+            // deactivated via config
+	    if (!ModEntry.config.ShakeTrees)
+		return;
             
             // not outdoors
             if (!Game1.player.currentLocation.IsOutdoors)
