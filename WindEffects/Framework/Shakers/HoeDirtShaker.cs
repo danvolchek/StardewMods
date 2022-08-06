@@ -19,7 +19,7 @@ namespace WindEffects.Framework.Shakers
         public void Shake(IReflectionHelper helper, Vector2 tile)
         {
             // deactivated via config
-	    if (!ModEntry.config.ShakeHoeDirt)
+	    if (!ModEntry.config.ShakeCrops)
 		return;
 
             // not outdoors
