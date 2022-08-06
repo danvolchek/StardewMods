@@ -50,7 +50,7 @@ namespace WindEffects
             this.manager.ChangeWavePattern(Game1.isDebrisWeather);
 
             if (!Game1.isDebrisWeather)
-                this.manager.DisableAutoSpawning = this.rand.NextDouble() > config.WindyDayChance;
+                this.manager.DisableAutoSpawning = this.rand.NextDouble() > ConvertToDouble(config.WindyDayChance);
 
             this.Monitor.Log($"Wind Effects are {(this.manager.DisableAutoSpawning ? "disabled" : "enabled")} for today.", LogLevel.Info);
         }
