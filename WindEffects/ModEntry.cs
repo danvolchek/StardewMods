@@ -52,7 +52,8 @@ namespace WindEffects
             if (!Game1.isDebrisWeather)
                 this.manager.DisableAutoSpawning = this.rand.NextDouble() > ConvertToDouble(config.WindyDayChance);
 
-            this.Monitor.Log($"Wind Effects are {(this.manager.DisableAutoSpawning ? "disabled" : "enabled")} for today.", LogLevel.Info);
+            if (config.WindyDayChance != 0)
+	        this.Monitor.Log($"Wind Effects are {(this.manager.DisableAutoSpawning ? "disabled" : "enabled")} for today.", LogLevel.Info);
         }
 
         private void Player_Warped(object sender, WarpedEventArgs e)
@@ -145,7 +146,7 @@ namespace WindEffects
             cfgMenu.AddBoolOption(
                 mod: ModManifest,
                 name: () => Helper.Translation.Get("config.wind_bushes_name"),
-                tooltip:() => Helper.Translation.Get("config.wind_bushes_tooltip"),
+                tooltip: () => Helper.Translation.Get("config.wind_bushes_tooltip"),
                 getValue: () => config.ShakeBushes,
                 setValue: value => config.ShakeBushes = value
             );
@@ -153,7 +154,7 @@ namespace WindEffects
             cfgMenu.AddBoolOption(
                 mod: ModManifest,
                 name: () => Helper.Translation.Get("config.wind_crops_name"),
-                tooltip:() => Helper.Translation.Get("config.wind_crops_tooltip"),
+                tooltip: () => Helper.Translation.Get("config.wind_crops_tooltip"),
                 getValue: () => config.ShakeCrops,
                 setValue: value => config.ShakeCrops = value
             );
@@ -161,7 +162,7 @@ namespace WindEffects
             cfgMenu.AddBoolOption(
                 mod: ModManifest,
                 name: () => Helper.Translation.Get("config.wind_grass_name"),
-                tooltip:() => Helper.Translation.Get("config.wind_grass_tooltip"),
+                tooltip: () => Helper.Translation.Get("config.wind_grass_tooltip"),
                 getValue: () => config.ShakeGrass,
                 setValue: value => config.ShakeGrass = value
             );
@@ -169,7 +170,7 @@ namespace WindEffects
             cfgMenu.AddBoolOption(
                 mod: ModManifest,
                 name: () => Helper.Translation.Get("config.wind_trees_name"),
-                tooltip:() => Helper.Translation.Get("config.wind_trees_tooltip"),
+                tooltip: () => Helper.Translation.Get("config.wind_trees_tooltip"),
                 getValue: () => config.ShakeTrees,
                 setValue: value => config.ShakeTrees = value
             );
