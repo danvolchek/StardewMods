@@ -8,7 +8,7 @@ namespace BetterGardenPots.Patches.Utility
 {
     internal class FindCloseFlowerPatch
     {
-        public static bool Prefix(GameLocation location, Vector2 startTileLocation, ref Crop __result)
+        public static bool Prefix(GameLocation location, Vector2 startTileLocation, int range, Func<Crop, bool> additional_check, ref Crop __result)
         {
             __result = null;
 
@@ -16,7 +16,7 @@ namespace BetterGardenPots.Patches.Utility
             HashSet<Vector2> vector2Set = new HashSet<Vector2>();
 
             vector2Queue.Enqueue(startTileLocation);
-            for (int index1 = 0; index1 <= 150 && vector2Queue.Count > 0; ++index1)
+            for (int index1 = 0; ((range >= 0) || ((range < 0) && (index1 <= 150))) && (vector2Queue.Count > 0); index1++)
             {
                 Vector2 index2 = vector2Queue.Dequeue();
 
@@ -28,15 +28,18 @@ namespace BetterGardenPots.Patches.Utility
                          pot.hoeDirt.Value != null)
                     current = pot.hoeDirt.Value.crop;
 
-                if (current != null && current.programColored.Value &&
-                    current.currentPhase.Value >= current.phaseDays.Count - 1 && !current.dead.Value)
+                if (current != null && 
+                    new SObject(current.indexOfHarvest.Value, 1).Category == -80 &&
+                    current.currentPhase.Value >= (current.phaseDays.Count - 1) &&
+                    !current.dead.Value &&
+                    (additional_check == null || additional_check(current)))
                 {
                     __result = current;
                     break;
                 }
 
                 foreach (Vector2 adjacentTileLocation in StardewValley.Utility.getAdjacentTileLocations(index2))
-                    if (!vector2Set.Contains(adjacentTileLocation))
+                    if (!vector2Set.Contains(adjacentTileLocation) && ((range < 0) || ((System.Math.Abs((float)(adjacentTileLocation.X - startTileLocation.X)) + System.Math.Abs((float)(adjacentTileLocation.Y - startTileLocation.Y))) <= range)))
                         vector2Queue.Enqueue(adjacentTileLocation);
                 vector2Set.Add(index2);
             }
