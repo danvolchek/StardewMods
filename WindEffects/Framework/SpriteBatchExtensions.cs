@@ -11,7 +11,7 @@ namespace WindEffects.Framework
 
         public static void Init(IModHelper helper)
         {
-            SpriteBatchExtensions.pixel = helper.Content.Load<Texture2D>("assets/pixel.png");
+            SpriteBatchExtensions.pixel = helper.ModContent.Load<Texture2D>("assets/pixel.png");
         }
 
         public static void DrawLine(this SpriteBatch spriteBatch, Vector2 point1, Vector2 point2, Color color, int lineWidth)

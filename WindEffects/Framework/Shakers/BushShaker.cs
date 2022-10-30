@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using StardewValley.TerrainFeatures;
 using System;
+using StardewValley;
 
 namespace WindEffects.Framework.Shakers
 {
@@ -20,6 +21,14 @@ namespace WindEffects.Framework.Shakers
         {
             // can't just call shake because it drops items. We don't want to drop items.
             // see Bush::shake for the logic this replicates
+
+            // deactivated via config
+	    if (!ModEntry.config.ShakeBushes)
+		return;
+            
+            // not outdoors
+            if (!Game1.player.currentLocation.IsOutdoors)
+                return;
 
             // already shaking
             if (helper.GetField<float>(this.bush, "maxShake").GetValue() != 0)

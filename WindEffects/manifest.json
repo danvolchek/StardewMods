@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Wind Effects",
   "Author": "Cat",
-  "Version": "1.0.2",
+  "Version": "1.0.3-unofficial.4-brimbane",
   "Description": "Wind blows through Stardew Valley!",
   "UniqueID": "cat.windeffects",
   "EntryDll": "WindEffects.dll",

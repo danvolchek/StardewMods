@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using StardewValley.TerrainFeatures;
 using System;
+using StardewValley;
 
 namespace WindEffects.Framework.Shakers
 {
@@ -18,6 +19,14 @@ namespace WindEffects.Framework.Shakers
 
         public void Shake(IReflectionHelper helper, Vector2 tile)
         {
+            // deactivated via config
+	    if (!ModEntry.config.ShakeGrass)
+		return;
+        
+            // not outdoors
+            if (!Game1.player.currentLocation.IsOutdoors)
+                return;
+                
             helper.GetMethod(grass, "shake").Invoke(3f * (float)Math.PI / 32f, (float)Math.PI / 80f, this.left);
             
             // works, but too loud

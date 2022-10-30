@@ -1,0 +1,12 @@
+{
+        "config.wind_prob_name": "Chance für windigen Tag",
+	"config.wind_prob_tooltip": "Wahrscheinlichkeit, dass ein Tag windig wird [Standard: 0.5]",
+        "config.wind_bushes_name": "Büsche schütteln",
+	"config.wind_bushes_tooltip": "Ob Büsche vom Wind beeinflusst werden oder nicht [Standard: An]",
+        "config.wind_crops_name": "Nutzpflanzen schütteln",
+	"config.wind_crops_tooltip": "Ob Nutzpflanzen vom Wind beeinflusst werden oder nicht [Standard: An]",
+        "config.wind_grass_name": "Gras schütteln",
+	"config.wind_grass_tooltip": "Ob Gras vom Wind beeinflusst wird oder nicht [Standard: An]",
+        "config.wind_trees_name": "Bäume schütteln",
+	"config.wind_trees_tooltip": "Ob Bäume (normale und Obst) vom Wind beeinflusst werden oder nicht [Standard: An]"
+}

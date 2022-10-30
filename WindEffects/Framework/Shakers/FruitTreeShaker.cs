@@ -24,6 +24,14 @@ namespace WindEffects.Framework.Shakers
             // unfortunately almost identical, but different from, TreeShaker
             // see FruitTree::shake for the logic this replicates
 
+            // deactivated via config
+	    if (!ModEntry.config.ShakeTrees)
+		return;
+            
+            // not outdoors
+            if (!Game1.player.currentLocation.IsOutdoors)
+                return;
+
             // already shaking
             if (helper.GetField<float>(fruitTree, "maxShake").GetValue() != 0)
                 return;

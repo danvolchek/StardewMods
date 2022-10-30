@@ -12,7 +12,8 @@ namespace WindEffects
         internal static bool debug;
 
         private Random rand = new Random();
-        private ModConfig config;
+        public static ModConfig config;
+        private IGenericModConfigMenuApi cfgMenu; // Generic Mod Config Menu
 
         public override void Entry(IModHelper helper)
         {
@@ -20,7 +21,7 @@ namespace WindEffects
 
             this.manager = new WaveManager(this.Helper, this.Monitor);
 
-            this.config = this.Helper.ReadConfig<ModConfig>();
+            config = this.Helper.ReadConfig<ModConfig>();
 
             this.Helper.Events.Display.Rendered += Display_Rendered;
             this.Helper.Events.Input.ButtonPressed += Input_ButtonPressed;
@@ -29,6 +30,7 @@ namespace WindEffects
             this.Helper.Events.GameLoop.DayStarted += GameLoop_DayStarted;
             this.Helper.Events.GameLoop.ReturnedToTitle += GameLoop_ReturnedToTitle;
             this.Helper.Events.GameLoop.TimeChanged += GameLoop_TimeChanged;
+            this.Helper.Events.GameLoop.GameLaunched += OnGameLaunched; // Generic Mod Config Menu
             this.Helper.ConsoleCommands.Add("we", "Wind Effects console commands.\nUsage:\n\twe debug: enable/disable debugging", this.ConsoleCommand_Triggered);
         }
 
@@ -48,9 +50,10 @@ namespace WindEffects
             this.manager.ChangeWavePattern(Game1.isDebrisWeather);
 
             if (!Game1.isDebrisWeather)
-                this.manager.DisableAutoSpawning = this.rand.NextDouble() > this.config.WindyDayChance;
+                this.manager.DisableAutoSpawning = this.rand.NextDouble() > Convert.ToDouble(config.WindyDayChance);
 
-            this.Monitor.Log($"Wind Effects are {(this.manager.DisableAutoSpawning ? "disabled" : "enabled")} for today.", LogLevel.Info);
+            if (config.WindyDayChance != 0)
+	        this.Monitor.Log($"Wind Effects are {(this.manager.DisableAutoSpawning ? "disabled" : "enabled")} for today.", LogLevel.Info);
         }
 
         private void Player_Warped(object sender, WarpedEventArgs e)
@@ -102,7 +105,7 @@ namespace WindEffects
 
             if (args.Length == 0)
             {
-                this.Monitor.Log($"Must provide a sub command. See help {name} for more info.", LogLevel.Error);
+                this.Monitor.Log($"Must provide a subcommand. See help {name} for more info.", LogLevel.Error);
                 return;
             }
 
@@ -113,7 +116,64 @@ namespace WindEffects
                 return;
             }
 
-            this.Monitor.Log($"Uknown sub command {args[0]}. See help {name} for more info.", LogLevel.Error);
+            this.Monitor.Log($"Unknown subcommand {args[0]}. See help {name} for more info.", LogLevel.Error);
         }
+
+	// Generic Mod Config Menu
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+	    // Get Generic Mod Config Menu's API (if installed)
+            cfgMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");  
+	    if (cfgMenu is null)
+		return;
+            
+	    // Register mod
+            cfgMenu.Register(
+                mod: ModManifest,
+                reset: () => config = new ModConfig(),
+                save: () => Helper.WriteConfig(config)
+            );
+
+            // Add config options
+            cfgMenu.AddNumberOption(
+		mod: ModManifest,
+		name: () => Helper.Translation.Get("config.wind_prob_name"),
+                tooltip: () => Helper.Translation.Get("config.wind_prob_tooltip"),
+                getValue: () => config.WindyDayChance, 
+                setValue: value => config.WindyDayChance = value, min: 0, max: 1, interval: 0.1f
+	    );
+
+            cfgMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("config.wind_bushes_name"),
+                tooltip: () => Helper.Translation.Get("config.wind_bushes_tooltip"),
+                getValue: () => config.ShakeBushes,
+                setValue: value => config.ShakeBushes = value
+            );
+
+            cfgMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("config.wind_crops_name"),
+                tooltip: () => Helper.Translation.Get("config.wind_crops_tooltip"),
+                getValue: () => config.ShakeCrops,
+                setValue: value => config.ShakeCrops = value
+            );
+
+            cfgMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("config.wind_grass_name"),
+                tooltip: () => Helper.Translation.Get("config.wind_grass_tooltip"),
+                getValue: () => config.ShakeGrass,
+                setValue: value => config.ShakeGrass = value
+            );
+
+            cfgMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => Helper.Translation.Get("config.wind_trees_name"),
+                tooltip: () => Helper.Translation.Get("config.wind_trees_tooltip"),
+                getValue: () => config.ShakeTrees,
+                setValue: value => config.ShakeTrees = value
+            );
+	}
     }
 }

@@ -1,0 +1,12 @@
+{
+        "config.wind_prob_name": "Windy day chance",
+	"config.wind_prob_tooltip": "Probability for wind during a day [Default: 0.5]",
+        "config.wind_bushes_name": "Shake bushes",
+	"config.wind_bushes_tooltip": "Whether bushes are affected by wind or not [Default: On]",
+        "config.wind_crops_name": "Shake crops",
+	"config.wind_crops_tooltip": "Whether crops are affected by wind or not [Default: On]",
+        "config.wind_grass_name": "Shake grass",
+	"config.wind_grass_tooltip": "Whether grass is affected by wind or not [Default: On]",
+        "config.wind_trees_name": "Shake trees",
+	"config.wind_trees_tooltip": "Whether trees (regular or fruit) are affected by wind or not [Default: On]"
+}
