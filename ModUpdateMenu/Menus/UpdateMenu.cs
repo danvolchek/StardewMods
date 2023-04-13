@@ -185,9 +185,13 @@ namespace ModUpdateMenu.Menus
         {
             if (this.SMAPIText != null && this.SMAPIComponent.containsPoint(x, y))
             {
+                Game1.playSound("bigSelect");
                 try
                 {
-                    Process.Start("https://smapi.io");
+                    Process.Start(new ProcessStartInfo("https://smapi.io")
+                    {
+                        UseShellExecute = true
+                    });
                 }
                 catch
                 {
@@ -387,7 +391,10 @@ namespace ModUpdateMenu.Menus
                 if (which.UpdateURLType != "???")
                     try
                     {
-                        Process.Start(which.UpdateURL);
+                        Process.Start(new ProcessStartInfo(which.UpdateURL)
+                        {
+                            UseShellExecute = true
+                        });
                     }
                     catch
                     {
