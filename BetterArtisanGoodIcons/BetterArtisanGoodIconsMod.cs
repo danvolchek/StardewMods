@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BetterArtisanGoodIcons.Extensions;
-using Harmony;
+using HarmonyLib;
 using StardewModdingAPI;
 using StardewValley.Objects;
 
@@ -20,7 +20,7 @@ namespace BetterArtisanGoodIcons
         {
             ArtisanGoodsManager.Init(this.Helper, this.Monitor);
 
-            HarmonyInstance harmony = HarmonyInstance.Create("cat.betterartisangoodicons");
+            Harmony harmony = new Harmony("cat.betterartisangoodicons");
 
             //Don't need to override draw for Object because artisan goods can't be placed down.
             Type objectType = typeof(StardewValley.Object);

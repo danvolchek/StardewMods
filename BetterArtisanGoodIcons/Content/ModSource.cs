@@ -13,15 +13,12 @@ namespace BetterArtisanGoodIcons.Content
         public ModSource(IModHelper helper)
         {
             this.helper = helper;
-            //1.3.28
-            //this.TextureData = helper.ReadJsonFile<CustomTextureData>("assets/data.json");
-            //1.3.31
             this.TextureData = helper.Data.ReadJsonFile<CustomTextureData>("assets/data.json");
         }
 
         public override T Load<T>(string path)
         {
-            return this.helper.Content.Load<T>(path);
+            return this.helper.ModContent.Load<T>(path);
         }
 
         public override IManifest GetManifest()
