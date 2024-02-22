@@ -20,13 +20,14 @@ namespace BetterArtisanGoodIcons
 		/// <param name="helper">Provides simplified APIs for writing mods.</param>
 		public override void Entry(IModHelper helper)
 		{
-			ArtisanGoodsManager.Init(this.Helper, this.Monitor);
-			Patches.Init(this.Monitor);
+			ArtisanGoodsManager.Init(this);
 
 			Harmony harmony = new Harmony(this.ModManifest.UniqueID);
 
 			try
 			{
+				// Patch the original `StardewValley` methods with the patch methods we wrote for them.
+				// The parameter types of the original methods we are looking for are necessary to avoid `AmbiguousMatchException` errors due to not being specific enough in our search.
 				harmony.Patch(
 					original: AccessTools.Method(typeof(SObject), nameof(SObject.drawWhenHeld), new Type[] { typeof(SpriteBatch), typeof(Vector2), typeof(Farmer) }),
 					prefix: new HarmonyMethod(typeof(Patches.SObjectPatches), nameof(Patches.SObjectPatches.DrawWhenHeld_Prefix))

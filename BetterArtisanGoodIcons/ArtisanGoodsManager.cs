@@ -11,6 +11,9 @@ namespace BetterArtisanGoodIcons
     /// <summary>Manages textures for all artisan goods.</summary>
     internal static class ArtisanGoodsManager
     {
+        /// <summary>A reference to the overall mod so we have easy access to its helper, monitor, etc. without having to pass them around to every class and/or function.</summary>
+        internal static BetterArtisanGoodIconsMod Mod;
+
         /// <summary>Texture managers that get the correct texture for each item.</summary>
         private static readonly IList<ArtisanGoodTextureProvider> TextureProviders = new List<ArtisanGoodTextureProvider>();
 
@@ -18,11 +21,12 @@ namespace BetterArtisanGoodIcons
         private static BetterArtisanGoodIconsConfig config;
 
         /// <summary>Initializes the manager.</summary>
-        internal static void Init(IModHelper helper, IMonitor monitor)
+        internal static void Init(BetterArtisanGoodIconsMod mod)
         {
-            config = helper.ReadConfig<BetterArtisanGoodIconsConfig>();
+            Mod = mod;
+            config = mod.Helper.ReadConfig<BetterArtisanGoodIconsConfig>();
 
-            foreach (ArtisanGoodTextureProvider provider in ContentSourceManager.GetTextureProviders(helper, monitor))
+            foreach (ArtisanGoodTextureProvider provider in ContentSourceManager.GetTextureProviders())
                 TextureProviders.Add(provider);
         }
 
@@ -33,9 +37,9 @@ namespace BetterArtisanGoodIcons
             mainPosition = Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, output.ParentSheetIndex, 16, 16);
             iconPosition = Rectangle.Empty;
 
-            foreach (ArtisanGoodTextureProvider manager in TextureProviders)
+            foreach (ArtisanGoodTextureProvider provider in TextureProviders)
             {
-                if (manager.GetDrawInfo(output, ref textureSheet, ref mainPosition, ref iconPosition))
+                if (provider.GetDrawInfo(output, ref textureSheet, ref mainPosition, ref iconPosition))
                 {
                     if (config.DisableSmallSourceIcons)
                         iconPosition = Rectangle.Empty;

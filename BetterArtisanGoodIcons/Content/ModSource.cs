@@ -6,24 +6,21 @@ namespace BetterArtisanGoodIcons.Content
     /// <summary>A content source that comes from a mod. </summary>
     internal class ModSource : TextureDataContentSource
     {
-        private readonly IModHelper helper;
-
         public override CustomTextureData TextureData { get; }
 
-        public ModSource(IModHelper helper)
+        public ModSource()
         {
-            this.helper = helper;
-            this.TextureData = helper.Data.ReadJsonFile<CustomTextureData>("assets/data.json");
+            this.TextureData = ArtisanGoodsManager.Mod.Helper.Data.ReadJsonFile<CustomTextureData>("assets/data.json");
         }
 
         public override T Load<T>(string path)
         {
-            return this.helper.ModContent.Load<T>(path);
+            return ArtisanGoodsManager.Mod.Helper.ModContent.Load<T>(path);
         }
 
         public override IManifest GetManifest()
         {
-            return this.helper.ModRegistry.Get(this.helper.ModRegistry.ModID).Manifest;
+            return ArtisanGoodsManager.Mod.Helper.ModRegistry.Get(ArtisanGoodsManager.Mod.Helper.ModRegistry.ModID).Manifest;
         }
     }
 }

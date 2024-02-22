@@ -10,14 +10,6 @@ namespace BetterArtisanGoodIcons
 {
     internal static class Patches
     {
-        private static IMonitor Monitor;
-
-        // Call this method from Entry class so we can monitor patches for errors
-        internal static void Init(IMonitor monitor)
-        {
-            Monitor = monitor;
-        }
-
         internal static class SObjectPatches
         {
             /// <summary>Draw the correct texture based on <see cref="SObject.preservedParentSheetIndex"/> or <see cref="SObject.Name"/>.</summary>
@@ -36,7 +28,7 @@ namespace BetterArtisanGoodIcons
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Failed in {nameof(SObjectPatches)}.{nameof(DrawWhenHeld_Prefix)}:\n{ex}", LogLevel.Error);
+					ArtisanGoodsManager.Mod.Monitor.Log($"Failed in {nameof(SObjectPatches)}.{nameof(DrawWhenHeld_Prefix)}:\n{ex}", LogLevel.Error);
 
                     return true;
                 }
@@ -80,7 +72,7 @@ namespace BetterArtisanGoodIcons
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Failed in {nameof(SObjectPatches)}.{nameof(DrawInMenu_Prefix)}:\n{ex}", LogLevel.Error);
+					ArtisanGoodsManager.Mod.Monitor.Log($"Failed in {nameof(SObjectPatches)}.{nameof(DrawInMenu_Prefix)}:\n{ex}", LogLevel.Error);
 
                     return true;
                 }
@@ -142,7 +134,7 @@ namespace BetterArtisanGoodIcons
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Failed in {nameof(SObjectPatches)}.{nameof(Draw_Prefix)}:\n{ex}", LogLevel.Error);
+					ArtisanGoodsManager.Mod.Monitor.Log($"Failed in {nameof(SObjectPatches)}.{nameof(Draw_Prefix)}:\n{ex}", LogLevel.Error);
 
                     return true;
                 }
@@ -178,7 +170,7 @@ namespace BetterArtisanGoodIcons
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Failed in {nameof(FurniturePatches)}.{nameof(Draw_Prefix)}:\n{ex}", LogLevel.Error);
+					ArtisanGoodsManager.Mod.Monitor.Log($"Failed in {nameof(FurniturePatches)}.{nameof(Draw_Prefix)}:\n{ex}", LogLevel.Error);
 
                     return true;
                 }

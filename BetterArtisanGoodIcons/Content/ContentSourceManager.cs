@@ -20,33 +20,32 @@ namespace BetterArtisanGoodIcons.Content
         };
 
         /// <summary>Gets all valid <see cref="ArtisanGoodTextureProvider"/>s that can be used to get artisan good icons.</summary>
-        internal static IEnumerable<ArtisanGoodTextureProvider> GetTextureProviders(IModHelper helper, IMonitor monitor)
+        internal static IEnumerable<ArtisanGoodTextureProvider> GetTextureProviders()
         {
             //Load content packs first so vanilla icons can be overwritten
-            foreach (IContentPack pack in helper.ContentPacks.GetOwned())
+            foreach (IContentPack pack in ArtisanGoodsManager.Mod.Helper.ContentPacks.GetOwned())
             {
-                foreach (ArtisanGoodTextureProvider provider in TryLoadContentSource(new ContentPackSource(pack), monitor))
+                foreach (ArtisanGoodTextureProvider provider in TryLoadContentSource(new ContentPackSource(pack)))
                     yield return provider;
             }
 
             //Load vanilla icons
-            foreach (ArtisanGoodTextureProvider provider in TryLoadContentSource(new ModSource(helper), monitor))
+            foreach (ArtisanGoodTextureProvider provider in TryLoadContentSource(new ModSource()))
                 yield return provider;
         }
 
         /// <summary>Tries to load textures for all artisan good types for a given <see cref="IContentSource"/>.</summary>
-        private static IEnumerable<ArtisanGoodTextureProvider> TryLoadContentSource(TextureDataContentSource contentSource, IMonitor monitor)
+        private static IEnumerable<ArtisanGoodTextureProvider> TryLoadContentSource(TextureDataContentSource contentSource)
         {
             foreach (Tuple<string, List<string>, ArtisanGood> item in contentSource.GetData())
             {
-                if (TryLoadTextureProvider(contentSource, item.Item1, item.Item2, item.Item3, monitor,
-                    out ArtisanGoodTextureProvider provider))
+                if (TryLoadTextureProvider(contentSource, item.Item1, item.Item2, item.Item3, out ArtisanGoodTextureProvider provider))
                     yield return provider;
             }
         }
 
         /// <summary>Tries to load a texture given the <see cref="IContentSource"/>, the path to the texture, the list of source names for it, and the good type.</summary>
-        private static bool TryLoadTextureProvider(IContentSource contentSource, string imagePath, List<string> source, ArtisanGood good, IMonitor monitor, out ArtisanGoodTextureProvider provider)
+        private static bool TryLoadTextureProvider(IContentSource contentSource, string imagePath, List<string> source, ArtisanGood good, out ArtisanGoodTextureProvider provider)
         {
             provider = null;
 
@@ -56,8 +55,8 @@ namespace BetterArtisanGoodIcons.Content
             IManifest manifest = contentSource.GetManifest();
             if (source == null || source.Count == 0 || source.Any(item => item == null))
             {
-                monitor.Log($"Couldn't load {good} from {manifest.Name} ({manifest.UniqueID}) because it has an invalid source list ({artisanGoodToSourceType[good]}).", LogLevel.Warn);
-                monitor.Log($"{artisanGoodToSourceType[good]} must not be null, must not be empty, and cannot have null items inside it.", LogLevel.Warn);
+				ArtisanGoodsManager.Mod.Monitor.Log($"Couldn't load {good} from {manifest.Name} ({manifest.UniqueID}) because it has an invalid source list ({artisanGoodToSourceType[good]}).", LogLevel.Warn);
+				ArtisanGoodsManager.Mod.Monitor.Log($"{artisanGoodToSourceType[good]} must not be null, must not be empty, and cannot have null items inside it.", LogLevel.Warn);
             }
             else
             {
@@ -68,7 +67,7 @@ namespace BetterArtisanGoodIcons.Content
                 }
                 catch (Exception)
                 {
-                    monitor.Log($"Couldn't load {good} from {manifest.Name} ({manifest.UniqueID}) because the {good} texture file path is invalid ({imagePath}).", LogLevel.Warn);
+					ArtisanGoodsManager.Mod.Monitor.Log($"Couldn't load {good} from {manifest.Name} ({manifest.UniqueID}) because the {good} texture file path is invalid ({imagePath}).", LogLevel.Warn);
                 }
             }
 
