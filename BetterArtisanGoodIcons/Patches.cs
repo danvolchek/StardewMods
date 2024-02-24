@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Netcode;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Objects;
@@ -160,34 +161,33 @@ namespace BetterArtisanGoodIcons
         internal static class FurniturePatches
         {
             /// <summary>Draw the right texture for the object placed on furniture.</summary>
-            public static bool Draw_Prefix(Furniture __instance, SpriteBatch spriteBatch, int x, int y, float alpha = 1f)
+            public static bool Draw_Prefix(Furniture __instance, NetVector2 ___drawPosition, NetInt ___sourceIndexOffset, SpriteBatch spriteBatch, int x, int y, float alpha = 1f)
             {
-                try
-                {
+				// NOTE - The `drawPosition` and `sourceIndexOffset` properties are not accessible through `__instance` since they're protected/private,
+				// but Harmony allows defining them with triple-leading-underscore parameters so that you can access them.
+				// Ref: https://harmony.pardeike.net/articles/patching-injections.html#___fields
+
+				try
+				{
 					if (__instance.isTemporarilyInvisible || __instance.heldObject.Value == null || __instance.heldObject.Value is Furniture
 						|| !ArtisanGoodsManager.GetDrawInfo(__instance.heldObject.Value, out Texture2D spriteSheet, out Rectangle position, out Rectangle iconPosition))
 					{
 						return true;
 					}
 
-                    // Pulled this calc from `Furniture.updateDrawPosition()` since `drawPosition` (which that method writes into) in `Furniture` is protected
-                    Vector2 drawPosition = new Vector2(__instance.boundingBox.X, __instance.boundingBox.Y - (__instance.sourceRect.Height * Game1.pixelZoom - __instance.boundingBox.Height));
-
-					Rectangle value = __instance.sourceRect.Value;
-                    
-                    // The `sourceIndexOffset` property is private to `Furniture`, so we can't read it, but it seems to only have a non-zero value for some light-emitting furniture, so should be fine to not have this
-					// value.X += value.Width * __instance.sourceIndexOffset.Value;
+                    Rectangle value = __instance.sourceRect.Value;
+					value.X += value.Width * ___sourceIndexOffset.Value;
 
 					if (Furniture.isDrawingLocationFurniture)
 					{
 						if (__instance.HasSittingFarmers() && __instance.sourceRect.Right <= Furniture.furnitureFrontTexture.Width && __instance.sourceRect.Bottom <= Furniture.furnitureFrontTexture.Height)
 						{
-							spriteBatch.Draw(Furniture.furnitureTexture, Game1.GlobalToLocal(Game1.viewport, drawPosition + ((__instance.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero)), value, Color.White * alpha, 0f, Vector2.Zero, Game1.pixelZoom, __instance.Flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (float)(__instance.boundingBox.Value.Top + 16) / 10000f);
-							spriteBatch.Draw(Furniture.furnitureFrontTexture, Game1.GlobalToLocal(Game1.viewport, drawPosition + ((__instance.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero)), value, Color.White * alpha, 0f, Vector2.Zero, Game1.pixelZoom, __instance.Flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (float)(__instance.boundingBox.Value.Bottom - 8) / 10000f);
+							spriteBatch.Draw(Furniture.furnitureTexture, Game1.GlobalToLocal(Game1.viewport, ___drawPosition + ((__instance.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero)), value, Color.White * alpha, 0f, Vector2.Zero, Game1.pixelZoom, __instance.Flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (float)(__instance.boundingBox.Value.Top + 16) / 10000f);
+							spriteBatch.Draw(Furniture.furnitureFrontTexture, Game1.GlobalToLocal(Game1.viewport, ___drawPosition + ((__instance.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero)), value, Color.White * alpha, 0f, Vector2.Zero, Game1.pixelZoom, __instance.Flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (float)(__instance.boundingBox.Value.Bottom - 8) / 10000f);
 						}
 						else
 						{
-							spriteBatch.Draw(Furniture.furnitureTexture, Game1.GlobalToLocal(Game1.viewport, drawPosition + ((__instance.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero)), value, Color.White * alpha, 0f, Vector2.Zero, Game1.pixelZoom, __instance.Flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, ((int)__instance.furniture_type.Value == 12) ? (2E-09f + __instance.TileLocation.Y / 100000f) : ((float)(__instance.boundingBox.Value.Bottom - (((int)__instance.furniture_type.Value == 6 || (int)__instance.furniture_type.Value == 17 || (int)__instance.furniture_type.Value == 13) ? 48 : 8)) / 10000f));
+							spriteBatch.Draw(Furniture.furnitureTexture, Game1.GlobalToLocal(Game1.viewport, ___drawPosition + ((__instance.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero)), value, Color.White * alpha, 0f, Vector2.Zero, Game1.pixelZoom, __instance.Flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, ((int)__instance.furniture_type.Value == 12) ? (2E-09f + __instance.TileLocation.Y / 100000f) : ((float)(__instance.boundingBox.Value.Bottom - (((int)__instance.furniture_type.Value == 6 || (int)__instance.furniture_type.Value == 17 || (int)__instance.furniture_type.Value == 13) ? 48 : 8)) / 10000f));
 						}
 					}
 					else
@@ -208,7 +208,7 @@ namespace BetterArtisanGoodIcons
 
 					if (Game1.debugMode)
 					{
-						spriteBatch.DrawString(Game1.smallFont, __instance.ParentSheetIndex > 0 ? __instance.ParentSheetIndex.ToString() : String.Empty, Game1.GlobalToLocal(Game1.viewport, drawPosition), Color.Yellow, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
+						spriteBatch.DrawString(Game1.smallFont, __instance.ParentSheetIndex > 0 ? __instance.ParentSheetIndex.ToString() : String.Empty, Game1.GlobalToLocal(Game1.viewport, ___drawPosition), Color.Yellow, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
 					}
 
 					return false;
