@@ -23,15 +23,26 @@ namespace BetterArtisanGoodIcons
         /// <summary>Initializes the manager.</summary>
         internal static void Init(BetterArtisanGoodIconsMod mod)
         {
+            // Hold onto this for easy access
             Mod = mod;
+
+            // Get the mod's current config options
             config = mod.Helper.ReadConfig<BetterArtisanGoodIconsConfig>();
 
-            foreach (ArtisanGoodTextureProvider provider in ContentSourceManager.GetTextureProviders())
+            // Wire up event listeners so ready-to-harvest bee houses show the icon of the honey item you'll get out of them instead of always the default honey item.
+			mod.Helper.Events.GameLoop.DayStarted += HoneyUpdater.OnDayStarted;
+			mod.Helper.Events.GameLoop.TimeChanged += HoneyUpdater.OnTimeChanged;
+			mod.Helper.Events.GameLoop.OneSecondUpdateTicked += HoneyUpdater.OnOneSecondUpdateTicked;
+			mod.Helper.Events.World.ObjectListChanged += HoneyUpdater.OnObjectListChanged;
+			mod.Helper.Events.World.LocationListChanged += HoneyUpdater.OnLocationListChanged;
+
+            // Collect all the texture providers
+			foreach (ArtisanGoodTextureProvider provider in ContentSourceManager.GetTextureProviders())
                 TextureProviders.Add(provider);
         }
 
-        /// <summary>Gets the info needed to draw the correct texture.</summary>
-        internal static bool GetDrawInfo(SObject output, out Texture2D textureSheet, out Rectangle mainPosition, out Rectangle iconPosition)
+		/// <summary>Gets the info needed to draw the correct texture.</summary>
+		internal static bool GetDrawInfo(SObject output, out Texture2D textureSheet, out Rectangle mainPosition, out Rectangle iconPosition)
         {
             textureSheet = Game1.objectSpriteSheet;
             mainPosition = Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, output.ParentSheetIndex, 16, 16);
