@@ -15,6 +15,7 @@ namespace BetterArtisanGoodIcons
 	{
 		private const int maxMinutesAwake = 1200;
 		private const int flowerRange = 5;
+		private const int startOfDayTime = 600;
 		private const bool shouldOutputDebug = true;
 
 		private static Dictionary<GameLocation, List<SObject>> beeHousesReady = new();
@@ -142,6 +143,21 @@ namespace BetterArtisanGoodIcons
 		/// <param name="e">The event arguments.</param>
 		internal static void OnTimeChanged(object sender, TimeChangedEventArgs e)
 		{
+			// We don't need to day anything right when we wake up, since that's handled by `OnDayStarted`,
+			// and we don't want to have any race conditions with it, either.
+			if (e.NewTime == startOfDayTime)
+			{
+				return;
+			}
+
+			// Keep this disabled unless testing something with this method to not spam the log
+			const bool showStartEnd = false;
+
+			if (showStartEnd)
+			{
+				DebugLog($"{nameof(OnTimeChanged)} - Started (old: {e.OldTime}, new: {e.NewTime})");
+			}
+
 			foreach (KeyValuePair<GameLocation, List<SObject>> entry in beeHousesReadyToday)
 			{
 				List<SObject> newlyReadyBeeHouses = entry.Value.Where(x => x.readyForHarvest.Value).ToList();
@@ -164,6 +180,11 @@ namespace BetterArtisanGoodIcons
 
 				beeHousesReady[entry.Key].AddRange(newlyReadyBeeHouses);
 				beeHousesReadyToday[entry.Key].RemoveAll(x => newlyReadyBeeHouses.Contains(x));
+			}
+
+			if (showStartEnd)
+			{
+				DebugLog($"{nameof(OnTimeChanged)} - Ended");
 			}
 		}
 
