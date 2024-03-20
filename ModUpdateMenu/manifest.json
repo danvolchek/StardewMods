@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Mod Update Menu",
   "Author": "Cat",
-  "Version": "1.6.1-unofficial.2-dphill",
+  "Version": "1.6-0.2.0-unofficial.dphill",
   "Description": "Shows an in game menu on the title screen about mods that need updates.",
   "UniqueID": "cat.modupdatemenu",
   "EntryDll": "ModUpdateMenu.dll",
