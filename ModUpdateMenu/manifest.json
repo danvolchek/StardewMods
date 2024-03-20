@@ -1,10 +1,10 @@
 ﻿{
   "Name": "Mod Update Menu",
   "Author": "Cat",
-  "Version": "1.6-0.2.0-unofficial.dphill",
+  "Version": "2.6.0-unofficial-1",
   "Description": "Shows an in game menu on the title screen about mods that need updates.",
   "UniqueID": "cat.modupdatemenu",
   "EntryDll": "ModUpdateMenu.dll",
   "MinimumApiVersion": "4.0.0",
-  "UpdateKeys": [ "GitHub:Dphill10827/UnofficialModUpdateMenu/ModUpdateMenu" ]
+  "UpdateKeys": [ "GitHub:Dphill10827/UnofficialModUpdateMenu" ]
 }
