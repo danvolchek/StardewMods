@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GiantCropRing", "GiantCropR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HoldToBreakGeodes", "HoldToBreakGeodes\HoldToBreakGeodes.csproj", "{D5882AA8-4299-4A16-8E36-8C3FB5C30231}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModUpdateMenu", "ModUpdateMenu\ModUpdateMenu.csproj", "{8A3C9F04-DA76-4636-A82E-418A341A87BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnofficialModUpdateMenu", "UnofficialModUpdateMenu\UnofficialModUpdateMenu.csproj", "{8A3C9F04-DA76-4636-A82E-418A341A87BC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoCrows", "NoCrows\NoCrows.csproj", "{64090A36-BDC4-401D-911B-5C6A5DD147E3}"
 EndProject
