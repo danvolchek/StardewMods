@@ -79,7 +79,7 @@ namespace ModUpdateMenu.Menus
             if (this.SMAPIText != null)
             {
                 IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(473, 36, 24, 24), 20, ((IClickableMenu)this).height - 25 - this.SMAPIHeight / 2, (int)(this.SMAPIWidth * 1.09), (int)(this.SMAPIHeight * 1.5) + 5, Color.White, 4f, true);
-                SpriteText.drawString(b, this.SMAPIText, 50, ((IClickableMenu)this).height - 30, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+                SpriteText.drawString(b, this.SMAPIText, 50, ((IClickableMenu)this).height - 30, 9999, -1, 9999, 1f, 0.88f, false, -1, "", Color.White);
             }
 
             int startX = (int)centeringOnScreen.X + 32;
@@ -93,19 +93,19 @@ namespace ModUpdateMenu.Menus
                     xOffset += this.GetColumnWidth(j);
 
                 if (i != 0)
-                    SpriteText.drawString(b, UpdateMenu.HeaderDivider, startX + xOffset - this.headerDividerDimensions.X, startY, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+                    SpriteText.drawString(b, UpdateMenu.HeaderDivider, startX + xOffset - this.headerDividerDimensions.X, startY, 9999, -1, 9999, 1f, 0.88f, false, -1, "", Color.White);
 
                 string headerText = UpdateMenu.sections[i] +
                                     (this.currentSortColumn == i ? (this.currentSortDirection == 0 ? " A" : " V") : "");
                 xOffset += (int)(width / 2) - SpriteText.getWidthOfString(UpdateMenu.sections[i]) / 2;
-                SpriteText.drawString(b, headerText, startX + xOffset, startY, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+                SpriteText.drawString(b, headerText, startX + xOffset, startY, 9999, -1, 9999, 1f, 0.88f, false, -1, "", Color.White);
             }
 
-            SpriteText.drawString(b, this.modDivider, startX, startY + 32, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+            SpriteText.drawString(b, this.modDivider, startX, startY + 32, 9999, -1, 9999, 1f, 0.88f, false, -1, "", Color.White);
 
             if (!this.notified)
             {
-                SpriteText.drawString(b, $"{UpdateMenu.UpdateProgress}{this.GetDots(this.numDots)}", startX + this.width / 2 - this.updateProgressDimensions.X, startY + (((IClickableMenu)this).height - 100) / 2 - this.updateProgressDimensions.Y, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+                SpriteText.drawString(b, $"{UpdateMenu.UpdateProgress}{this.GetDots(this.numDots)}", startX + this.width / 2 - this.updateProgressDimensions.X, startY + (((IClickableMenu)this).height - 100) / 2 - this.updateProgressDimensions.Y, 9999, -1, 9999, 1f, 0.88f, false, -1, "", Color.Yellow);
             }
             else if (this.statuses == null)
             {
@@ -125,9 +125,9 @@ namespace ModUpdateMenu.Menus
 
                     if (modName != status.ModName)
                         modName = modName.Substring(0, modName.Length - 3) + "...";
-                    SpriteText.drawString(b, modName, startX, yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
-                    SpriteText.drawString(b, status.UpdateStatus.ToString(), startX + (int)this.GetColumnWidth(0), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", UpdateMenu.GetColorForStatus(status));
-                    SpriteText.drawString(b, status.UpdateURLType, startX + (int)this.GetColumnWidth(0) + (int)this.GetColumnWidth(1), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", 4);
+                    SpriteText.drawString(b, modName, startX, yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", Color.White);
+                    SpriteText.drawString(b, status.UpdateStatus.ToString(), startX + (int)this.GetColumnWidth(0), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", GetColorForStatus(status));
+                    SpriteText.drawString(b, status.UpdateURLType, startX + (int)this.GetColumnWidth(0) + (int)this.GetColumnWidth(1), yOffset, 9999, -1, 9999, 1f, 0.88f, false, -1, "", Color.White);
                     yOffset += 64;
                 }
 
@@ -187,7 +187,12 @@ namespace ModUpdateMenu.Menus
             {
                 try
                 {
-                    Process.Start("https://smapi.io");
+                    var ps = new ProcessStartInfo("https://smapi.io")
+                    {
+                        UseShellExecute = true,
+                        Verb = "open"
+                    };
+                    Process.Start(ps);
                 }
                 catch
                 {
@@ -289,7 +294,7 @@ namespace ModUpdateMenu.Menus
                         break;
 
                     case 2:
-                        this.hoverText = which.UpdateURLType != "???" ? $"Click to go to: ^{which.UpdateURL}" : "Unknown update link.";
+                        this.hoverText = which.UpdateURL != null ? $"Click to go to: ^{which.UpdateURL}" : "Unknown update link.";
                         break;
                 }
 
@@ -383,15 +388,20 @@ namespace ModUpdateMenu.Menus
             }
             else if (offset == 2)
             {
-                Game1.playSound("bigSelect");
-                if (which.UpdateURLType != "???")
-                    try
+                try
+                {
+                    var ps = new ProcessStartInfo(which.UpdateURL)
                     {
-                        Process.Start(which.UpdateURL);
-                    }
-                    catch
-                    {
-                    }
+                        UseShellExecute = true,
+                        Verb = "open"
+                    };
+                    Process.Start(ps);
+                    Game1.playSound("bigSelect");
+                }
+                catch
+                {
+                    Game1.playSound("toyPiano");
+                }
             }
         }
 
@@ -557,7 +567,7 @@ namespace ModUpdateMenu.Menus
             return new Point((int)(p.X * (2 + (input.Contains("^") ? 0.1 : 0))), p.Y * 2);
         }
 
-        private static int GetColorForStatus(ModStatus status)
+        private static Microsoft.Xna.Framework.Color GetColorForStatus(ModStatus status)
         {
             switch (status.UpdateStatus)
             {
