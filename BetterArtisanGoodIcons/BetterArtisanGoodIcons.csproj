@@ -14,3 +14,4 @@
     <Reference Include="Newtonsoft.Json" HintPath="$(GamePath)\smapi-internal\Newtonsoft.Json.dll" />
   </ItemGroup>
 </Project>
+
