@@ -24,8 +24,8 @@ namespace ModUpdateMenu.Menus
 
         public UpdateButton(IModHelper helper)
         {
-            Texture2D buttonTexture = helper.Content.Load<Texture2D>("assets/updateButton.png");
-            this.statusTexture = helper.Content.Load<Texture2D>("assets/statusIcons.png");
+            Texture2D buttonTexture = helper.ModContent.Load<Texture2D>("assets/updateButton.png");
+            this.statusTexture = helper.ModContent.Load<Texture2D>("assets/statusIcons.png");
 
             this.updateButton = new ClickableTextureComponent(
                 new Rectangle(36, Game1.viewport.Height - 150 - 48, 81, 75), buttonTexture, new Rectangle(0, 0, 27, 25),

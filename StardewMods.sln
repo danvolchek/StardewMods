@@ -70,8 +70,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HatsOnCats", "HatsOnCats\Ha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetterWorkbenches", "BetterWorkbenches\BetterWorkbenches.csproj", "{359174FF-E351-4B83-9825-7EC16E9190E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BobberDistance", "BobberDistance\BobberDistance.csproj", "{D9A78F16-4826-43E5-A2B5-0001F0637F45}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FloweryTools", "FloweryTools\FloweryTools.csproj", "{A65A9570-E318-4546-BAD0-60E953722590}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindEffects", "WindEffects\WindEffects.csproj", "{42DE7351-807C-40C2-B62F-CBFC50A502A9}"
