@@ -1,6 +1,9 @@
-# Unofficial Mod Update Menu
+# Unofficial Mod Update Menu, now updated for 1.6!
 
-[ModUpdateMenu.zip](https://github.com/Dphill10827/StardewMods/files/9245631/ModUpdateMenu.zip)
+How to use:
+Install Smapi:
+Copy this file into your 'Mods' folder: [ModUpdateMenu.zip](https://github.com/Dphill10827/StardewMods/files/14670049/ModUpdateMenu.zip)
+
 
 ## How it works
 
