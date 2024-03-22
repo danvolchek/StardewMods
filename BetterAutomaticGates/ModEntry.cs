@@ -96,7 +96,8 @@ namespace BetterAutomaticGates
         /// <returns>Whether a player is near the gate.</returns>
         private bool IsGateNearAnyPlayer(Fence gate, GameLocation location)
         {
-            return location.farmers.Select(player => new Vector2(player.getTileX(), player.getTileY())).Any(position => this.GetGatesNearPosition(location, position).Contains(gate));
+            //return location.farmers.Select(player => new Vector2(player.getTileX(), player.getTileY())).Any(position => this.GetGatesNearPosition(location, position).Contains(gate));
+            return location.farmers.Select(player => new Vector2(player.Tile.X, player.Tile.Y)).Any(position => this.GetGatesNearPosition(location, position).Contains(gate));
         }
 
         /// <summary>Gets all gates near the local player.</summary>
@@ -104,7 +105,8 @@ namespace BetterAutomaticGates
         /// <returns>The gates that were found.</returns>
         private IEnumerable<Fence> GetGatesNearLocalPlayer(GameLocation location)
         {
-            return this.GetGatesNearPosition(location, new Vector2(Game1.player.getTileX(), Game1.player.getTileY()));
+            //return this.GetGatesNearPosition(location, new Vector2(Game1.player.getTileX(), Game1.player.getTileY()));
+            return this.GetGatesNearPosition(location, new Vector2(Game1.player.Tile.X, Game1.player.Tile.Y));
         }
 
         /// <summary>Gets all gates near the given position.</summary>

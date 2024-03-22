@@ -1,7 +1,8 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Framework.ModLoading.Rewriters.StardewValley_1_5;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
@@ -40,7 +41,7 @@ namespace BetterHay
 
             if (Config.EnableTakingHayFromHoppersAnytime)
             {
-                HarmonyInstance harmony = HarmonyInstance.Create(helper.ModRegistry.ModID);
+                var harmony = HarmonyInstanceFacade.Create(helper.ModRegistry.ModID);
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
         }
@@ -60,17 +61,20 @@ namespace BetterHay
                 {
                     if (!Game1.player.currentLocation.terrainFeatures.FieldDict.ContainsKey(item.Key) && item.Value is Grass grass && grass.numberOfWeeds.Value <= 0 && grass.grassType.Value == 1)
                     {
-                        if ((Game1.IsMultiplayer
-                                ? Game1.recentMultiplayerRandom
-                                : new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0)))
-                            .NextDouble() < 0.5)
+                        //if ((Game1.IsMultiplayer
+                        //        ? Game1.recentMultiplayerRandom
+                        //        : new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0)))
+                        //    .NextDouble() < 0.5)
+                        if ((new Random((int)(Game1.uniqueIDForThisGame + item.Key.X * 1000.0 + item.Key.Y * 11.0)))
+                        .NextDouble() < 0.5)
                         {
                             if (Game1.player.CurrentTool is MeleeWeapon && (Game1.player.CurrentTool.Name.Contains("Scythe") || Game1.player.CurrentTool.ParentSheetIndex == 47))
                             {
-                                if (this.IsWithinRange(Game1.player.getTileLocation(), item.Key, 3))
+                                //if (this.IsWithinRange(Game1.player.getTileLocation(), item.Key, 3))
+                                if (this.IsWithinRange(Game1.player.Tile, item.Key, 3))
                                 {
                                     if (this.dropGrassStarterRandom.NextDouble() < Config.ChanceToDropGrassStarterInsteadOfHay)
-                                        this.AttemptToGiveGrassStarter(item.Key, Game1.getFarm().piecesOfHay.Value == Utility.numSilos() * 240);
+                                        this.AttemptToGiveGrassStarter(item.Key, Game1.getFarm().piecesOfHay.Value == Game1.getFarm().GetHayCapacity());
                                     else if (Game1.getFarm().tryToAddHay(1) != 0)
                                     {
                                         if (!BetterHayGrass.TryAddItemToInventory(178) && Config.DropHayOnGroundIfNoRoomInInventory)

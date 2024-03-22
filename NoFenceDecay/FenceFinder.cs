@@ -1,5 +1,6 @@
 ﻿using StardewModdingAPI;
 using StardewValley;
+using StardewValley.GameData.Buildings;
 using StardewValley.Locations;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,12 +52,12 @@ namespace NoFenceDecay
                 yield return f;
             }
 
-            if (!(l is BuildableGameLocation bLoc))
+            if (!l.IsBuildableLocation())
             {
                 yield break;
             }
 
-            foreach (Fence f in this.GetFences(bLoc.buildings.Where(item => item != null).Select(item => item.indoors.Value).Where(item => item != null)))
+            foreach (Fence f in this.GetFences(l.buildings.Where(item => item != null).Select(item => item.indoors.Value).Where(item => item != null)))
             {
                 yield return f;
             }
