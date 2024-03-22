@@ -40,7 +40,8 @@ namespace BetterAutomaticGates.Framework
         {
             gate = null;
 
-            if (location.objects.TryGetValue(position, out SObject obj) && obj is Fence found && found.isGate.Value && found.getDrawSum(location) != 0)
+            //if (location.objects.TryGetValue(position, out SObject obj) && obj is Fence found && found.isGate.Value && found.getDrawSum(location) != 0)
+            if (location.objects.TryGetValue(position, out SObject obj) && obj is Fence found && found.isGate.Value && found.getDrawSum() != 0)
             {
                 gate = found;
             }
@@ -62,7 +63,8 @@ namespace BetterAutomaticGates.Framework
             adjacent = null;
             Vector2 positionOffset = gate.GetAdjacentGatePositionOffset(location);
 
-            return positionOffset != Vector2.Zero && location.TryGetGate(gate.TileLocation + positionOffset, out adjacent) && GateExtensions.IsOppositeDirection(gate.getDrawSum(location), adjacent.getDrawSum(location));
+            //return positionOffset != Vector2.Zero && location.TryGetGate(gate.TileLocation + positionOffset, out adjacent) && GateExtensions.IsOppositeDirection(gate.getDrawSum(location), adjacent.getDrawSum(location));
+            return positionOffset != Vector2.Zero && location.TryGetGate(gate.TileLocation + positionOffset, out adjacent) && GateExtensions.IsOppositeDirection(gate.getDrawSum(), adjacent.getDrawSum());
         }
 
         /// <summary>Gets the position offset of where this gate's adjacent position should be.</summary>
@@ -71,7 +73,8 @@ namespace BetterAutomaticGates.Framework
         /// <returns>The offset, or zero if none was found.</returns>
         private static Vector2 GetAdjacentGatePositionOffset(this Fence gate, GameLocation location)
         {
-            switch (gate.getDrawSum(location))
+            //switch (gate.getDrawSum(location))
+            switch (gate.getDrawSum())
             {
                 case 10:
                     return new Vector2(1, 0);

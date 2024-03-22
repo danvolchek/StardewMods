@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿//using Harmony;
+using HarmonyLib;
 using StardewValley;
 using System;
 using System.Reflection;
@@ -42,20 +43,24 @@ namespace BetterHay
                         //##CHANGES
                         if (num2 == 0)
                             num2 = 1;
-                        if (Game1.player.couldInventoryAcceptThisObject(178, num2, 0))
+                        //if (Game1.player.couldInventoryAcceptThisObject(178, num2, 0))
+                        if (Game1.player.couldInventoryAcceptThisItem("178", num2, 0))
                         {
                             Game1.getFarm().piecesOfHay.Value -= Math.Max(1, num2);
-                            who.addItemToInventoryBool((Item)new SObject(178, num2, false, -1, 0), false);
+                            //who.addItemToInventoryBool((Item)new SObject(178, num2, false, -1, 0), false);
+                            who.addItemToInventoryBool((Item)new SObject("178", num2, false, -1, 0), false);
                             Game1.playSound("shwip");
                             if (Game1.getFarm().piecesOfHay.Value <= 0)
                                 instance.showNextIndex.Value = false;
                             return true;
                         }
                     }
-                    else if (Game1.player.couldInventoryAcceptThisObject(178, 1, 0))
+                    //else if (Game1.player.couldInventoryAcceptThisObject(178, 1, 0))
+                    else if (Game1.player.couldInventoryAcceptThisItem("178", 1, 0))
                     {
                         --Game1.getFarm().piecesOfHay.Value;
-                        who.addItemToInventoryBool((Item)new SObject(178, 1, false, -1, 0), false);
+                        //who.addItemToInventoryBool((Item)new SObject(178, 1, false, -1, 0), false);
+                        who.addItemToInventoryBool((Item)new SObject("178", 1, false, -1, 0), false);
                         Game1.playSound("shwip");
                     }
 
