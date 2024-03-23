@@ -1,5 +1,5 @@
 ﻿using System;
-using Harmony;
+using HarmonyLib;
 using SafeLightning.CommandParsing;
 using StardewModdingAPI;
 using System.Reflection;
@@ -24,7 +24,7 @@ namespace SafeLightning
             CommandParser commandParser = new CommandParser(this.Monitor, this.Helper.ConsoleCommands);
             commandParser.RegisterCommands();
 
-            HarmonyInstance instance = HarmonyInstance.Create(this.Helper.ModRegistry.ModID);
+            Harmony instance = new Harmony(this.Helper.ModRegistry.ModID);
             instance.PatchAll(Assembly.GetExecutingAssembly());
         }
 
@@ -64,7 +64,7 @@ namespace SafeLightning
 
             if (farm.objects.TryGetValue(position, out StardewValley.Object obj) && obj.bigCraftable.Value && obj.ParentSheetIndex == 9 && obj.heldObject.Value == null)
             {
-                obj.heldObject.Value = new StardewValley.Object(787, 1, false, -1, 0);
+                obj.heldObject.Value = new StardewValley.Object("787", 1, false, -1, 0);
                 obj.MinutesUntilReady = Utility.CalculateMinutesUntilMorning(Game1.timeOfDay);
                 obj.shakeTimer = 1000;
 
