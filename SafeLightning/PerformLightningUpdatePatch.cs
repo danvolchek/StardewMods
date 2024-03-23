@@ -1,7 +1,8 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Netcode;
 using StardewValley;
+using StardewValley.Extensions;
 using StardewValley.TerrainFeatures;
 using System;
 using System.Collections.Generic;
@@ -31,9 +32,9 @@ namespace SafeLightning
         /// <summary>The code to run before the original method.</summary>
         /// <returns>Whether to run the original method or not.</returns>
         [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Method names are defined by Harmony.")]
-        private static bool Prefix()
+        private static bool Prefix(int time_of_day)
         {
-            PerformLightningUpdatePatch.PerformLightningUpdate();
+            PerformLightningUpdatePatch.PerformLightningUpdate(time_of_day);
             return false;
         }
 
@@ -42,89 +43,88 @@ namespace SafeLightning
         [SuppressMessage("ReSharper", "All", Justification = "Copied from the vanilla decompilation.")]
         [SuppressMessage("SMAPI.CommonErrors", "AvoidNetField", Justification = "Copied from the vanilla decompilation.")]
         [SuppressMessage("SMAPI.CommonErrors", "AvoidImplicitNetFieldCast", Justification = "Copied from the vanilla decompilation.")]
-        private static void PerformLightningUpdate()
+        private static void PerformLightningUpdate(int time_of_day)
         {
-            Random random = new Random((int)Game1.uniqueIDForThisGame + (int)Game1.stats.DaysPlayed + Game1.timeOfDay);
-            if (random.NextDouble() < 0.125 + Game1.player.team.AverageDailyLuck((GameLocation)null) + Game1.player.team.AverageLuckLevel((GameLocation)null) / 100.0)
+            Random random = Utility.CreateRandom(Game1.uniqueIDForThisGame, Game1.stats.DaysPlayed, time_of_day);
+            if (random.NextDouble() < 0.125 + Game1.player.team.AverageDailyLuck() + Game1.player.team.AverageLuckLevel() / 100.0)
             {
                 Farm.LightningStrikeEvent lightningStrikeEvent = new Farm.LightningStrikeEvent();
                 lightningStrikeEvent.bigFlash = true;
-                Farm locationFromName = Game1.getLocationFromName("Farm") as Farm;
-                List<Vector2> source = new List<Vector2>();
-                foreach (KeyValuePair<Vector2, Object> pair in locationFromName.objects.Pairs)
+                Farm farm = Game1.getFarm();
+                List<Vector2> list = new List<Vector2>();
+                foreach (KeyValuePair<Vector2, Object> pair in farm.objects.Pairs)
                 {
-                    if ((bool)((NetFieldBase<bool, NetBool>)pair.Value.bigCraftable) && pair.Value.ParentSheetIndex == 9)
-                        source.Add(pair.Key);
-                }
-                if (source.Count > 0)
-                {
-                    for (int index1 = 0; index1 < 2; ++index1)
+                    if (pair.Value.QualifiedItemId == "(BC)9")
                     {
-                        Vector2 index2 = source.ElementAt<Vector2>(random.Next(source.Count));
-                        if (locationFromName.objects[index2].heldObject.Value == null)
+                        list.Add(pair.Key);
+                    }
+                }
+
+                if (list.Count > 0)
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Vector2 vector = random.ChooseFrom(list);
+                        if (farm.objects[vector].heldObject.Value == null)
                         {
-                            locationFromName.objects[index2].heldObject.Value = new Object(787, 1, false, -1, 0);
-                            locationFromName.objects[index2].minutesUntilReady.Value = Utility.CalculateMinutesUntilMorning(Game1.timeOfDay);
-                            locationFromName.objects[index2].shakeTimer = 1000;
+                            farm.objects[vector].heldObject.Value = ItemRegistry.Create<Object>("(O)787");
+                            farm.objects[vector].minutesUntilReady.Value = Utility.CalculateMinutesUntilMorning(Game1.timeOfDay);
+                            farm.objects[vector].shakeTimer = 1000;
                             lightningStrikeEvent.createBolt = true;
-                            lightningStrikeEvent.boltPosition = index2 * 64f + new Vector2(32f, 0.0f);
-                            locationFromName.lightningStrikeEvent.Fire(lightningStrikeEvent);
+                            lightningStrikeEvent.boltPosition = vector * 64f + new Vector2(32f, 0f);
+                            farm.lightningStrikeEvent.Fire(lightningStrikeEvent);
                             return;
                         }
                     }
                 }
-                if (random.NextDouble() < 0.25 - Game1.player.team.AverageDailyLuck((GameLocation)null) - Game1.player.team.AverageLuckLevel((GameLocation)null) / 100.0)
+
+                if (random.NextDouble() < 0.25 - Game1.player.team.AverageDailyLuck() - Game1.player.team.AverageLuckLevel() / 100.0)
                 {
                     try
                     {
-                        KeyValuePair<Vector2, TerrainFeature> keyValuePair = locationFromName.terrainFeatures.Pairs.ElementAt(random.Next(locationFromName.terrainFeatures.Count()));
-                        if (!(keyValuePair.Value is FruitTree))
+                        if (Utility.TryGetRandom(farm.terrainFeatures, out var key, out var value))
                         {
-                            int num = !(keyValuePair.Value is HoeDirt) || (keyValuePair.Value as HoeDirt).crop == null ? 0 : (!(bool)((NetFieldBase<bool, NetBool>)(keyValuePair.Value as HoeDirt).crop.dead) ? 1 : 0);
-                            if (keyValuePair.Value.performToolAction((Tool)null, 50, keyValuePair.Key, (GameLocation)locationFromName))
+                            FruitTree fruitTree = value as FruitTree;
+                            if (fruitTree != null)
                             {
-                                //lightningStrikeEvent.destroyedTerrainFeature = true;
+                                //fruitTree.struckByLightningCountdown.Value = 4;
+                                //fruitTree.shake(key, doEvenIfStillShaking: true);
                                 lightningStrikeEvent.createBolt = true;
-                                //locationFromName.terrainFeatures.Remove(keyValuePair.Key);
-                                lightningStrikeEvent.boltPosition = keyValuePair.Key * 64f + new Vector2(32f, (float)sbyte.MinValue);
+                                lightningStrikeEvent.boltPosition = key * 64f + new Vector2(32f, -128f);
                             }
-                            if (num != 0)
+                            else
                             {
-                                if (keyValuePair.Value is HoeDirt)
+                                Crop crop = (value as HoeDirt)?.crop;
+                                bool num = crop != null && !crop.dead;
+                                if (value.performToolAction(null, 50, key))
                                 {
-                                    if ((keyValuePair.Value as HoeDirt).crop != null)
-                                    {
-                                        if ((bool)((NetFieldBase<bool, NetBool>)(keyValuePair.Value as HoeDirt).crop.dead))
-                                        {
-                                            lightningStrikeEvent.createBolt = true;
-                                            lightningStrikeEvent.boltPosition = keyValuePair.Key * 64f + new Vector2(32f, 0.0f);
-                                        }
-                                    }
+                                    //lightningStrikeEvent.destroyedTerrainFeature = true;
+                                    lightningStrikeEvent.createBolt = true;
+                                    //farm.terrainFeatures.Remove(key);
+                                    lightningStrikeEvent.boltPosition = key * 64f + new Vector2(32f, -128f);
+                                }
+
+                                if (num && (bool)crop.dead)
+                                {
+                                    lightningStrikeEvent.createBolt = true;
+                                    lightningStrikeEvent.boltPosition = key * 64f + new Vector2(32f, 0f);
                                 }
                             }
                         }
-                        else if (keyValuePair.Value is FruitTree)
-                        {
-                            //(keyValuePair.Value as FruitTree).struckByLightningCountdown.Value = 4;
-                            //(keyValuePair.Value as FruitTree).shake(keyValuePair.Key, true, (GameLocation)locationFromName);
-                            lightningStrikeEvent.createBolt = true;
-                            lightningStrikeEvent.boltPosition = keyValuePair.Key * 64f + new Vector2(32f, (float)sbyte.MinValue);
-                        }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                     }
                 }
-                locationFromName.lightningStrikeEvent.Fire(lightningStrikeEvent);
+
+                farm.lightningStrikeEvent.Fire(lightningStrikeEvent);
             }
-            else
+            else if (random.NextDouble() < 0.1)
             {
-                if (random.NextDouble() >= 0.1)
-                    return;
-                (Game1.getLocationFromName("Farm") as Farm).lightningStrikeEvent.Fire(new Farm.LightningStrikeEvent()
-                {
-                    smallFlash = true
-                });
+                Farm.LightningStrikeEvent lightningStrikeEvent2 = new Farm.LightningStrikeEvent();
+                lightningStrikeEvent2.smallFlash = true;
+                Farm farm = Game1.getFarm();
+                farm.lightningStrikeEvent.Fire(lightningStrikeEvent2);
             }
         }
     }

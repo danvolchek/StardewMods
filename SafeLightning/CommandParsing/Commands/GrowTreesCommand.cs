@@ -33,7 +33,7 @@ namespace SafeLightning.CommandParsing.Commands
 
                     case FruitTree ft:
                         ft.daysUntilMature.Value -= 4;
-                        ft.dayUpdate(Game1.getFarm(), item.Key);
+                        ft.dayUpdate();
                         break;
                 }
             }
